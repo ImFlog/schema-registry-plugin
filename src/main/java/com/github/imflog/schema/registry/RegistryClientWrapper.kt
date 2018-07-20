@@ -1,4 +1,4 @@
-package com.github.imflog.gradle.schema
+package com.github.imflog.schema.registry
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient

@@ -3,14 +3,15 @@ import org.gradle.wrapper.WrapperExecutor
 group = "com.github.imflog"
 version = "0.1.0-SNAPSHOT"
 
-task<Wrapper>("wrapper") {
-    gradleVersion = "4.4"
+task<Wrapper>("wrap") {
+    gradleVersion = "4.9"
     distributionType = Wrapper.DistributionType.ALL
 }
 
 plugins {
-    kotlin("jvm").version("1.2.41")
+    kotlin("jvm").version("1.2.51")
     id("java-gradle-plugin")
+    id("com.gradle.plugin-publish") version "0.9.10"
 }
 
 val kotlinVersion: String? by extra {
@@ -18,9 +19,11 @@ val kotlinVersion: String? by extra {
             .resolvedConfiguration.firstLevelModuleDependencies
             .find { it.moduleName == "org.jetbrains.kotlin.jvm.gradle.plugin" }?.moduleVersion
 }
+val junitVersion = "5.2.0"
+val wiremockVersion = "2.18.0"
 
 repositories {
-    mavenCentral()
+    jcenter()
     maven("http://packages.confluent.io/maven/")
 }
 
@@ -35,18 +38,29 @@ dependencies {
     testImplementation("junit", "junit", "4.12")
     testImplementation("org.assertj", "assertj-core", "3.6.2")
     testImplementation("org.mockito", "mockito-all", "1.10.19")
-    testImplementation("org.powermock", "powermock-core", "1.7.4")
+    testImplementation("com.github.tomakehurst", "wiremock-standalone", wiremockVersion)
 }
 
-//configure<JavaPluginConvention> {
-//    sourceCompatibility = JavaVersion.VERSION_1_8
-//}
-
+val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
 gradlePlugin {
     plugins.invoke {
         "schema-registry" {
-            id = "com.github.imflog.schema-registry"
-            implementationClass = "com.github.imflog.gradle.schema.SchemaRegistryPlugin"
+            id = registryPluginName
+            implementationClass = "com.github.imflog.schema.registry.SchemaRegistryPlugin"
+        }
+    }
+}
+
+pluginBundle {
+    website = "https://github.com/ImFlog/schema-registry-plugin"
+    vcsUrl = "https://github.com/ImFlog/schema-registry-plugin.git"
+
+    (plugins) {
+        "schemaRegistryPlugin" {
+            id = registryPluginName
+            displayName = "Kafka schema registry gradle plugin"
+            tags = listOf("schema", "registry", "schema-registry", "kafka")
+            version = version
         }
     }
 }
