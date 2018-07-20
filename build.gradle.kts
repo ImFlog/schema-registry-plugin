@@ -1,7 +1,7 @@
 import org.gradle.wrapper.WrapperExecutor
 
 group = "com.github.imflog"
-version = "0.1.0-SNAPSHOT"
+version = "0.0.1"
 
 task<Wrapper>("wrap") {
     gradleVersion = "4.9"
@@ -58,6 +58,7 @@ pluginBundle {
     (plugins) {
         "schemaRegistryPlugin" {
             id = registryPluginName
+            description = "A plugin to download, register and test schemas from a Kafka Schema Registry"
             displayName = "Kafka schema registry gradle plugin"
             tags = listOf("schema", "registry", "schema-registry", "kafka")
             version = version
