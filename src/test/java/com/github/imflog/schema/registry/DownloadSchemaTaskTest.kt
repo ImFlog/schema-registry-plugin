@@ -94,7 +94,7 @@ class DownloadSchemaTaskTest {
 
         assertThat(File(folderRule.root, "src/main/avro")).exists()
         assertThat(File(folderRule.root, "src/main/avro/test-subject.avsc")).exists()
-        assertThat(result?.task(":downloadSchemaTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
     @Test
