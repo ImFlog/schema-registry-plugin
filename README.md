@@ -9,7 +9,7 @@ for instructions about how to add the plugin to your build configuration.
 When you do so, three tasks are added under registry group:
 * downloadSchemasTask
 * testSchemasCompatibilityTask
-* registerSchemaTask
+* registerSchemasTask
 What these tasks do and how to configure them is described in the following sections.
 ## Download schemas
 Like the name of the task imply, this task is responsible of retrieving schemas from a schema registry.
@@ -18,8 +18,10 @@ A DSL is available to configure the task:
 ```groovy
 schemaRegistry {
     url = 'http://localhost:8081/'
-    output = 'src/main/avro'
-    subjects = ['topic1-key', 'topic1-value']
+    download {
+        output = 'src/main/avro'
+        subjects = ['topic1-key', 'topic1-value']
+    }
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
@@ -29,5 +31,18 @@ And the subjects are the name of the various subject to retrieve the schemas for
 ## Test schemas compatibility
 TODO
 ## Register schemas
-TODO
+Once again the name speaks for itself.
+This task register schemas from a local path to a Schema Registry.
 
+A DSL is available to add specify what to send:
+```groovy
+schemaRegistry {
+    url = 'http://localhost:8081'
+    register {
+        subject('mySubject', 'file/path')
+        subject('otherSubject', 'other/path')
+    }
+}
+```
+You have to put the url where the script can reach the Schema Registry.
+You have to list all the (subject, avsc file path) pairs that you want to send. 
