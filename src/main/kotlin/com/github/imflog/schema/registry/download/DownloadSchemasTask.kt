@@ -1,5 +1,6 @@
-package com.github.imflog.schema.registry
+package com.github.imflog.schema.registry.download
 
+import com.github.imflog.schema.registry.RegistryClientWrapper
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata
 import org.apache.avro.Schema
 import org.gradle.api.DefaultTask
@@ -10,7 +11,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 
-const val DOWNLOAD_SCHEMA_TASK = "downloadSchemasTask"
+const val DOWNLOAD_SCHEMAS_TASK = "downloadSchemasTask"
 
 open class DownloadSchemasTask : DefaultTask() {
     init {
