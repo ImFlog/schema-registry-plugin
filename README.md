@@ -25,7 +25,9 @@ schemaRegistry {
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
+
 You need to specify where you want to output the downloaded schemas.
+
 And the subjects are the name of the various subject to retrieve the schemas for. 
 
 ## Test schemas compatibility
@@ -45,4 +47,5 @@ schemaRegistry {
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
+
 You have to list all the (subject, avsc file path) pairs that you want to send. 
