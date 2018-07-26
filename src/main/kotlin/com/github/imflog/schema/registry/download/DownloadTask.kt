@@ -1,19 +1,20 @@
 package com.github.imflog.schema.registry.download
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import io.confluent.kafka.schemaregistry.client.SchemaMetadata
-import org.apache.avro.Schema
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleScriptException
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import java.io.File
+import java.io.IOException
 
 const val DOWNLOAD_SCHEMAS_TASK = "downloadSchemasTask"
 
-open class DownloadSchemasTask : DefaultTask() {
+open class DownloadTask : DefaultTask() {
     init {
         group = "registry"
         description = "Download schemas from the registry"
@@ -23,39 +24,26 @@ open class DownloadSchemasTask : DefaultTask() {
     lateinit var outputDir: File
 
     @Input
-    var outputPath: Property<String> = project.objects.property(String::class.java)
+    var outputPath: String = ""
         set(path) {
             field = path
-            this.outputDir = File(project.rootDir, path.get())
+            this.outputDir = File(project.rootDir, path)
         }
 
     @Input
-    var subjects: ListProperty<String> = project.objects.listProperty(String::class.java)
+    lateinit var subjects: ArrayList<String>
     @Input
-    var url: Property<String> = project.objects.property(String::class.java)
+    lateinit var url: String
 
     @TaskAction
     fun downloadSchemas() {
-        logger.info("Start loading schemas for $subjects")
-        subjects.get().forEach { subject ->
-            val downloadedSchema = downloadSchema(url.get(), subject)
-            writeSchemas(subject, downloadedSchema)
-        }
-    }
-
-    private fun downloadSchema(url: String, subject: String): Schema {
-        val registryClient = RegistryClientWrapper.instance.client(url)
-        val latestSchemaMetadata: SchemaMetadata? = registryClient?.getLatestSchemaMetadata(subject)
-        val parser = Schema.Parser()
-        return parser.parse(latestSchemaMetadata!!.schema)
-    }
-
-    private fun writeSchemas(subject: String, schemas: Schema) {
-        val outputFile = File(outputDir, "$subject.avsc")
-        logger.info("Writing file  $outputFile")
-        println("Writing file  $outputFile")
-        outputFile.printWriter().use { out ->
-            out.println(schemas.toString(true))
+        val errorCount = DownloadTaskAction(
+                RegistryClientWrapper.instance.client(url)!!,
+                subjects,
+                outputDir)
+                .run()
+        if (errorCount > 0) {
+            throw GradleScriptException("$errorCount schemas not downloaded, see logs for details", Throwable())
         }
     }
 }

@@ -1,13 +1,11 @@
-package com.github.imflog.schema.registry.download
+package com.github.imflog.schema.registry.register
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -15,15 +13,10 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.*
 import java.io.File
 
-class DownloadSchemaTaskTest {
-
+class RegisterTaskTest {
     lateinit var folderRule: TemporaryFolder
-    val subject = "test-subject"
 
-    val schema = "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}"
     lateinit var buildFile: File
-
-    val mapper = ObjectMapper()
 
     companion object {
         lateinit var wiremockServerItem: WireMockServer
@@ -50,14 +43,12 @@ class DownloadSchemaTaskTest {
     fun init() {
         folderRule = TemporaryFolder()
         // Register schema
-        val avroSchema = Schema(subject, 1, 1, schema)
         wiremockServerItem.stubFor(
-                WireMock.get(WireMock
-                        .urlMatching("/subjects/.*/versions/latest"))
+                WireMock.post(WireMock
+                        .urlMatching("/subjects/.*/versions"))
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
-                                .withHeader("Accept", "application/json")
-                                .withBody(mapper.writeValueAsString(avroSchema))))
+                                .withBody("{\"id\": 1}")))
     }
 
     @After
@@ -66,7 +57,7 @@ class DownloadSchemaTaskTest {
     }
 
     @Test
-    fun `DownloadSchemaTask should download last schema version`() {
+    fun `RegisterSchemasTask should register schemas`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText("""
@@ -77,23 +68,39 @@ class DownloadSchemaTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                download {
-                    output = 'src/main/avro'
-                    subjects = ['$subject']
+                register {
+                    subject('testSubject1', 'avro/test.avsc')
+                    subject('testSubject2', 'avro/other_test.avsc')
                 }
             }
         """)
 
+        folderRule.newFolder("avro")
+        var testAvsc = folderRule.newFile("avro/other_test.avsc")
+        val schemaTest = """
+            {
+                "type":"record",
+                "name":"Blah",
+                "fields":[
+                    {
+                        "name":"name",
+                        "type":"string"
+                    }
+                ]
+            }
+        """.trimIndent()
+        testAvsc.writeText(schemaTest)
+
+        var testAvsc2 = folderRule.newFile("avro/test.avsc")
+        testAvsc2.writeText(schemaTest)
+
         val result: BuildResult? = GradleRunner.create()
                 .withGradleVersion("4.9")
                 .withProjectDir(folderRule.root)
-                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withArguments(REGISTER_SCHEMAS_TASK)
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()
-
-        assertThat(File(folderRule.root, "src/main/avro")).exists()
-        assertThat(File(folderRule.root, "src/main/avro/test-subject.avsc")).exists()
-        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 }

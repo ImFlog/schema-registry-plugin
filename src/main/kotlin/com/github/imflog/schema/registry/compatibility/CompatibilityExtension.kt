@@ -1,13 +1,11 @@
 package com.github.imflog.schema.registry.compatibility
 
-import com.github.imflog.schema.registry.StringToFileSubject
-import org.gradle.api.Project
-import org.gradle.api.provider.ListProperty
+import com.github.imflog.schema.registry.StringFileSubject
 
-open class CompatibilityExtension(project: Project) {
-    val subjects: ListProperty<StringToFileSubject> = project.objects.listProperty(StringToFileSubject::class.java)
+open class CompatibilityExtension {
+    val subjects: ArrayList<StringFileSubject> = ArrayList()
 
     fun subject(inputSubject: String, file: String) {
-        subjects.add(StringToFileSubject(inputSubject, file))
+        subjects.add(StringFileSubject(inputSubject, file))
     }
 }

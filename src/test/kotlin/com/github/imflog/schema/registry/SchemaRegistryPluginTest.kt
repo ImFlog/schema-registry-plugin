@@ -42,8 +42,10 @@ class SchemaRegistryPluginTest {
 
     @Test
     fun `plugin should add tasks when applied`() {
-        val downloadSchemaTask = project.tasks.getByName(DOWNLOAD_SCHEMAS_TASK)
-        assertThat(downloadSchemaTask).isNotNull()
+        project.afterEvaluate {
+            val downloadSchemaTask = project.tasks.getByName(DOWNLOAD_SCHEMAS_TASK)
+            assertThat(downloadSchemaTask).isNotNull()
+        }
     }
 
     @Test
