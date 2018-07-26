@@ -1,10 +1,13 @@
 package com.github.imflog.schema.registry
 
+import com.github.imflog.schema.registry.compatibility.CompatibilityExtension
+import com.github.imflog.schema.registry.compatibility.CompatibilityTask
+import com.github.imflog.schema.registry.compatibility.TEST_SCHEMAS_TASK
 import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
-import com.github.imflog.schema.registry.download.DownloadSchemasExtension
+import com.github.imflog.schema.registry.download.DownloadExtension
 import com.github.imflog.schema.registry.download.DownloadSchemasTask
 import com.github.imflog.schema.registry.register.REGISTER_SCHEMAS_TASK
-import com.github.imflog.schema.registry.register.RegisterSchemasExtension
+import com.github.imflog.schema.registry.register.RegisterExtension
 import com.github.imflog.schema.registry.register.RegisterSchemasTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -19,11 +22,15 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     project)
             val downloadExtension = extensions.create(
                     "download",
-                    DownloadSchemasExtension::class.java,
+                    DownloadExtension::class.java,
                     project)
             val registerExtension = extensions.create(
                     "register",
-                    RegisterSchemasExtension::class.java,
+                    RegisterExtension::class.java,
+                    project)
+            val compatibilityExtension = extensions.create(
+                    "compatibility",
+                    CompatibilityExtension::class.java,
                     project)
 
             tasks.create(
@@ -37,6 +44,12 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     REGISTER_SCHEMAS_TASK, RegisterSchemasTask::class.java).apply {
                 url = globalExtension.url
                 subjects = registerExtension.subjects
+            }
+
+            tasks.create(
+                    TEST_SCHEMAS_TASK, CompatibilityTask::class.java).apply {
+                url = globalExtension.url
+                subjects = compatibilityExtension.subjects
             }
         }
     }

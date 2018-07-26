@@ -1,7 +1,7 @@
 package com.github.imflog.schema.registry.register
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.download.Subject
+import com.github.imflog.schema.registry.StringToFileSubject
 import org.apache.avro.Schema
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.ListProperty
@@ -22,7 +22,7 @@ open class RegisterSchemasTask : DefaultTask() {
     var url: Property<String> = project.objects.property(String::class.java)
 
     @Input
-    var subjects: ListProperty<Subject> = project.objects.listProperty(Subject::class.java)
+    var subjects: ListProperty<StringToFileSubject> = project.objects.listProperty(StringToFileSubject::class.java)
 
     @TaskAction
     fun registerSchemas() {
@@ -31,11 +31,11 @@ open class RegisterSchemasTask : DefaultTask() {
         }
     }
 
-    private fun registerSchema(subject: Subject, url: String) {
+    private fun registerSchema(stringToFileSubject: StringToFileSubject, url: String) {
         val registryClient = RegistryClientWrapper.instance.client(url)
-        val schema = readSchema(subject.path)
-        logger.debug("Calling register (${subject.subject}, ${subject.path})")
-        registryClient!!.register(subject.subject, schema)
+        val schema = readSchema(stringToFileSubject.path)
+        logger.debug("Calling register (${stringToFileSubject.subject}, ${stringToFileSubject.path})")
+        registryClient!!.register(stringToFileSubject.subject, schema)
     }
 
     private fun readSchema(path: String): Schema {

@@ -31,12 +31,27 @@ You need to specify where you want to output the downloaded schemas.
 And the subjects are the name of the various subject to retrieve the schemas for. 
 
 ## Test schemas compatibility
-TODO
+This task test compatibility between local schemas and schemas stored in the Schema Registry.
+
+A DSL is available to specify what to test:
+```groovy
+schemaRegistry {
+    url = 'http://localhost:8081'
+    compatibility {
+        subject('mySubject', 'file/path')
+        subject('otherSubject', 'other/path')
+    }
+}
+```
+You have to put the url where the script can reach the Schema Registry.
+
+You have to list all the (subject, avsc file path) pairs that you want to test. 
+
 ## Register schemas
 Once again the name speaks for itself.
 This task register schemas from a local path to a Schema Registry.
 
-A DSL is available to add specify what to send:
+A DSL is available to specify what to register:
 ```groovy
 schemaRegistry {
     url = 'http://localhost:8081'
