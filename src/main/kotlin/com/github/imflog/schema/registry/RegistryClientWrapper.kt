@@ -7,18 +7,11 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
  * This is a singleton.
  * We can reuse the registryClient without instantiating new ones.
  */
-open class RegistryClientWrapper private constructor() {
-    private object Holder {
-        val INSTANCE = RegistryClientWrapper()
-    }
-
-    companion object {
-        val instance: RegistryClientWrapper by lazy { Holder.INSTANCE }
-    }
+object RegistryClientWrapper {
 
     private var registryClient: SchemaRegistryClient? = null
 
-    open fun client(url: String): SchemaRegistryClient? {
+    fun client(url: String): SchemaRegistryClient? {
         if (registryClient == null) {
             registryClient = CachedSchemaRegistryClient(url, 100)
         }

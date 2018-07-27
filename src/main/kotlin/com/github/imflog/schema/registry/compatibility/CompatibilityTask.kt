@@ -19,7 +19,7 @@ open class CompatibilityTask : DefaultTask() {
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
-                RegistryClientWrapper.instance.client(url)!!,
+                RegistryClientWrapper.client(url)!!,
                 subjects,
                 project.rootDir
         ).run()

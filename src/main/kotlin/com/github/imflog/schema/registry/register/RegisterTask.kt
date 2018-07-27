@@ -24,7 +24,7 @@ open class RegisterSchemasTask : DefaultTask() {
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
-                RegistryClientWrapper.instance.client(url)!!,
+                RegistryClientWrapper.client(url)!!,
                 subjects,
                 project.rootDir
         ).run()

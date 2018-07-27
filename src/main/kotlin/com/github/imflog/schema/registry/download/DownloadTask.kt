@@ -38,7 +38,7 @@ open class DownloadTask : DefaultTask() {
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
-                RegistryClientWrapper.instance.client(url)!!,
+                RegistryClientWrapper.client(url)!!,
                 subjects,
                 outputDir)
                 .run()
