@@ -1,12 +1,10 @@
 package com.github.imflog.schema.registry.register
 
-import com.github.imflog.schema.registry.StringFileSubject
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.junit.After
-import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -30,7 +28,7 @@ class RegisterTaskActionTest {
         // given
         val registryClient = MockSchemaRegistryClient()
 
-        val subjects = arrayListOf(StringFileSubject("test", "src/main/avro/external/test.avsc"))
+        val subjects = arrayListOf(Pair("test", "src/main/avro/external/test.avsc"))
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
@@ -61,7 +59,7 @@ class RegisterTaskActionTest {
         val registryClient = MockSchemaRegistryClient()
         registryClient.register("test", testSchema)
 
-        val subjects = arrayListOf(StringFileSubject("test", "src/main/avro/external/test.avsc"))
+        val subjects = arrayListOf(Pair("test", "src/main/avro/external/test.avsc"))
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",

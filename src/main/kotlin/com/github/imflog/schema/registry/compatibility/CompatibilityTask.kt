@@ -1,7 +1,6 @@
 package com.github.imflog.schema.registry.compatibility
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.StringFileSubject
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.Input
@@ -14,7 +13,7 @@ open class CompatibilityTask : DefaultTask() {
     @Input
     lateinit var url: String
     @Input
-    lateinit var subjects: ArrayList<StringFileSubject>
+    lateinit var subjects: ArrayList<Pair<String, String>>
 
     @TaskAction
     fun testCompatibility() {

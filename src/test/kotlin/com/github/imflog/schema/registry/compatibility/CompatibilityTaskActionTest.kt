@@ -1,6 +1,5 @@
 package com.github.imflog.schema.registry.compatibility
 
-import com.github.imflog.schema.registry.StringFileSubject
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
@@ -34,7 +33,7 @@ class CompatibilityTaskActionTest {
         registryClient.register("test", testSchema)
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(StringFileSubject("test", "src/main/avro/external/test.avsc"))
+        val subjects = arrayListOf(Pair("test", "src/main/avro/external/test.avsc"))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
              "name": "test",
@@ -65,7 +64,7 @@ class CompatibilityTaskActionTest {
         registryClient.register("test", testSchema)
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(StringFileSubject("test", "src/main/avro/external/test.avsc"))
+        val subjects = arrayListOf(Pair("test", "src/main/avro/external/test.avsc"))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
              "name": "test",
