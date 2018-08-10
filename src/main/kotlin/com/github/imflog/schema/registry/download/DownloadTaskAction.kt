@@ -7,22 +7,23 @@ import org.gradle.api.logging.Logging
 import java.io.File
 
 class DownloadTaskAction(
-        private val client: SchemaRegistryClient,
-        private val subjects: MutableList<String>,
-        private val outputDir: File
+        val client: SchemaRegistryClient,
+        val subjectPairs: List<Pair<String, String>>,
+        val rootDir: File
 ) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
 
     fun run(): Int {
-        logger.info("Start loading schemas for $subjects")
         var errorCount = 0
-        subjects.forEach { subject ->
+        subjectPairs.forEach { pair ->
+            val (subject, path) = pair
+            logger.info("Start loading schemas for $subject")
             try {
                 val downloadedSchema = downloadSchema(subject)
-                writeSchemas(subject, downloadedSchema)
+                writeSchemas(subject, downloadedSchema, path)
             } catch (e: Exception) {
-                logger.error("Error during schema retrieval for $subject")
+                logger.error("Error during schema retrieval for $subject", e)
                 errorCount++
             }
         }
@@ -35,12 +36,14 @@ class DownloadTaskAction(
         return parser.parse(latestSchemaMetadata?.schema)
     }
 
-    private fun writeSchemas(subject: String, schemas: Schema) {
+    private fun writeSchemas(subject: String, schemas: Schema, path: String) {
+        val outputDir = File(rootDir, path)
+        outputDir.mkdirs()
         val outputFile = File(outputDir, "$subject.avsc")
+        outputFile.createNewFile()
         logger.info("Writing file  $outputFile")
         outputFile.printWriter().use { out ->
             out.println(schemas.toString(true))
         }
     }
-
 }

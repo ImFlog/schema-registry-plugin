@@ -2,7 +2,6 @@ package com.github.imflog.schema.registry.download
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
-import com.github.imflog.schema.registry.SchemaRegistryPlugin
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -10,7 +9,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions.assertThat
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
-import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -51,6 +49,8 @@ class DownloadTaskTest {
     @Before
     fun init() {
         folderRule = TemporaryFolder()
+        folderRule.create()
+
         // Register schema
         val avroSchema = Schema(subject, 1, 1, schema)
         wiremockServerItem.stubFor(
@@ -69,7 +69,6 @@ class DownloadTaskTest {
 
     @Test
     fun `DownloadSchemaTask should download last schema version`() {
-        folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText("""
             plugins {
@@ -80,8 +79,7 @@ class DownloadTaskTest {
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
                 download {
-                    output = 'src/main/avro/test'
-                    subjects = ['$subject']
+                    subject('test-subject', 'src/main/avro/test')
                 }
             }
         """)

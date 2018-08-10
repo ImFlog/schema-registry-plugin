@@ -26,38 +26,43 @@ class DownloadTaskActionTest {
     @Test
     fun `Should download schemas`() {
         // given
-        val subjects = mutableListOf("test", "foo")
+        val testSubject = "test"
+        val fooSubject = "foo"
+        val outputDir = "src/main/avro/external"
 
         val parser = Schema.Parser()
         val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val fooSchema = parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
 
         val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
-        registryClient.register("foo", fooSchema)
+        registryClient.register(testSubject, testSchema)
+        registryClient.register(fooSubject, fooSchema)
 
-        val outputDir = File(folderRule.root, "src/main/avro/external")
         folderRule.newFolder("src", "main", "avro", "external")
 
         // when
         val errorCount = DownloadTaskAction(
                 registryClient,
-                subjects,
-                outputDir
+                arrayListOf(
+                        Pair(testSubject, outputDir),
+                        Pair(fooSubject, outputDir)
+                ),
+                folderRule.root
         ).run()
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(outputDir, "test.avsc")).isNotNull()
-        Assertions.assertThat(File(outputDir, "test.avsc").readText()).containsIgnoringCase("test")
-        Assertions.assertThat(File(outputDir, "foo.avsc")).isNotNull()
-        Assertions.assertThat(File(outputDir, "foo.avsc").readText()).containsIgnoringCase("foo")
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText()).containsIgnoringCase("test")
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc")).isNotNull()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc").readText()).containsIgnoringCase("foo")
     }
 
     @Test
     fun `Should fail on missing schema`() {
         // given
-        val subjects = mutableListOf("oups")
+        val subject = "oups"
+        val outputDir = "src/main/avro/external"
 
         val parser = Schema.Parser()
         val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
@@ -67,14 +72,13 @@ class DownloadTaskActionTest {
         registryClient.register("test", testSchema)
         registryClient.register("foo", fooSchema)
 
-        val outputDir = File(folderRule.root, "src/main/avro/external")
         folderRule.newFolder("src", "main", "avro", "external")
 
         // when
         val errorCount = DownloadTaskAction(
                 registryClient,
-                subjects,
-                outputDir
+                arrayListOf(Pair(subject, outputDir)),
+                folderRule.root
         ).run()
 
         // then

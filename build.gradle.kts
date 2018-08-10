@@ -9,7 +9,7 @@ task<Wrapper>("wrap") {
 }
 
 plugins {
-    kotlin("jvm").version("1.2.51")
+    kotlin("jvm").version("1.2.60")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.9.10"
 }
