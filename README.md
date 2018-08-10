@@ -19,16 +19,15 @@ A DSL is available to configure the task:
 schemaRegistry {
     url = 'http://localhost:8081/'
     download {
-        output = 'src/main/avro'
-        subjects = ['topic1-key', 'topic1-value']
+        subject('topic1-key', 'src/main/avro')
+        subject('topic1-value', 'src/main/avro/values')
     }
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
 
-You need to specify where you want to output the downloaded schemas.
-
-And the subjects are the name of the various subject to retrieve the schemas for. 
+You need to specify the pairs (subjectName, outputDir) for all the
+schemas you want to download. 
 
 ## Test schemas compatibility
 This task test compatibility between local schemas and schemas stored in the Schema Registry.
