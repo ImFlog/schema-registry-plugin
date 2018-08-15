@@ -18,7 +18,7 @@ open class RegisterSchemasTask : DefaultTask() {
     lateinit var url: String
 
     @Input
-    lateinit var subjects: ArrayList<Pair<String, String>>
+    lateinit var subjects: ArrayList<Pair<String, List<String>>>
 
     @TaskAction
     fun registerSchemas() {

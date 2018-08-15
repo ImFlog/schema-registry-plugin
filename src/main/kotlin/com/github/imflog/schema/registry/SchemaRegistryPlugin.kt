@@ -21,7 +21,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     SubjectExtension::class.java)
             val registerExtension = extensions.create(
                     "register",
-                    SubjectExtension::class.java)
+                    RegisterSubjectExtension::class.java)
             val compatibilityExtension = extensions.create(
                     "compatibility",
                     SubjectExtension::class.java)

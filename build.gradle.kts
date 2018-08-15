@@ -1,6 +1,6 @@
 import org.gradle.wrapper.WrapperExecutor
 
-group = "com.github.imflog"
+group = "com.github.oasalonen"
 version = "0.4.0-SNAPSHOT"
 
 task<Wrapper>("wrap") {
@@ -41,7 +41,7 @@ dependencies {
     testImplementation("com.github.tomakehurst", "wiremock-standalone", wiremockVersion)
 }
 
-val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
+val registryPluginName = "com.github.oasalonen.kafka-schema-registry-gradle-plugin"
 gradlePlugin {
     plugins.invoke {
         "schema-registry" {
@@ -52,13 +52,13 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = "https://github.com/ImFlog/schema-registry-plugin"
-    vcsUrl = "https://github.com/ImFlog/schema-registry-plugin.git"
+    website = "https://github.com/oasalonen/schema-registry-plugin"
+    vcsUrl = "https://github.com/oasalonen/schema-registry-plugin.git"
 
     (plugins) {
         "schemaRegistryPlugin" {
             id = registryPluginName
-            description = "A plugin to download, register and test schemas from a Kafka Schema Registry"
+            description = "A plugin to download, register and test schemas from a Kafka Schema Registry. Forked from com.github.ImFlog.kafka-schema-registry-gradle-plugin"
             displayName = "Kafka schema registry gradle plugin"
             tags = listOf("schema", "registry", "schema-registry", "kafka")
             version = version

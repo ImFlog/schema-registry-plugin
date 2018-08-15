@@ -28,7 +28,7 @@ class RegisterTaskActionTest {
         // given
         val registryClient = MockSchemaRegistryClient()
 
-        val subjects = arrayListOf(Pair("test", "src/main/avro/external/test.avsc"))
+        val subjects = arrayListOf(Pair("test", listOf("src/main/avro/external/test.avsc")))
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
@@ -59,7 +59,7 @@ class RegisterTaskActionTest {
         val registryClient = MockSchemaRegistryClient()
         registryClient.register("test", testSchema)
 
-        val subjects = arrayListOf(Pair("test", "src/main/avro/external/test.avsc"))
+        val subjects = arrayListOf(Pair("test", listOf("src/main/avro/external/test.avsc")))
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
