@@ -1,6 +1,8 @@
 [![CircleCI](https://circleci.com/gh/ImFlog/schema-registry-plugin/tree/master.svg?style=svg)](https://circleci.com/gh/ImFlog/schema-registry-plugin/tree/master)
 
 # Schema-registry-plugin
+This plugin is a fork of https://github.com/ImFlog/schema-registry-plugin. This fork extends the original by allowing registering schema sets (multiple avsc files that reference each other). 
+
 The aim of this plugin is to adapt the [Confluent schema registry maven plugin](https://docs.confluent.io/current/schema-registry/docs/maven-plugin.html) for Gradle builds.
 
 See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
@@ -55,11 +57,14 @@ A DSL is available to specify what to register:
 schemaRegistry {
     url = 'http://localhost:8081'
     register {
-        subject('mySubject', 'file/path')
-        subject('otherSubject', 'other/path')
+        subject('mySubject', ['file/path'])
+        subject('otherSubject', ['other/path', 'other/path/depends/on/previous'])
     }
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
 
-You have to list all the (subject, avsc file path) pairs that you want to send. 
+You have to list all the (subject, avsc file path) pairs that you want to send. The order of the file paths in the list is significant. Any Avro Schema that contains another type must be after the other type in the list. So if you have a user-profile.avsc that references a type in address.avsc, you should declare the list as follows:
+```groovy
+['address.avsc', 'user-profile.avsc'])
+```
