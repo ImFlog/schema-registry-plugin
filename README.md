@@ -5,7 +5,7 @@ This plugin is a fork of https://github.com/ImFlog/schema-registry-plugin. This 
 
 The aim of this plugin is to adapt the [Confluent schema registry maven plugin](https://docs.confluent.io/current/schema-registry/docs/maven-plugin.html) for Gradle builds.
 
-See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
+See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.oasalonen.kafka-schema-registry-gradle-plugin)
 for instructions about how to add the plugin to your build configuration.
 
 When you do so, three tasks are added under registry group:
