@@ -57,9 +57,21 @@ schemaRegistry {
     register {
         subject('mySubject', 'file/path')
         subject('otherSubject', 'other/path')
+        subject('subjectWithDependencies', 'dependent/path', ['firstDependency/path', 'secondDependency/path'])
     }
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
 
-You have to list all the (subject, avsc file path) pairs that you want to send. 
+You have to list all the (subject, avsc file path) pairs that you want to send.
+
+If you have dependencies with other schemas required before the register phase,
+you can add a third parameter with the needed paths.
+
+The order of the file paths in the list is significant.
+Any Avro Schema that contains another type must be after the other type in the list.
+So if you have a user-profile.avsc that references a type in address.avsc,
+you should declare the list as follows:
+```groovy
+['address.avsc', 'user-profile.avsc']
+```

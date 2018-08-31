@@ -71,12 +71,13 @@ class RegisterTaskTest {
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
+                    subject('testSubject3', 'avro/dependency_test.avsc', ['avro/test.avsc'])
                 }
             }
         """)
 
         folderRule.newFolder("avro")
-        var testAvsc = folderRule.newFile("avro/other_test.avsc")
+        var testAvsc = folderRule.newFile("avro/test.avsc")
         val schemaTest = """
             {
                 "type":"record",
@@ -91,8 +92,23 @@ class RegisterTaskTest {
         """.trimIndent()
         testAvsc.writeText(schemaTest)
 
-        var testAvsc2 = folderRule.newFile("avro/test.avsc")
+        var testAvsc2 = folderRule.newFile("avro/other_test.avsc")
         testAvsc2.writeText(schemaTest)
+
+        var depAvsc = folderRule.newFile("avro/dependency_test.avsc")
+        val depSchema = """
+            {
+                "type":"record",
+                "name":"Dependency",
+                "fields":[
+                    {
+                        "name":"blah",
+                        "type":"Blah"
+                    }
+                ]
+            }
+        """.trimIndent()
+        depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
                 .withGradleVersion("4.9")

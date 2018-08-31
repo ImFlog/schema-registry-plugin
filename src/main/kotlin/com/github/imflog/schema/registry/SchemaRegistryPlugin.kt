@@ -6,6 +6,7 @@ import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
 import com.github.imflog.schema.registry.download.DownloadTask
 import com.github.imflog.schema.registry.register.REGISTER_SCHEMAS_TASK
 import com.github.imflog.schema.registry.register.RegisterSchemasTask
+import com.github.imflog.schema.registry.register.RegisterSubjectExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -21,7 +22,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     SubjectExtension::class.java)
             val registerExtension = extensions.create(
                     "register",
-                    SubjectExtension::class.java)
+                    RegisterSubjectExtension::class.java)
             val compatibilityExtension = extensions.create(
                     "compatibility",
                     SubjectExtension::class.java)
