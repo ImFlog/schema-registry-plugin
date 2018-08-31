@@ -45,7 +45,7 @@ dependencies {
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
 gradlePlugin {
     plugins.invoke {
-        "schema-registry" {
+        create("schema-registry") {
             id = registryPluginName
             implementationClass = "com.github.imflog.schema.registry.SchemaRegistryPlugin"
         }
@@ -57,7 +57,7 @@ pluginBundle {
     vcsUrl = "https://github.com/ImFlog/schema-registry-plugin.git"
 
     (plugins) {
-        "schemaRegistryPlugin" {
+        create("schemaRegistryPlugin") {
             id = registryPluginName
             description = "A plugin to download, register and test schemas from a Kafka Schema Registry"
             displayName = "Kafka schema registry gradle plugin"
