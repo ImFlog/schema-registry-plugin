@@ -7,7 +7,7 @@ import java.io.File
 
 class RegisterTaskAction(
         val client: SchemaRegistryClient,
-        val subjects: ArrayList<Pair<String, String>>,
+        val subjects: ArrayList<Pair<String, List<String>>>,
         val rootDir: File
 ) {
 
@@ -15,9 +15,9 @@ class RegisterTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path) ->
+        subjects.forEach { (subject, paths) ->
             try {
-                registerSchema(subject, path)
+                registerSchema(subject, paths)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)
                 errorCount++
@@ -26,15 +26,20 @@ class RegisterTaskAction(
         return errorCount
     }
 
-    private fun registerSchema(subject: String, path: String) {
-        val schema = readSchema(path)
-        logger.debug("Calling register ($subject, $path)")
+    private fun registerSchema(subject: String, paths: List<String>) {
+        val schema = readSchema(paths)
+        logger.debug("Calling register ($subject)")
         client.register(subject, schema)
     }
 
-    private fun readSchema(path: String): Schema {
+    private fun readSchema(paths: List<String>): Schema {
         val parser = Schema.Parser()
-        val schemaContent = File(rootDir, path).readText()
-        return parser.parse(schemaContent)
+        val schemas = ArrayList<Schema>()
+        paths.forEach { path ->
+            val schemaContent = File(rootDir, path).readText()
+            val schema = parser.parse(schemaContent);
+            schemas.add(schema)
+        }
+        return schemas.last()
     }
 }

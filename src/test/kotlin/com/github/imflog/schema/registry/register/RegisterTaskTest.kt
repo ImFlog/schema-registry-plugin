@@ -69,8 +69,8 @@ class RegisterTaskTest {
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
                 register {
-                    subject('testSubject1', 'avro/test.avsc')
-                    subject('testSubject2', 'avro/other_test.avsc')
+                    subject('testSubject1', ['avro/test.avsc'])
+                    subject('testSubject2', ['avro/other_test.avsc', 'avro/other_test_complex.avsc'])
                 }
             }
         """)
@@ -90,6 +90,21 @@ class RegisterTaskTest {
             }
         """.trimIndent()
         testAvsc.writeText(schemaTest)
+
+        var testAvscComplex = folderRule.newFile("avro/other_test_complex.avsc")
+        val schemaTestComplex = """
+            {
+                "type":"record",
+                "name":"ComplexBlah",
+                "fields":[
+                    {
+                        "name":"inner",
+                        "type":"Blah"
+                    }
+                ]
+            }
+        """.trimIndent()
+        testAvscComplex.writeText(schemaTestComplex)
 
         var testAvsc2 = folderRule.newFile("avro/test.avsc")
         testAvsc2.writeText(schemaTest)
