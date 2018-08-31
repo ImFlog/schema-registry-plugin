@@ -8,9 +8,9 @@ import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildFailure
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 const val REGISTRY_FAKE_PORT = 6666
@@ -23,21 +23,16 @@ class SchemaRegistryPluginTest {
 
     lateinit var buildFile: File
 
-    @Before
+    @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
-        // Register schema
-    }
-
-    @After
-    internal fun tearDown() {
-        folderRule.delete()
-    }
-
-    @Before
-    fun setUp() {
         project = ProjectBuilder.builder().build()
         project.pluginManager.apply(SchemaRegistryPlugin::class.java)
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        folderRule.delete()
     }
 
     @Test

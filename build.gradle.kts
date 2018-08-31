@@ -4,12 +4,12 @@ group = "com.github.imflog"
 version = "0.4.0-SNAPSHOT"
 
 task<Wrapper>("wrap") {
-    gradleVersion = "4.9"
+    gradleVersion = "4.10"
     distributionType = Wrapper.DistributionType.ALL
 }
 
 plugins {
-    kotlin("jvm").version("1.2.60")
+    kotlin("jvm").version("1.2.61")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.9.10"
 }
@@ -35,7 +35,8 @@ dependencies {
     implementation("org.apache.avro", "avro", "1.8.2")
 
     testImplementation(gradleTestKit())
-    testImplementation("junit", "junit", "4.12")
+    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
     testImplementation("org.assertj", "assertj-core", "3.6.2")
     testImplementation("org.mockito", "mockito-all", "1.10.19")
     testImplementation("com.github.tomakehurst", "wiremock-standalone", wiremockVersion)

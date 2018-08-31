@@ -4,21 +4,21 @@ import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class DownloadTaskActionTest {
     lateinit var folderRule: TemporaryFolder
 
-    @Before
+    @BeforeEach
     fun setUp() {
         folderRule = TemporaryFolder()
         folderRule.create()
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         folderRule.delete()
     }

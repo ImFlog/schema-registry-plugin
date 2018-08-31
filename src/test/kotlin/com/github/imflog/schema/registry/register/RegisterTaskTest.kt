@@ -10,7 +10,7 @@ import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.*
+import org.junit.jupiter.api.*
 import java.io.File
 
 class RegisterTaskTest {
@@ -21,7 +21,7 @@ class RegisterTaskTest {
     companion object {
         lateinit var wiremockServerItem: WireMockServer
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun initClass() {
             wiremockServerItem = WireMockServer(
@@ -32,14 +32,14 @@ class RegisterTaskTest {
             wiremockServerItem.start()
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun tearDown() {
             wiremockServerItem.stop()
         }
     }
 
-    @Before
+    @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
         // Register schema
@@ -51,7 +51,7 @@ class RegisterTaskTest {
                                 .withBody("{\"id\": 1}")))
     }
 
-    @After
+    @AfterEach
     internal fun tearDown() {
         folderRule.delete()
     }

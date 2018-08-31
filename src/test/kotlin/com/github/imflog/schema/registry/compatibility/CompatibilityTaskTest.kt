@@ -10,7 +10,7 @@ import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.*
+import org.junit.jupiter.api.*
 import java.io.File
 
 class CompatibilityTaskTest {
@@ -20,7 +20,7 @@ class CompatibilityTaskTest {
     companion object {
         lateinit var wireMockServerItem: WireMockServer
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun initClass() {
             wireMockServerItem = WireMockServer(
@@ -31,14 +31,14 @@ class CompatibilityTaskTest {
             wireMockServerItem.start()
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun tearDown() {
             wireMockServerItem.stop()
         }
     }
 
-    @Before
+    @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
         folderRule.create()
@@ -70,7 +70,7 @@ class CompatibilityTaskTest {
         testAvsc2.writeText(schemaTest)
     }
 
-    @After
+    @AfterEach
     internal fun tearDown() {
         folderRule.delete()
     }

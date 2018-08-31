@@ -12,7 +12,7 @@ import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.*
+import org.junit.jupiter.api.*
 import java.io.File
 
 class DownloadTaskTest {
@@ -28,7 +28,7 @@ class DownloadTaskTest {
     companion object {
         lateinit var wiremockServerItem: WireMockServer
 
-        @BeforeClass
+        @BeforeAll
         @JvmStatic
         fun initClass() {
             wiremockServerItem = WireMockServer(
@@ -39,14 +39,14 @@ class DownloadTaskTest {
             wiremockServerItem.start()
         }
 
-        @AfterClass
+        @AfterAll
         @JvmStatic
         fun tearDown() {
             wiremockServerItem.stop()
         }
     }
 
-    @Before
+    @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
         folderRule.create()
@@ -62,7 +62,7 @@ class DownloadTaskTest {
                                 .withBody(mapper.writeValueAsString(avroSchema))))
     }
 
-    @After
+    @AfterEach
     internal fun tearDown() {
         folderRule.delete()
     }
