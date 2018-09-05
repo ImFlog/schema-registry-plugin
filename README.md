@@ -19,8 +19,8 @@ A DSL is available to configure the task:
 schemaRegistry {
     url = 'http://localhost:8081/'
     download {
-        subject('topic1-key', 'src/main/avro.avsc')
-        subject('topic1-value', 'src/main/avro/values.avsc')
+        subject('topic1-key', 'src/main/avro')
+        subject('topic1-value', 'src/main/avro/values')
     }
 }
 ```
