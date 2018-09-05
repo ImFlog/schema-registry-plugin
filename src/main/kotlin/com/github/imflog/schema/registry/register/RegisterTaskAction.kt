@@ -39,7 +39,7 @@ class RegisterTaskAction(
      * This adds all record names to the current parser known types.
      */
     private fun loadDependencies(dependencies: List<String>, parser: Schema.Parser) {
-        dependencies.forEach {
+        dependencies.reversed().forEach {
             readSchema(parser, it)
         }
     }
