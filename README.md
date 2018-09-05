@@ -37,8 +37,8 @@ A DSL is available to specify what to test:
 schemaRegistry {
     url = 'http://localhost:8081'
     compatibility {
-        subject('mySubject', 'file/path')
-        subject('otherSubject', 'other/path')
+        subject('mySubject', 'file/path.avsc')
+        subject('otherSubject', 'other/path.avsc')
     }
 }
 ```
@@ -55,11 +55,25 @@ A DSL is available to specify what to register:
 schemaRegistry {
     url = 'http://localhost:8081'
     register {
-        subject('mySubject', 'file/path')
-        subject('otherSubject', 'other/path')
+        subject('mySubject', 'file/path.avsc')
+        subject('otherSubject', 'other/path.avsc')
+        subject('subjectWithDependencies', 'dependent/path.avsc', ['firstDependency/path.avsc', 'secondDependency/path.avsc'])
     }
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
 
-You have to list all the (subject, avsc file path) pairs that you want to send. 
+You have to list all the (subject, avsc file path) pairs that you want to send.
+
+If you have dependencies with other schemas required before the register phase,
+you can add a third parameter with the needed paths.
+
+The order of the file paths in the list is significant.
+Basically you need to follow the logical order of the types used.
+If an `User` need an `Address` record which itself needs a `Street` record
+you will need to define the dependencies like this:
+```groovy
+register{
+    subject('userSubject', 'path/user.avsc', ['path/address.avsc', 'path/street.avsc'])
+}
+```
