@@ -1,7 +1,7 @@
 import org.gradle.wrapper.WrapperExecutor
 
 group = "com.github.imflog"
-version = "0.4.0-SNAPSHOT"
+version = "0.4.0"
 
 task<Wrapper>("wrap") {
     gradleVersion = "4.10"
