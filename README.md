@@ -8,7 +8,7 @@ for instructions about how to add the plugin to your build configuration.
 
 When you do so, three tasks are added under registry group:
 * downloadSchemasTask
-* testSchemasCompatibilityTask
+* testSchemasTask
 * registerSchemasTask
 What these tasks do and how to configure them is described in the following sections.
 ## Download schemas
