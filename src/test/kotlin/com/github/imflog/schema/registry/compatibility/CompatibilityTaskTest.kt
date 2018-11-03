@@ -41,7 +41,6 @@ class CompatibilityTaskTest {
     @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
-        folderRule.create()
         wireMockServerItem.stubFor(
                 WireMock.post(WireMock
                         .urlMatching("/compatibility/subjects/.*/versions/.*"))
@@ -49,7 +48,16 @@ class CompatibilityTaskTest {
                                 .withStatus(200)
                                 .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
                                 .withBody("{\"is_compatible\": true}")))
+    }
 
+    @AfterEach
+    internal fun tearDown() {
+        folderRule.delete()
+    }
+
+    @Test
+    fun `CompatibilityTask should validate input schema with no dependencies`() {
+        folderRule.create()
         folderRule.newFolder("avro")
         val testAvsc = folderRule.newFile("avro/other_test.avsc")
         val schemaTest = """
@@ -68,15 +76,7 @@ class CompatibilityTaskTest {
 
         val testAvsc2 = folderRule.newFile("avro/test.avsc")
         testAvsc2.writeText(schemaTest)
-    }
 
-    @AfterEach
-    internal fun tearDown() {
-        folderRule.delete()
-    }
-
-    @Test
-    fun `CompatibilityTask should validate input schema`() {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText("""
             plugins {
@@ -92,6 +92,65 @@ class CompatibilityTaskTest {
                 }
             }
         """)
+
+        val result: BuildResult? = GradleRunner.create()
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(TEST_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `CompatibilityTask should validate input schema with dependencies`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                compatibility {
+                    subject('testSubject', 'avro/core.avsc', ['avro/dependency.avsc'])
+                }
+            }
+        """)
+
+        folderRule.newFolder("avro")
+        val coreAvsc = folderRule.newFile("avro/core.avsc")
+        val coreSchema = """
+            {
+                "type":"record",
+                "name":"Core",
+                "fields":[
+                    {
+                        "name":"dep",
+                        "type":"Dependency"
+                    }
+                ]
+            }
+        """.trimIndent()
+        coreAvsc.writeText(coreSchema)
+
+        val depAvsc = folderRule.newFile("avro/dependency_test.avsc")
+        val depSchema = """
+            {
+                "type":"record",
+                "name":"Dependency",
+                "fields":[
+                    {
+                        "name":"name",
+                        "type":"string"
+                    }
+                ]
+            }
+        """.trimIndent()
+        depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
                 .withGradleVersion("4.9")
