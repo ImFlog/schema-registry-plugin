@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry
 
+import com.github.imflog.schema.registry.compatibility.CompatibilitySubjectExtension
 import com.github.imflog.schema.registry.compatibility.CompatibilityTask
 import com.github.imflog.schema.registry.compatibility.TEST_SCHEMAS_TASK
 import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
@@ -25,7 +26,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     RegisterSubjectExtension::class.java)
             val compatibilityExtension = extensions.create(
                     "compatibility",
-                    SubjectExtension::class.java)
+                    CompatibilitySubjectExtension::class.java)
 
             afterEvaluate {
                 tasks.create(

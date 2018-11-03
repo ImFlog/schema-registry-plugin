@@ -9,11 +9,15 @@ import org.gradle.api.tasks.TaskAction
 const val TEST_SCHEMAS_TASK = "testSchemasTask"
 
 open class CompatibilityTask : DefaultTask() {
+    init {
+        group = "registry"
+        description = "Test compatibility against registry"
+    }
 
     @Input
     lateinit var url: String
     @Input
-    lateinit var subjects: ArrayList<Pair<String, String>>
+    lateinit var subjects: List<Triple<String, String, List<String>>>
 
     @TaskAction
     fun testCompatibility() {
