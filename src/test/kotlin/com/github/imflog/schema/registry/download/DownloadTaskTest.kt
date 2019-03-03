@@ -78,6 +78,7 @@ class DownloadTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                userInfo = ""
                 download {
                     subject('test-subject', 'src/main/avro/test')
                 }

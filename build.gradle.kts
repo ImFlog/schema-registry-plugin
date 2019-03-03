@@ -1,7 +1,7 @@
 import org.gradle.wrapper.WrapperExecutor
 
 group = "com.github.imflog"
-version = "0.6.0-SNAPSHOT"
+version = "0.8.0-SNAPSHOT"
 
 task<Wrapper>("wrap") {
     gradleVersion = "4.10"
@@ -12,6 +12,7 @@ plugins {
     kotlin("jvm").version("1.2.61")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.9.10"
+    id ("maven-publish")
 }
 
 val kotlinVersion: String? by extra {
@@ -30,7 +31,7 @@ repositories {
 dependencies {
     compileOnly(gradleApi())
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
-    implementation("io.confluent", "kafka-avro-serializer", "3.2.1")
+    implementation("io.confluent", "kafka-avro-serializer", "5.0.0")
             .exclude("org.slf4j", "slf4j-log4j12")
     implementation("org.apache.avro", "avro", "1.8.2")
 
@@ -40,6 +41,14 @@ dependencies {
     testImplementation("org.assertj", "assertj-core", "3.6.2")
     testImplementation("org.mockito", "mockito-all", "1.10.19")
     testImplementation("com.github.tomakehurst", "wiremock-standalone", wiremockVersion)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
 }
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"

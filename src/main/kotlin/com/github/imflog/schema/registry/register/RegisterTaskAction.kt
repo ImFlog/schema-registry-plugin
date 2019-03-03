@@ -3,7 +3,6 @@ package com.github.imflog.schema.registry.register
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import org.apache.avro.Schema
 import org.gradle.api.logging.Logging
-import sun.misc.ExtensionDependency
 import java.io.File
 
 class RegisterTaskAction(

@@ -68,6 +68,7 @@ class RegisterTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                userInfo = "username:password"
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')

@@ -44,7 +44,7 @@ class SchemaRegistryPluginTest {
     }
 
     @Test
-    fun `plugin should fail with wrong extension configuration`() {
+    fun `plugin should fail with wrong url extension configuration`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText("""
@@ -55,6 +55,7 @@ class SchemaRegistryPluginTest {
 
             schemaRegistry {
                 urlFoo = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                 userInfo = 'username:password'
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
@@ -71,6 +72,38 @@ class SchemaRegistryPluginTest {
             Assertions.fail("Should not reach this point")
         } catch (ex: UnexpectedBuildFailure) {
             Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'urlFoo'")
+        }
+    }
+
+    @Test
+    fun `plugin should fail with wrong userInfo extension configuration`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                userInfoBar = 'username:password'
+                output = 'src/main/avro'
+                subjects = ['$subject']
+            }
+        """)
+
+        try {
+            GradleRunner.create()
+                    .withGradleVersion("4.9")
+                    .withProjectDir(folderRule.root)
+                    .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                    .withPluginClasspath()
+                    .withDebug(true)
+                    .build()
+            Assertions.fail("Should not reach this point")
+        } catch (ex: UnexpectedBuildFailure) {
+            Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'userInfoBar'")
         }
     }
 }
