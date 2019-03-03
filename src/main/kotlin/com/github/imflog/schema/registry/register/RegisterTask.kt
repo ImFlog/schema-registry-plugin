@@ -18,12 +18,15 @@ open class RegisterSchemasTask : DefaultTask() {
     lateinit var url: String
 
     @Input
+    lateinit var userInfo: String //username:password
+
+    @Input
     lateinit var subjects: List<Triple<String, String, List<String>>>
 
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
-                RegistryClientWrapper.client(url)!!,
+                RegistryClientWrapper.client(url, userInfo)!!,
                 subjects,
                 project.rootDir
         ).run()

@@ -18,12 +18,15 @@ open class DownloadTask : DefaultTask() {
     lateinit var subjects: List<Pair<String, String>>
 
     @Input
+    lateinit var userInfo: String //username:password
+
+    @Input
     lateinit var url: String
 
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
-                RegistryClientWrapper.client(url)!!,
+                RegistryClientWrapper.client(url,userInfo)!!,
                 subjects,
                 project.rootDir)
                 .run()

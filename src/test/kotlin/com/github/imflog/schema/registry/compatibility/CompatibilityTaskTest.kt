@@ -137,7 +137,7 @@ class CompatibilityTaskTest {
         """.trimIndent()
         coreAvsc.writeText(coreSchema)
 
-        val depAvsc = folderRule.newFile("avro/dependency_test.avsc")
+        val depAvsc = folderRule.newFile("avro/dependency.avsc")
         val depSchema = """
             {
                 "type":"record",
