@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.register
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
+import com.github.imflog.schema.registry.SchemaRegistryBasicAuth
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.Input
@@ -18,7 +19,7 @@ open class RegisterSchemasTask : DefaultTask() {
     lateinit var url: String
 
     @Input
-    lateinit var userInfo: String //username:password
+    lateinit var auth: SchemaRegistryBasicAuth
 
     @Input
     lateinit var subjects: List<Triple<String, String, List<String>>>
@@ -26,7 +27,7 @@ open class RegisterSchemasTask : DefaultTask() {
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
-                RegistryClientWrapper.client(url, userInfo)!!,
+                RegistryClientWrapper.client(url, auth)!!,
                 subjects,
                 project.rootDir
         ).run()

@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.register
 
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
+import com.github.imflog.schema.registry.SchemaRegistryBasicAuth
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -17,6 +18,9 @@ class RegisterTaskTest {
     lateinit var folderRule: TemporaryFolder
 
     lateinit var buildFile: File
+
+    val username: String = "user"
+    val password: String = "pass"
 
     companion object {
         lateinit var wiremockServerItem: WireMockServer
@@ -46,6 +50,7 @@ class RegisterTaskTest {
         wiremockServerItem.stubFor(
                 WireMock.post(WireMock
                         .urlMatching("/subjects/.*/versions"))
+                        .withBasicAuth(username,password)
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withBody("{\"id\": 1}")))
@@ -68,7 +73,8 @@ class RegisterTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                userInfo = "username:password"
+                credentials.username = '$username'
+                credentials.password = '$password'
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')

@@ -55,7 +55,6 @@ class SchemaRegistryPluginTest {
 
             schemaRegistry {
                 urlFoo = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                 userInfo = 'username:password'
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
@@ -76,7 +75,7 @@ class SchemaRegistryPluginTest {
     }
 
     @Test
-    fun `plugin should fail with wrong userInfo extension configuration`() {
+    fun `plugin should fail with wrong credentials extension configuration`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText("""
@@ -87,7 +86,8 @@ class SchemaRegistryPluginTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                userInfoBar = 'username:password'
+                credentialsBar.username = 'user'
+                credentialsBar.password = 'pass'
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
@@ -103,7 +103,7 @@ class SchemaRegistryPluginTest {
                     .build()
             Assertions.fail("Should not reach this point")
         } catch (ex: UnexpectedBuildFailure) {
-            Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'userInfoBar'")
+            Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'credentialsBar'")
         }
     }
 }

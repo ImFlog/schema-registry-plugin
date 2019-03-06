@@ -18,6 +18,8 @@ A DSL is available to configure the task:
 ```groovy
 schemaRegistry {
     url = 'http://localhost:8081/'
+    credentials.username = 'basicauthentication-username' //optional
+    credentials.password = 'basicauthentication-password' //optional
     download {
         subject('topic1-key', 'src/main/avro')
         subject('topic1-value', 'src/main/avro/values')
@@ -36,6 +38,8 @@ A DSL is available to specify what to test:
 ```groovy
 schemaRegistry {
     url = 'http://localhost:8081'
+    credentials.username = 'basicauthentication-username' //optional
+    credentials.password = 'basicauthentication-password' //optional
     compatibility {
         subject('mySubject', 'file/path.avsc')
         subject('otherSubject', 'other/path.avsc')
@@ -68,6 +72,8 @@ A DSL is available to specify what to register:
 ```groovy
 schemaRegistry {
     url = 'http://localhost:8081'
+    credentials.username = 'basicauthentication-username' //optional
+    credentials.password = 'basicauthentication-password' //optional
     register {
         subject('mySubject', 'file/path.avsc')
         subject('otherSubject', 'other/path.avsc')

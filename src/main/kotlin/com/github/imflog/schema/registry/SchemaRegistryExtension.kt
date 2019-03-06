@@ -4,5 +4,5 @@ open class SchemaRegistryExtension {
 
     var url: String = "http://localhost:8081"
 
-    var userInfo: String  = ""
+    var credentials: SchemaRegistryBasicAuth = SchemaRegistryBasicAuth()
 }

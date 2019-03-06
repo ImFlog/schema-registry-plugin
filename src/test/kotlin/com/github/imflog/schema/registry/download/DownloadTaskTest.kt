@@ -21,6 +21,7 @@ class DownloadTaskTest {
     val subject = "test-subject"
 
     val schema = "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}"
+
     lateinit var buildFile: File
 
     val mapper = ObjectMapper()
@@ -78,7 +79,6 @@ class DownloadTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                userInfo = ""
                 download {
                     subject('test-subject', 'src/main/avro/test')
                 }

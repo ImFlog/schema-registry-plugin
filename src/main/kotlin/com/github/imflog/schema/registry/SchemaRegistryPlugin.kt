@@ -32,21 +32,21 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 tasks.create(
                         DOWNLOAD_SCHEMAS_TASK, DownloadTask::class.java).apply {
                     url = globalExtension.url
-                    userInfo = globalExtension.userInfo
+                    auth = globalExtension.credentials
                     subjects = downloadExtension.subjects
                 }
 
                 tasks.create(
                         REGISTER_SCHEMAS_TASK, RegisterSchemasTask::class.java).apply {
                     url = globalExtension.url
-                    userInfo = globalExtension.userInfo
+                    auth = globalExtension.credentials
                     subjects = registerExtension.subjects
                 }
 
                 tasks.create(
                         TEST_SCHEMAS_TASK, CompatibilityTask::class.java).apply {
                     url = globalExtension.url
-                    userInfo = globalExtension.userInfo
+                    auth = globalExtension.credentials
                     subjects = compatibilityExtension.subjects
                 }
             }

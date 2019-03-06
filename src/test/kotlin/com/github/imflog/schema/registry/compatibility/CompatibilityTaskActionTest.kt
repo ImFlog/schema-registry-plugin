@@ -30,10 +30,10 @@ class CompatibilityTaskActionTest {
         val parser = Schema.Parser()
         val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
-        registryClient.register("testcompatibility", testSchema)
+        registryClient.register("test", testSchema)
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(Triple("testcompatibility", "src/main/avro/external/test.avsc", emptyList<String>()))
+        val subjects = arrayListOf(Triple("test", "src/main/avro/external/test.avsc", emptyList<String>()))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
              "name": "test",
