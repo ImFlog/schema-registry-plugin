@@ -15,14 +15,16 @@ object RegistryClientWrapper {
 
     private var registryClient: SchemaRegistryClient? = null
 
-    fun client(url: String, userInfo: String): SchemaRegistryClient? {
+    private const val basicAuthSourceUserInfo: String = "USER_INFO"
+
+    fun client(url: String, auth: SchemaRegistryBasicAuth): SchemaRegistryClient? {
         if (registryClient == null) {
             val config = HashMap<String, String>()
-            if (!userInfo.isEmpty()) {
+            if (!auth.username.isNullOrEmpty() && !auth.password.isNullOrEmpty()) {
                 // Note that BASIC_AUTH_CREDENTIALS_SOURCE is not configurable as the plugin only supports
                 // a single schema registry URL, so there is no additional utility of the URL source.
-                config[SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE] = "USER_INFO"
-                config[SchemaRegistryClientConfig.USER_INFO_CONFIG] = userInfo
+                config[SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE] = basicAuthSourceUserInfo
+                config[SchemaRegistryClientConfig.USER_INFO_CONFIG] = auth.getBasicAuthCredentials()
             }
             registryClient = CachedSchemaRegistryClient(url, 100, config)
         }

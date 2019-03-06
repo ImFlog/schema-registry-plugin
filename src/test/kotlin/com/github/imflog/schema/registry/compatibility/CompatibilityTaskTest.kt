@@ -17,6 +17,9 @@ class CompatibilityTaskTest {
     lateinit var folderRule: TemporaryFolder
     lateinit var buildFile: File
 
+    val username: String = "user"
+    val password: String = "pass"
+
     companion object {
         lateinit var wireMockServerItem: WireMockServer
 
@@ -44,6 +47,7 @@ class CompatibilityTaskTest {
         wireMockServerItem.stubFor(
                 WireMock.post(WireMock
                         .urlMatching("/compatibility/subjects/.*/versions/.*"))
+                        .withBasicAuth(username,password)
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
@@ -86,6 +90,8 @@ class CompatibilityTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                credentials.username = '$username'
+                credentials.password = '$password'
                 compatibility {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
@@ -115,6 +121,8 @@ class CompatibilityTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                credentials.username = '$username'
+                credentials.password = '$password'
                 compatibility {
                     subject('testSubject', 'avro/core.avsc', ['avro/dependency.avsc'])
                 }
