@@ -61,7 +61,7 @@ class CompatibilityTaskActionTest {
         val parser = Schema.Parser()
         val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
-        registryClient.register("testdependencies", testSchema)
+        registryClient.register("test", testSchema)
 
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
@@ -96,7 +96,7 @@ class CompatibilityTaskActionTest {
 
         val subjects = listOf(
                 Triple(
-                        "testdependencies",
+                        "test",
                         "src/main/avro/external/test.avsc",
                         listOf(
                                 "src/main/avro/external/directDependency.avsc",
@@ -120,10 +120,10 @@ class CompatibilityTaskActionTest {
         val parser = Schema.Parser()
         val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
-        registryClient.register("testing", testSchema)
+        registryClient.register("test", testSchema)
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(Triple("testing", "src/main/avro/external/test.avsc", emptyList<String>()))
+        val subjects = arrayListOf(Triple("test", "src/main/avro/external/test.avsc", emptyList<String>()))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
             {"type": "record",
              "name": "test",
