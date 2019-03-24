@@ -61,6 +61,14 @@ class DownloadTaskTest {
         wiremockServerItem.stubFor(
                 WireMock.get(WireMock
                         .urlMatching("/subjects/.*/versions/latest"))
+                        .withBasicAuth(username,password)
+                        .willReturn(WireMock.aResponse()
+                                .withStatus(200)
+                                .withHeader("Accept", "application/json")
+                                .withBody(mapper.writeValueAsString(avroSchema))))
+        wiremockServerItem.stubFor(
+                WireMock.get(WireMock
+                        .urlMatching("/subjects/.*/versions/latest"))
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withHeader("Accept", "application/json")

@@ -53,6 +53,13 @@ class CompatibilityTaskTest {
                                 .withStatus(200)
                                 .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
                                 .withBody("{\"is_compatible\": true}")))
+        wireMockServerItem.stubFor(
+                WireMock.post(WireMock
+                        .urlMatching("/compatibility/subjects/.*/versions/.*"))
+                        .willReturn(WireMock.aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
+                                .withBody("{\"is_compatible\": true}")))
     }
 
     @AfterEach

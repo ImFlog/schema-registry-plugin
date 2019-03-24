@@ -54,6 +54,13 @@ class RegisterTaskTest {
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withBody("{\"id\": 1}")))
+        wiremockServerItem.stubFor(
+                WireMock.post(WireMock
+                        .urlMatching("/subjects/.*/versions"))
+                        .willReturn(WireMock.aResponse()
+                                .withStatus(200)
+                                .withBody("{\"id\": 1}")))
+
     }
 
     @AfterEach
