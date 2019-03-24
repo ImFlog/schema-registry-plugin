@@ -20,6 +20,10 @@ class DownloadTaskTest {
     lateinit var folderRule: TemporaryFolder
     val subject = "test-subject"
 
+    val username: String = "user"
+
+    val password: String = "pass"
+
     val schema = "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}"
 
     lateinit var buildFile: File
@@ -70,6 +74,40 @@ class DownloadTaskTest {
 
     @Test
     fun `DownloadSchemaTask should download last schema version`() {
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                credentials {
+                    username = '$username'
+                    password = '$password'
+                }
+                download {
+                    subject('test-subject', 'src/main/avro/test')
+                }
+            }
+        """)
+
+        val result: BuildResult? = GradleRunner.create()
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
+
+        assertThat(File(folderRule.root, "src/main/avro/test")).exists()
+        assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
+        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `DownloadSchemaTask should download last schema version without credentials`() {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText("""
             plugins {
