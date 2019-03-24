@@ -6,7 +6,6 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import java.util.HashMap
 
 
-
 /**
  * This is a singleton.
  * We can reuse the registryClient without instantiating new ones.
@@ -14,13 +13,17 @@ import java.util.HashMap
 object RegistryClientWrapper {
 
     private var registryClient: SchemaRegistryClient? = null
+    private var clientConfig: HashMap<String, String> = HashMap<String, String>()
 
     private const val BASIC_AUTH_SOURCE: String = "USER_INFO"
 
     fun client(url: String, auth: SchemaRegistryBasicAuth): SchemaRegistryClient? {
-        if (registryClient == null) {
-
-            registryClient = CachedSchemaRegistryClient(url, 100, getConfig(auth))
+        var tempClientConfig = getConfig(auth)
+        if (registryClient == null
+                || tempClientConfig.getOrDefault(SchemaRegistryClientConfig.USER_INFO_CONFIG, "") !=
+                clientConfig.getOrDefault(SchemaRegistryClientConfig.USER_INFO_CONFIG, "")) {
+            clientConfig = tempClientConfig
+            registryClient = CachedSchemaRegistryClient(url, 100, clientConfig)
         }
         return registryClient
     }

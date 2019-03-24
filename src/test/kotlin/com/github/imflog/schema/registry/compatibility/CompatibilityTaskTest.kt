@@ -18,6 +18,7 @@ class CompatibilityTaskTest {
     lateinit var buildFile: File
 
     val username: String = "user"
+
     val password: String = "pass"
 
     companion object {
@@ -90,8 +91,10 @@ class CompatibilityTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                credentials.username = '$username'
-                credentials.password = '$password'
+                credentials {
+                    username = '$username'
+                    password = '$password'
+                }
                 compatibility {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
@@ -121,8 +124,69 @@ class CompatibilityTaskTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
-                credentials.username = '$username'
-                credentials.password = '$password'
+                credentials {
+                    username = '$username'
+                    password = '$password'
+                }
+                compatibility {
+                    subject('testSubject', 'avro/core.avsc', ['avro/dependency.avsc'])
+                }
+            }
+        """)
+
+        folderRule.newFolder("avro")
+        val coreAvsc = folderRule.newFile("avro/core.avsc")
+        val coreSchema = """
+            {
+                "type":"record",
+                "name":"Core",
+                "fields":[
+                    {
+                        "name":"dep",
+                        "type":"Dependency"
+                    }
+                ]
+            }
+        """.trimIndent()
+        coreAvsc.writeText(coreSchema)
+
+        val depAvsc = folderRule.newFile("avro/dependency.avsc")
+        val depSchema = """
+            {
+                "type":"record",
+                "name":"Dependency",
+                "fields":[
+                    {
+                        "name":"name",
+                        "type":"string"
+                    }
+                ]
+            }
+        """.trimIndent()
+        depAvsc.writeText(depSchema)
+
+        val result: BuildResult? = GradleRunner.create()
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(TEST_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `CompatibilityTask should validate input schema with dependencies without credentials`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
                 compatibility {
                     subject('testSubject', 'avro/core.avsc', ['avro/dependency.avsc'])
                 }

@@ -86,8 +86,11 @@ class SchemaRegistryPluginTest {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                credentials {
+                    username = 'user'
+                    password = 'pass'
+                }
                 credentialsBar.username = 'user'
-                credentialsBar.password = 'pass'
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
