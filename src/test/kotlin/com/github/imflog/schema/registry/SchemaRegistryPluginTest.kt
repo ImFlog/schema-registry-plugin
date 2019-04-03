@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 const val REGISTRY_FAKE_PORT = 6666
+const val REGISTRY_FAKE_AUTH_PORT = 7777
 
 class SchemaRegistryPluginTest {
     lateinit var project: Project
