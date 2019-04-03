@@ -1,7 +1,7 @@
 package com.github.imflog.schema.registry.download
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.SchemaRegistryBasicAuth
+import com.github.imflog.schema.registry.SchemaRegistryBasicAuthExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.Input
@@ -19,7 +19,7 @@ open class DownloadTask : DefaultTask() {
     lateinit var subjects: List<Pair<String, String>>
 
     @Input
-    lateinit var auth: SchemaRegistryBasicAuth
+    lateinit var basicAuth: SchemaRegistryBasicAuthExtension
 
     @Input
     lateinit var url: String
@@ -27,7 +27,7 @@ open class DownloadTask : DefaultTask() {
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
-                RegistryClientWrapper.client(url,auth)!!,
+                RegistryClientWrapper.client(url, basicAuth),
                 subjects,
                 project.rootDir)
                 .run()

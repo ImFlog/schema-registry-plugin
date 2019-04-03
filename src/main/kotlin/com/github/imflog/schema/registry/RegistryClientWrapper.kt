@@ -3,7 +3,6 @@ package com.github.imflog.schema.registry
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
-import java.util.HashMap
 
 
 /**
@@ -12,30 +11,24 @@ import java.util.HashMap
  */
 object RegistryClientWrapper {
 
-    private var registryClient: SchemaRegistryClient? = null
-    private var clientConfig: HashMap<String, String> = HashMap<String, String>()
-
     private const val BASIC_AUTH_SOURCE: String = "USER_INFO"
 
-    fun client(url: String, auth: SchemaRegistryBasicAuth): SchemaRegistryClient? {
-        var tempClientConfig = getConfig(auth)
-        if (registryClient == null
-                || tempClientConfig.getOrDefault(SchemaRegistryClientConfig.USER_INFO_CONFIG, "") !=
-                clientConfig.getOrDefault(SchemaRegistryClientConfig.USER_INFO_CONFIG, "")) {
-            clientConfig = tempClientConfig
-            registryClient = CachedSchemaRegistryClient(url, 100, clientConfig)
-        }
-        return registryClient
-    }
+    fun client(url: String, auth: SchemaRegistryBasicAuthExtension): SchemaRegistryClient =
+            CachedSchemaRegistryClient(url, 100, getConfig(auth))
 
-    fun getConfig(auth: SchemaRegistryBasicAuth): HashMap<String, String> {
-        val config = HashMap<String, String>()
-        if (!auth.username.isNullOrEmpty() && !auth.password.isNullOrEmpty()) {
-            // Note that BASIC_AUTH_CREDENTIALS_SOURCE is not configurable as the plugin only supports
-            // a single schema registry URL, so there is no additional utility of the URL source.
-            config[SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE] = BASIC_AUTH_SOURCE
-            config[SchemaRegistryClientConfig.USER_INFO_CONFIG] = auth.getBasicAuthCredentials()
+    /**
+     * Retrieves configuration from the plugin extension.
+     * Note that BASIC_AUTH_CREDENTIALS_SOURCE is not configurable as the plugin only supports
+     * a single schema registry URL, so there is no additional utility of the URL source.
+     */
+    private fun getConfig(auth: SchemaRegistryBasicAuthExtension): Map<String, String> {
+        return if (auth.username == null || auth.password == null) {
+            mapOf()
+        } else {
+            mapOf(
+                    SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE to BASIC_AUTH_SOURCE,
+                    SchemaRegistryClientConfig.USER_INFO_CONFIG to auth.getBasicAuthCredentials()
+            )
         }
-        return config
     }
 }

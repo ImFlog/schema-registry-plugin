@@ -27,26 +27,30 @@ class SchemaRegistryPlugin : Plugin<Project> {
             val compatibilityExtension = extensions.create(
                     "compatibility",
                     CompatibilitySubjectExtension::class.java)
+            val authExtension = extensions.create(
+                    "credentials",
+                    SchemaRegistryBasicAuthExtension::class.java
+            )
 
             afterEvaluate {
                 tasks.create(
                         DOWNLOAD_SCHEMAS_TASK, DownloadTask::class.java).apply {
                     url = globalExtension.url
-                    auth = globalExtension.credentials
+                    basicAuth = authExtension
                     subjects = downloadExtension.subjects
                 }
 
                 tasks.create(
                         REGISTER_SCHEMAS_TASK, RegisterSchemasTask::class.java).apply {
                     url = globalExtension.url
-                    auth = globalExtension.credentials
+                    auth = authExtension
                     subjects = registerExtension.subjects
                 }
 
                 tasks.create(
                         TEST_SCHEMAS_TASK, CompatibilityTask::class.java).apply {
                     url = globalExtension.url
-                    auth = globalExtension.credentials
+                    auth = authExtension
                     subjects = compatibilityExtension.subjects
                 }
             }

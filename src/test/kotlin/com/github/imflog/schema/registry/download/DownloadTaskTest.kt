@@ -1,13 +1,16 @@
 package com.github.imflog.schema.registry.download
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
+import com.github.imflog.schema.registry.compatibility.CompatibilityTaskTest
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.useDefaultDateFormatsOnly
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -32,6 +35,7 @@ class DownloadTaskTest {
 
     companion object {
         lateinit var wiremockServerItem: WireMockServer
+        lateinit var wiremockAuthServerItem: WireMockServer
 
         @BeforeAll
         @JvmStatic
@@ -42,12 +46,20 @@ class DownloadTaskTest {
                             .port(REGISTRY_FAKE_PORT)
                             .notifier(ConsoleNotifier(true)))
             wiremockServerItem.start()
+
+            wiremockAuthServerItem = WireMockServer(
+                    WireMockConfiguration
+                            .wireMockConfig()
+                            .port(REGISTRY_FAKE_AUTH_PORT)
+                            .notifier(ConsoleNotifier(true)))
+            wiremockAuthServerItem.start()
         }
 
         @AfterAll
         @JvmStatic
         fun tearDown() {
             wiremockServerItem.stop()
+            wiremockAuthServerItem.stop()
         }
     }
 
@@ -58,17 +70,19 @@ class DownloadTaskTest {
 
         // Register schema
         val avroSchema = Schema(subject, 1, 1, schema)
+        // Stub without authentication configuration
         wiremockServerItem.stubFor(
                 WireMock.get(WireMock
-                        .urlMatching("/subjects/.*/versions/latest"))
-                        .withBasicAuth(username,password)
+                        .urlMatching("/subjects/test-subject/versions/latest"))
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withHeader("Accept", "application/json")
                                 .withBody(mapper.writeValueAsString(avroSchema))))
-        wiremockServerItem.stubFor(
+        // Stub with authentication configuration
+        wiremockAuthServerItem.stubFor(
                 WireMock.get(WireMock
-                        .urlMatching("/subjects/.*/versions/latest"))
+                        .urlMatching("/subjects/test-subject/versions/latest"))
+                        .withBasicAuth(username, password)
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withHeader("Accept", "application/json")
@@ -90,7 +104,7 @@ class DownloadTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
                 credentials {
                     username = '$username'
                     password = '$password'
@@ -142,5 +156,59 @@ class DownloadTaskTest {
         assertThat(File(folderRule.root, "src/main/avro/test")).exists()
         assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
         assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `DownloadSchemaTask should fail download when schema does not exist`() {
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                download {
+                    subject('UNKNOWN', 'src/main/avro/test')
+                }
+            }
+        """)
+
+        val result: BuildResult? = GradleRunner.create()
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .buildAndFail()
+        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+    }
+
+    @Test
+    fun `DownloadSchemaTask should fail download when credentials not setup and required`() {
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
+                download {
+                    subject('test-subject', 'src/main/avro/test')
+                }
+            }
+        """)
+
+        val result: BuildResult? = GradleRunner.create()
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .buildAndFail()
+        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 }

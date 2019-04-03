@@ -1,7 +1,7 @@
 package com.github.imflog.schema.registry.register
 
+import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
-import com.github.imflog.schema.registry.SchemaRegistryBasicAuth
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -11,7 +11,11 @@ import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.*
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 class RegisterTaskTest {
@@ -24,6 +28,7 @@ class RegisterTaskTest {
 
     companion object {
         lateinit var wiremockServerItem: WireMockServer
+        lateinit var wiremockAuthServerItem: WireMockServer
 
         @BeforeAll
         @JvmStatic
@@ -34,29 +39,39 @@ class RegisterTaskTest {
                             .port(REGISTRY_FAKE_PORT)
                             .notifier(ConsoleNotifier(true)))
             wiremockServerItem.start()
+
+
+            wiremockAuthServerItem = WireMockServer(
+                    WireMockConfiguration
+                            .wireMockConfig()
+                            .port(REGISTRY_FAKE_AUTH_PORT)
+                            .notifier(ConsoleNotifier(true)))
+            wiremockAuthServerItem.start()
         }
 
         @AfterAll
         @JvmStatic
         fun tearDown() {
             wiremockServerItem.stop()
+            wiremockAuthServerItem.stop()
         }
     }
 
     @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
-        // Register schema
+        // Stub without authentication configuration
         wiremockServerItem.stubFor(
                 WireMock.post(WireMock
                         .urlMatching("/subjects/.*/versions"))
-                        .withBasicAuth(username,password)
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withBody("{\"id\": 1}")))
-        wiremockServerItem.stubFor(
+        // Stub with authentication configuration
+        wiremockAuthServerItem.stubFor(
                 WireMock.post(WireMock
                         .urlMatching("/subjects/.*/versions"))
+                        .withBasicAuth(username, password)
                         .willReturn(WireMock.aResponse()
                                 .withStatus(200)
                                 .withBody("{\"id\": 1}")))
@@ -79,7 +94,7 @@ class RegisterTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
                 credentials {
                     username = '$username'
                     password = '$password'
@@ -198,5 +213,49 @@ class RegisterTaskTest {
                 .withDebug(true)
                 .build()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `RegisterSchemasTask should fail register schemas without credentials when required`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
+                register {
+                    subject('testSubject1', 'avro/test.avsc')
+                }
+            }
+        """)
+
+        folderRule.newFolder("avro")
+        val testAvsc = folderRule.newFile("avro/test.avsc")
+        val schemaTest = """
+            {
+                "type":"record",
+                "name":"Blah",
+                "fields":[
+                    {
+                        "name":"name",
+                        "type":"string"
+                    }
+                ]
+            }
+        """.trimIndent()
+        testAvsc.writeText(schemaTest)
+
+        val result: BuildResult? = GradleRunner.create()
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(REGISTER_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .buildAndFail()
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 }

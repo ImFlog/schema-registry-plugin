@@ -1,7 +1,7 @@
 package com.github.imflog.schema.registry.compatibility
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.SchemaRegistryBasicAuth
+import com.github.imflog.schema.registry.SchemaRegistryBasicAuthExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.tasks.Input
@@ -19,7 +19,7 @@ open class CompatibilityTask : DefaultTask() {
     lateinit var url: String
 
     @Input
-    lateinit var auth: SchemaRegistryBasicAuth
+    lateinit var auth: SchemaRegistryBasicAuthExtension
 
     @Input
     lateinit var subjects: List<Triple<String, String, List<String>>>
@@ -27,7 +27,7 @@ open class CompatibilityTask : DefaultTask() {
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
-                RegistryClientWrapper.client(url, auth)!!,
+                RegistryClientWrapper.client(url, auth),
                 subjects,
                 project.rootDir
         ).run()

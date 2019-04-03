@@ -24,7 +24,12 @@ val wiremockVersion = "2.18.0"
 
 repositories {
     jcenter()
+    mavenCentral()
     maven("http://packages.confluent.io/maven/")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 dependencies {
