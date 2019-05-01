@@ -1,10 +1,11 @@
 group = "com.github.imflog"
-version = "0.6.0-SNAPSHOT"
+version = "0.6.0"
 
 plugins {
     kotlin("jvm").version("1.3.31")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.10.1"
+    id("maven-publish")
 }
 
 val kotlinVersion: String? by extra {
@@ -48,9 +49,13 @@ tasks.withType<Test> {
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
 gradlePlugin {
-    plugins.invoke {
+    plugins {
         create("schema-registry") {
             id = registryPluginName
+            description = "A plugin to download, register and test schemas from a Kafka Schema Registry"
+            displayName = "Kafka schema registry gradle plugin"
+            version = version
+
             implementationClass = "com.github.imflog.schema.registry.SchemaRegistryPlugin"
         }
     }
@@ -59,14 +64,5 @@ gradlePlugin {
 pluginBundle {
     website = "https://github.com/ImFlog/schema-registry-plugin"
     vcsUrl = "https://github.com/ImFlog/schema-registry-plugin.git"
-
-    (plugins) {
-        create("schemaRegistryPlugin") {
-            id = registryPluginName
-            description = "A plugin to download, register and test schemas from a Kafka Schema Registry"
-            displayName = "Kafka schema registry gradle plugin"
-            tags = listOf("schema", "registry", "schema-registry", "kafka")
-            version = version
-        }
-    }
+    tags = listOf("schema", "registry", "schema-registry", "kafka")
 }
