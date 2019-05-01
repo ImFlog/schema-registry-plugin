@@ -7,9 +7,9 @@ import org.gradle.api.logging.Logging
 import java.io.File
 
 class DownloadTaskAction(
-        val client: SchemaRegistryClient,
-        val subjectPairs: List<Pair<String, String>>,
-        val rootDir: File
+    val client: SchemaRegistryClient,
+    val subjectPairs: List<Pair<String, String>>,
+    val rootDir: File
 ) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)

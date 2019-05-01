@@ -31,8 +31,10 @@ class DownloadTaskActionTest {
         val outputDir = "src/main/avro/external"
 
         val parser = Schema.Parser()
-        val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val fooSchema = parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val testSchema =
+            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val fooSchema =
+            parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
 
         val registryClient = MockSchemaRegistryClient()
         registryClient.register(testSubject, testSchema)
@@ -42,20 +44,22 @@ class DownloadTaskActionTest {
 
         // when
         val errorCount = DownloadTaskAction(
-                registryClient,
-                arrayListOf(
-                        Pair(testSubject, outputDir),
-                        Pair(fooSubject, outputDir)
-                ),
-                folderRule.root
+            registryClient,
+            arrayListOf(
+                Pair(testSubject, outputDir),
+                Pair(fooSubject, outputDir)
+            ),
+            folderRule.root
         ).run()
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
         Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText()).containsIgnoringCase("test")
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
+            .containsIgnoringCase("test")
         Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc")).isNotNull()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc").readText()).containsIgnoringCase("foo")
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc").readText())
+            .containsIgnoringCase("foo")
     }
 
     @Test
@@ -65,8 +69,10 @@ class DownloadTaskActionTest {
         val outputDir = "src/main/avro/external"
 
         val parser = Schema.Parser()
-        val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val fooSchema = parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val testSchema =
+            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val fooSchema =
+            parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
 
         val registryClient = MockSchemaRegistryClient()
         registryClient.register("test", testSchema)
@@ -76,9 +82,9 @@ class DownloadTaskActionTest {
 
         // when
         val errorCount = DownloadTaskAction(
-                registryClient,
-                arrayListOf(Pair(subject, outputDir)),
-                folderRule.root
+            registryClient,
+            arrayListOf(Pair(subject, outputDir)),
+            folderRule.root
         ).run()
 
         // then

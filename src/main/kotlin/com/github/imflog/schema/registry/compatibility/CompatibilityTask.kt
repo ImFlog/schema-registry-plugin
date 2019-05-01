@@ -27,9 +27,9 @@ open class CompatibilityTask : DefaultTask() {
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
-                RegistryClientWrapper.client(url, auth),
-                subjects,
-                project.rootDir
+            RegistryClientWrapper.client(url, auth),
+            subjects,
+            project.rootDir
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not compatible, see logs for details.", Throwable())

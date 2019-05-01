@@ -48,7 +48,8 @@ class SchemaRegistryPluginTest {
     fun `plugin should fail with wrong url extension configuration`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -59,17 +60,18 @@ class SchemaRegistryPluginTest {
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
-        """)
+        """
+        )
 
         try {
             GradleRunner.create()
-                    .withGradleVersion("4.9")
-                    .withProjectDir(folderRule.root)
-                    .withArguments(DOWNLOAD_SCHEMAS_TASK)
-                    .withPluginClasspath()
-                    .withDebug(true)
-                    .build()
-            Assertions.fail("Should not reach this point")
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
+            Assertions.fail<Any>("Should not reach this point")
         } catch (ex: UnexpectedBuildFailure) {
             Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'urlFoo'")
         }
@@ -79,7 +81,8 @@ class SchemaRegistryPluginTest {
     fun `plugin should fail with wrong credentials extension configuration`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -95,17 +98,18 @@ class SchemaRegistryPluginTest {
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
-        """)
+        """
+        )
 
         try {
             GradleRunner.create()
-                    .withGradleVersion("4.9")
-                    .withProjectDir(folderRule.root)
-                    .withArguments(DOWNLOAD_SCHEMAS_TASK)
-                    .withPluginClasspath()
-                    .withDebug(true)
-                    .build()
-            Assertions.fail("Should not reach this point")
+                .withGradleVersion("4.9")
+                .withProjectDir(folderRule.root)
+                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
+            Assertions.fail<Any>("Should not reach this point")
         } catch (ex: UnexpectedBuildFailure) {
             Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'credentialsBar'")
         }

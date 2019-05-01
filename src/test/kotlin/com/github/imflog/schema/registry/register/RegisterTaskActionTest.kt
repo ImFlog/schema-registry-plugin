@@ -28,7 +28,8 @@ class RegisterTaskActionTest {
         // given
         val registryClient = MockSchemaRegistryClient()
         folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
+        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+            """
             {"type": "record",
              "name": "test",
              "fields": [
@@ -36,20 +37,22 @@ class RegisterTaskActionTest {
                 {"name": "newField", "type": "string", "default": ""}
              ]
             }
-        """.trimIndent())
+        """.trimIndent()
+        )
 
         val subjects = listOf(
-                Triple(
-                        "test",
-                        "src/main/avro/external/test.avsc",
-                        listOf<String>()
-                ))
+            Triple(
+                "test",
+                "src/main/avro/external/test.avsc",
+                listOf<String>()
+            )
+        )
 
         // when
         val errorCount = RegisterTaskAction(
-                registryClient,
-                subjects,
-                folderRule.root
+            registryClient,
+            subjects,
+            folderRule.root
         ).run()
 
         // then
@@ -60,12 +63,14 @@ class RegisterTaskActionTest {
     fun `Should update version for same schema`() {
         // given
         val parser = Schema.Parser()
-        val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val testSchema =
+            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
         registryClient.register("test", testSchema)
 
         folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
+        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+            """
             {"type": "record",
              "name": "test",
              "fields": [
@@ -73,37 +78,42 @@ class RegisterTaskActionTest {
                 {"name": "newField", "type": "string", "default": ""}
              ]
             }
-        """.trimIndent())
+        """.trimIndent()
+        )
 
-        val subjects = listOf(Triple(
+        val subjects = listOf(
+            Triple(
                 "test",
                 "src/main/avro/external/test.avsc",
                 listOf<String>()
-        ))
+            )
+        )
 
         // when
         val errorCount = RegisterTaskAction(
-                registryClient,
-                subjects,
-                folderRule.root
+            registryClient,
+            subjects,
+            folderRule.root
         ).run()
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
         Assertions.assertThat(registryClient.getLatestSchemaMetadata("test").version)
-                .isEqualTo(2)
+            .isEqualTo(2)
     }
 
     @Test
     internal fun `Should register schema with dependencies in another file`() {
         // given
         val parser = Schema.Parser()
-        val testSchema = parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val testSchema =
+            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
         registryClient.register("test", testSchema)
 
         folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText("""
+        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+            """
             {"type": "record",
              "name": "test",
              "fields": [
@@ -111,9 +121,11 @@ class RegisterTaskActionTest {
                 {"name": "address", "type": "Address"}
              ]
             }
-        """.trimIndent())
+        """.trimIndent()
+        )
 
-        File(folderRule.root, "src/main/avro/external/directDependency.avsc").writeText("""
+        File(folderRule.root, "src/main/avro/external/directDependency.avsc").writeText(
+            """
             {"type": "record",
              "name": "Address",
              "fields": [
@@ -121,32 +133,37 @@ class RegisterTaskActionTest {
                 {"name": "street", "type": "Street" }
              ]
             }
-        """.trimIndent())
+        """.trimIndent()
+        )
 
-        File(folderRule.root, "src/main/avro/external/undirectDependency.avsc").writeText("""
+        File(folderRule.root, "src/main/avro/external/undirectDependency.avsc").writeText(
+            """
             {"type": "record",
              "name": "Street",
              "fields": [
                 {"name": "street", "type": "string" }
              ]
             }
-        """.trimIndent())
+        """.trimIndent()
+        )
 
 
         val subjects = listOf(
-                Triple(
-                        "test",
-                        "src/main/avro/external/test.avsc",
-                        listOf(
-                                "src/main/avro/external/directDependency.avsc",
-                                "src/main/avro/external/undirectDependency.avsc"))
+            Triple(
+                "test",
+                "src/main/avro/external/test.avsc",
+                listOf(
+                    "src/main/avro/external/directDependency.avsc",
+                    "src/main/avro/external/undirectDependency.avsc"
+                )
+            )
         )
 
         // when
         val errorCount = RegisterTaskAction(
-                registryClient,
-                subjects,
-                folderRule.root
+            registryClient,
+            subjects,
+            folderRule.root
         ).run()
 
         // then

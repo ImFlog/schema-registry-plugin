@@ -27,10 +27,10 @@ open class DownloadTask : DefaultTask() {
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
-                RegistryClientWrapper.client(url, basicAuth),
-                subjects,
-                project.rootDir)
-                .run()
+            RegistryClientWrapper.client(url, basicAuth),
+            subjects,
+            project.rootDir
+        ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not downloaded, see logs for details", Throwable())
         }

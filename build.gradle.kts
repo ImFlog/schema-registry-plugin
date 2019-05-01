@@ -1,17 +1,10 @@
-import org.gradle.wrapper.WrapperExecutor
-
 group = "com.github.imflog"
 version = "0.6.0-SNAPSHOT"
 
-task<Wrapper>("wrap") {
-    gradleVersion = "4.10"
-    distributionType = Wrapper.DistributionType.ALL
-}
-
 plugins {
-    kotlin("jvm").version("1.2.61")
+    kotlin("jvm").version("1.3.31")
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "0.9.10"
+    id("com.gradle.plugin-publish") version "0.10.1"
 }
 
 val kotlinVersion: String? by extra {
@@ -19,32 +12,37 @@ val kotlinVersion: String? by extra {
             .resolvedConfiguration.firstLevelModuleDependencies
             .find { it.moduleName == "org.jetbrains.kotlin.jvm.gradle.plugin" }?.moduleVersion
 }
-val junitVersion = "5.2.0"
-val wiremockVersion = "2.18.0"
-
 repositories {
     jcenter()
     mavenCentral()
     maven("http://packages.confluent.io/maven/")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
+// Dependencies versions
+val confluentVersion = "5.0.0"
+val avroVersion = "1.8.2"
+
+// Test versions
+val junitVersion = "5.4.2"
+val wiremockVersion = "2.23.2"
+val assertJVersion = "3.12.2"
 
 dependencies {
-    compileOnly(gradleApi())
+    implementation(gradleApi())
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
-    implementation("io.confluent", "kafka-avro-serializer", "5.0.0")
+    implementation("io.confluent", "kafka-avro-serializer", confluentVersion)
             .exclude("org.slf4j", "slf4j-log4j12")
-    implementation("org.apache.avro", "avro", "1.8.2")
+    implementation("org.apache.avro", "avro", avroVersion)
 
     testImplementation(gradleTestKit())
-    testCompile("org.junit.jupiter:junit-jupiter-api:5.2.0")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.2.0")
-    testImplementation("org.assertj", "assertj-core", "3.6.2")
-    testImplementation("org.mockito", "mockito-all", "1.10.19")
-    testImplementation("com.github.tomakehurst", "wiremock-standalone", wiremockVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
+    testRuntime("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+    testImplementation("org.assertj", "assertj-core", assertJVersion)
+    testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"

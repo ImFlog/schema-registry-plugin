@@ -2,7 +2,6 @@ package com.github.imflog.schema.registry.compatibility
 
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
-import com.github.imflog.schema.registry.RegistryClientWrapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -35,17 +34,19 @@ class CompatibilityTaskTest {
         @JvmStatic
         fun initClass() {
             wireMockServerItem = WireMockServer(
-                    WireMockConfiguration
-                            .wireMockConfig()
-                            .port(REGISTRY_FAKE_PORT)
-                            .notifier(ConsoleNotifier(true)))
+                WireMockConfiguration
+                    .wireMockConfig()
+                    .port(REGISTRY_FAKE_PORT)
+                    .notifier(ConsoleNotifier(true))
+            )
             wireMockServerItem.start()
 
             wireMockAuthServerItem = WireMockServer(
-                    WireMockConfiguration
-                            .wireMockConfig()
-                            .port(REGISTRY_FAKE_AUTH_PORT)
-                            .notifier(ConsoleNotifier(true)))
+                WireMockConfiguration
+                    .wireMockConfig()
+                    .port(REGISTRY_FAKE_AUTH_PORT)
+                    .notifier(ConsoleNotifier(true))
+            )
             wireMockAuthServerItem.start()
         }
 
@@ -63,22 +64,32 @@ class CompatibilityTaskTest {
         folderRule = TemporaryFolder()
         // Stub without authentication configuration
         wireMockServerItem.stubFor(
-                WireMock.post(WireMock
-                        .urlMatching("/compatibility/subjects/.*/versions/.*"))
-                        .willReturn(WireMock.aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
-                                .withBody("{\"is_compatible\": true}")))
+            WireMock.post(
+                WireMock
+                    .urlMatching("/compatibility/subjects/.*/versions/.*")
+            )
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
+                        .withBody("{\"is_compatible\": true}")
+                )
+        )
 
         // Stub with authentication configuration
         wireMockAuthServerItem.stubFor(
-                WireMock.post(WireMock
-                        .urlMatching("/compatibility/subjects/.*/versions/.*"))
-                        .withBasicAuth(username, password)
-                        .willReturn(WireMock.aResponse()
-                                .withStatus(200)
-                                .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
-                                .withBody("{\"is_compatible\": true}")))
+            WireMock.post(
+                WireMock
+                    .urlMatching("/compatibility/subjects/.*/versions/.*")
+            )
+                .withBasicAuth(username, password)
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
+                        .withBody("{\"is_compatible\": true}")
+                )
+        )
     }
 
     @AfterEach
@@ -109,7 +120,8 @@ class CompatibilityTaskTest {
         testAvsc2.writeText(schemaTest)
 
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -126,15 +138,16 @@ class CompatibilityTaskTest {
                     subject('testSubject2', 'avro/other_test.avsc')
                 }
             }
-        """)
+        """
+        )
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("5.2")
-                .withProjectDir(folderRule.root)
-                .withArguments(TEST_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
+            .withGradleVersion("5.2")
+            .withProjectDir(folderRule.root)
+            .withArguments(TEST_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -142,7 +155,8 @@ class CompatibilityTaskTest {
     fun `CompatibilityTask should validate input schema with dependencies`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -158,7 +172,8 @@ class CompatibilityTaskTest {
                     subject('testSubject', 'avro/core.avsc', ['avro/dependency.avsc'])
                 }
             }
-        """)
+        """
+        )
 
         folderRule.newFolder("avro")
         val coreAvsc = folderRule.newFile("avro/core.avsc")
@@ -192,12 +207,12 @@ class CompatibilityTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("5.2")
-                .withProjectDir(folderRule.root)
-                .withArguments(TEST_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
+            .withGradleVersion("5.2")
+            .withProjectDir(folderRule.root)
+            .withArguments(TEST_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -225,7 +240,8 @@ class CompatibilityTaskTest {
 
         buildFile = folderRule.newFile("build.gradle")
         // Auth configuration is omited to test the failure
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -237,15 +253,16 @@ class CompatibilityTaskTest {
                     subject('testSubject1', 'avro/test.avsc')
                 }
             }
-        """)
+        """
+        )
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("5.2")
-                .withProjectDir(folderRule.root)
-                .withArguments(TEST_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .buildAndFail()
+            .withGradleVersion("5.2")
+            .withProjectDir(folderRule.root)
+            .withArguments(TEST_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .buildAndFail()
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 
@@ -272,7 +289,8 @@ class CompatibilityTaskTest {
         testAvsc2.writeText(schemaTest)
 
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -289,15 +307,16 @@ class CompatibilityTaskTest {
                     subject('testSubject2', 'avro/other_test.avsc')
                 }
             }
-        """)
+        """
+        )
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("5.2")
-                .withProjectDir(folderRule.root)
-                .withArguments(TEST_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
+            .withGradleVersion("5.2")
+            .withProjectDir(folderRule.root)
+            .withArguments(TEST_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 }

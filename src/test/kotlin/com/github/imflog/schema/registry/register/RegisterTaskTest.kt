@@ -34,18 +34,20 @@ class RegisterTaskTest {
         @JvmStatic
         fun initClass() {
             wiremockServerItem = WireMockServer(
-                    WireMockConfiguration
-                            .wireMockConfig()
-                            .port(REGISTRY_FAKE_PORT)
-                            .notifier(ConsoleNotifier(true)))
+                WireMockConfiguration
+                    .wireMockConfig()
+                    .port(REGISTRY_FAKE_PORT)
+                    .notifier(ConsoleNotifier(true))
+            )
             wiremockServerItem.start()
 
 
             wiremockAuthServerItem = WireMockServer(
-                    WireMockConfiguration
-                            .wireMockConfig()
-                            .port(REGISTRY_FAKE_AUTH_PORT)
-                            .notifier(ConsoleNotifier(true)))
+                WireMockConfiguration
+                    .wireMockConfig()
+                    .port(REGISTRY_FAKE_AUTH_PORT)
+                    .notifier(ConsoleNotifier(true))
+            )
             wiremockAuthServerItem.start()
         }
 
@@ -62,19 +64,29 @@ class RegisterTaskTest {
         folderRule = TemporaryFolder()
         // Stub without authentication configuration
         wiremockServerItem.stubFor(
-                WireMock.post(WireMock
-                        .urlMatching("/subjects/.*/versions"))
-                        .willReturn(WireMock.aResponse()
-                                .withStatus(200)
-                                .withBody("{\"id\": 1}")))
+            WireMock.post(
+                WireMock
+                    .urlMatching("/subjects/.*/versions")
+            )
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody("{\"id\": 1}")
+                )
+        )
         // Stub with authentication configuration
         wiremockAuthServerItem.stubFor(
-                WireMock.post(WireMock
-                        .urlMatching("/subjects/.*/versions"))
-                        .withBasicAuth(username, password)
-                        .willReturn(WireMock.aResponse()
-                                .withStatus(200)
-                                .withBody("{\"id\": 1}")))
+            WireMock.post(
+                WireMock
+                    .urlMatching("/subjects/.*/versions")
+            )
+                .withBasicAuth(username, password)
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody("{\"id\": 1}")
+                )
+        )
 
     }
 
@@ -87,7 +99,8 @@ class RegisterTaskTest {
     fun `RegisterSchemasTask should register schemas`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -105,7 +118,8 @@ class RegisterTaskTest {
                     subject('testSubject3', 'avro/dependency_test.avsc', ['avro/test.avsc'])
                 }
             }
-        """)
+        """
+        )
 
         folderRule.newFolder("avro")
         var testAvsc = folderRule.newFile("avro/test.avsc")
@@ -142,12 +156,12 @@ class RegisterTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("4.9")
-                .withProjectDir(folderRule.root)
-                .withArguments(REGISTER_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
+            .withGradleVersion("4.9")
+            .withProjectDir(folderRule.root)
+            .withArguments(REGISTER_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -155,7 +169,8 @@ class RegisterTaskTest {
     fun `RegisterSchemasTask should register schemas without credentials`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -169,7 +184,8 @@ class RegisterTaskTest {
                     subject('testSubject3', 'avro/dependency_test.avsc', ['avro/test.avsc'])
                 }
             }
-        """)
+        """
+        )
 
         folderRule.newFolder("avro")
         var testAvsc = folderRule.newFile("avro/test.avsc")
@@ -206,12 +222,12 @@ class RegisterTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("4.9")
-                .withProjectDir(folderRule.root)
-                .withArguments(REGISTER_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
+            .withGradleVersion("4.9")
+            .withProjectDir(folderRule.root)
+            .withArguments(REGISTER_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -219,7 +235,8 @@ class RegisterTaskTest {
     fun `RegisterSchemasTask should fail register schemas without credentials when required`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -231,7 +248,8 @@ class RegisterTaskTest {
                     subject('testSubject1', 'avro/test.avsc')
                 }
             }
-        """)
+        """
+        )
 
         folderRule.newFolder("avro")
         val testAvsc = folderRule.newFile("avro/test.avsc")
@@ -250,12 +268,12 @@ class RegisterTaskTest {
         testAvsc.writeText(schemaTest)
 
         val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("4.9")
-                .withProjectDir(folderRule.root)
-                .withArguments(REGISTER_SCHEMAS_TASK)
-                .withPluginClasspath()
-                .withDebug(true)
-                .buildAndFail()
+            .withGradleVersion("4.9")
+            .withProjectDir(folderRule.root)
+            .withArguments(REGISTER_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .buildAndFail()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 }

@@ -6,9 +6,10 @@ import org.gradle.api.logging.Logging
 import java.io.File
 
 class CompatibilityTaskAction(
-        val client: SchemaRegistryClient,
-        val subjects: List<Triple<String, String, List<String>>>,
-        val rootDir: File) {
+    val client: SchemaRegistryClient,
+    val subjects: List<Triple<String, String, List<String>>>,
+    val rootDir: File
+) {
 
     private val logger = Logging.getLogger(CompatibilityTaskAction::class.java)
 

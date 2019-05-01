@@ -14,7 +14,7 @@ object RegistryClientWrapper {
     private const val BASIC_AUTH_SOURCE: String = "USER_INFO"
 
     fun client(url: String, auth: SchemaRegistryBasicAuthExtension): SchemaRegistryClient =
-            CachedSchemaRegistryClient(url, 100, getConfig(auth))
+        CachedSchemaRegistryClient(url, 100, getConfig(auth))
 
     /**
      * Retrieves configuration from the plugin extension.
@@ -26,8 +26,8 @@ object RegistryClientWrapper {
             mapOf()
         } else {
             mapOf(
-                    SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE to BASIC_AUTH_SOURCE,
-                    SchemaRegistryClientConfig.USER_INFO_CONFIG to auth.getBasicAuthCredentials()
+                SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE to BASIC_AUTH_SOURCE,
+                SchemaRegistryClientConfig.USER_INFO_CONFIG to auth.getBasicAuthCredentials()
             )
         }
     }
