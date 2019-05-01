@@ -24,20 +24,21 @@ val avroVersion = "1.8.2"
 
 // Test versions
 val junitVersion = "5.4.2"
+val mockkVersion = "1.9"
 val wiremockVersion = "2.23.2"
 val assertJVersion = "3.12.2"
 
 dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
-    implementation("io.confluent", "kafka-avro-serializer", confluentVersion)
+    implementation("io.confluent", "kafka-schema-registry", confluentVersion)
             .exclude("org.slf4j", "slf4j-log4j12")
-    implementation("org.apache.avro", "avro", avroVersion)
 
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntime("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
     testImplementation("org.assertj", "assertj-core", assertJVersion)
+    testImplementation("io.mockk", "mockk", mockkVersion)
     testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
 }
 

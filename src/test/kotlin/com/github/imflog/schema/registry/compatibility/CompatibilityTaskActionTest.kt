@@ -1,6 +1,10 @@
 package com.github.imflog.schema.registry.compatibility
 
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
+import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
+import io.mockk.every
+import io.mockk.spyk
 import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
@@ -159,4 +163,37 @@ class CompatibilityTaskActionTest {
         Assertions.assertThat(errorCount).isEqualTo(1)
     }
 
+    @Test
+    internal fun `Should succeed if schema does not exist`() {
+        // Given
+
+        val spySchemaRegistry = spyk<MockSchemaRegistryClient>()
+        every {
+            spySchemaRegistry.testCompatibility(any(), any())
+        } throws RestClientException("Subject not found", 404, Errors.SUBJECT_NOT_FOUND_ERROR_CODE)
+
+        folderRule.newFolder("src", "main", "avro", "external")
+
+        val subjects = arrayListOf(Triple("test", "src/main/avro/external/test.avsc", emptyList<String>()))
+        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "boolean" }
+             ]
+            }
+        """.trimIndent()
+        )
+
+        // when
+        val errorCount = CompatibilityTaskAction(
+            spySchemaRegistry,
+            subjects,
+            folderRule.root
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+    }
 }
