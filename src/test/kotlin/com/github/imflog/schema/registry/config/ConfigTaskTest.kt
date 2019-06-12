@@ -189,4 +189,34 @@ class ConfigTaskTest {
         Assertions.assertThat(result?.task(":configSubjectsTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 
+    @Test
+    fun `ConfigTask should detect and reject invalid compatibility settings`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                config {
+                    subject('testSubject1', 'FULL_TRANSITIVE')
+                    subject('testSubject2', 'FUL_TRANSITIVE') // intentionally broken
+                }
+            }
+            """.trimIndent()
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("4.9")
+            .withProjectDir(folderRule.root)
+            .withArguments(CONFIG_SUBJECTS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .buildAndFail()
+        Assertions.assertThat(result?.task(":configSubjectsTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+    }
 }

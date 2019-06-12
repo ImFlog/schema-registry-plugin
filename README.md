@@ -126,8 +126,11 @@ schemaRegistry {
 }
 ```
 
+See the Confluent
+[Schema Registry documentation](https://docs.confluent.io/current/schema-registry/avro.html#compatibility-types)
+for more information on valid compatibility levels.
+
 You have to put the URL where the script can reach the Schema Registry.
 
 You have to list the (subject, compatibility-level) 
 
-See the Confluent [Schema Registry documentation](https://docs.confluent.io/current/schema-registry/avro.html#compatibility-types) for more information on valid compatibility levels.
