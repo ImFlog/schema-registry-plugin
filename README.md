@@ -121,11 +121,13 @@ schemaRegistry {
     } //optional
     config {
         subject('mySubject', 'FULL_TRANSITIVE')
-        subject('otherSubject, 'FORWARD')
+        subject('otherSubject', 'FORWARD')
     }
 }
 ```
 
 You have to put the URL where the script can reach the Schema Registry.
 
-You have to list the (subject, compatibility-level) pairs that you want to configure.
+You have to list the (subject, compatibility-level) 
+
+See the Confluent [Schema Registry documentation](https://docs.confluent.io/current/schema-registry/avro.html#compatibility-types) for more information on valid compatibility levels.
