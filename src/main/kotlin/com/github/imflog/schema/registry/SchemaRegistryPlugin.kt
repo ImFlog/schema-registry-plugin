@@ -3,6 +3,9 @@ package com.github.imflog.schema.registry
 import com.github.imflog.schema.registry.compatibility.CompatibilitySubjectExtension
 import com.github.imflog.schema.registry.compatibility.CompatibilityTask
 import com.github.imflog.schema.registry.compatibility.TEST_SCHEMAS_TASK
+import com.github.imflog.schema.registry.config.CONFIG_SUBJECTS_TASK
+import com.github.imflog.schema.registry.config.ConfigSubjectExtension
+import com.github.imflog.schema.registry.config.ConfigTask
 import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
 import com.github.imflog.schema.registry.download.DownloadTask
 import com.github.imflog.schema.registry.register.REGISTER_SCHEMAS_TASK
@@ -35,6 +38,10 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 "credentials",
                 SchemaRegistryBasicAuthExtension::class.java
             )
+            val configExtension = extensions.create(
+                "config",
+                ConfigSubjectExtension::class.java
+            )
 
             afterEvaluate {
                 tasks.create(
@@ -59,6 +66,14 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     url = globalExtension.url
                     auth = authExtension
                     subjects = compatibilityExtension.subjects
+                }
+
+                tasks.create(
+                    CONFIG_SUBJECTS_TASK, ConfigTask::class.java
+                ).apply {
+                    url = globalExtension.url
+                    auth = authExtension
+                    subjects = configExtension.subjects
                 }
             }
         }

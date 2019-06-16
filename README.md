@@ -6,10 +6,12 @@ The aim of this plugin is to adapt the [Confluent schema registry maven plugin](
 See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
 for instructions about how to add the plugin to your build configuration.
 
-When you do so, three tasks are added under registry group:
+When you do so, four tasks are added under registry group:
 * downloadSchemasTask
 * testSchemasTask
 * registerSchemasTask
+* configSubjectsTask
+
 What these tasks do and how to configure them is described in the following sections.
 ## Download schemas
 Like the name of the task imply, this task is responsible of retrieving schemas from a schema registry.
@@ -104,3 +106,31 @@ register{
     subject('userSubject', 'path/user.avsc', ['path/address.avsc', 'path/street.avsc'])
 }
 ```
+
+## Configure subjects
+
+This task sets the schema compatibility level for registered subjects.
+
+A DSL is available to specify which subjects to configure:
+```groovy
+schemaRegistry {
+    url = 'http://localhost:8081'
+    credentials {
+        username = 'basicauthentication-username'
+        password = 'basicauthentication-password'
+    } //optional
+    config {
+        subject('mySubject', 'FULL_TRANSITIVE')
+        subject('otherSubject', 'FORWARD')
+    }
+}
+```
+
+See the Confluent
+[Schema Registry documentation](https://docs.confluent.io/current/schema-registry/avro.html#compatibility-types)
+for more information on valid compatibility levels.
+
+You have to put the URL where the script can reach the Schema Registry.
+
+You have to list the (subject, compatibility-level) 
+
