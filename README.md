@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/ImFlog/schema-registry-plugin/tree/master.svg?style=svg)](https://circleci.com/gh/ImFlog/schema-registry-plugin/tree/master)
+[![GitHub Actions status](https://github.com/ImFlog/schema-registry-plugin/workflows/Build/badge.svg)](https://github.com/ImFlog/schema-registry-plugin/actions)
 
 # Schema-registry-plugin
 The aim of this plugin is to adapt the [Confluent schema registry maven plugin](https://docs.confluent.io/current/schema-registry/docs/maven-plugin.html) for Gradle builds.

@@ -1,5 +1,5 @@
 group = "com.github.imflog"
-version = "0.10.0-SNAPSHOT"
+version = "0.9.1-SNAPSHOT"
 
 plugins {
     kotlin("jvm").version("1.3.71")
@@ -38,7 +38,7 @@ val assertJVersion = "3.15.0"
 dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
-    testRuntime("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
     testImplementation("org.assertj", "assertj-core", assertJVersion)
     testImplementation("io.mockk", "mockk", mockkVersion)
     testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
@@ -46,6 +46,29 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ImFlog/schema-registry-plugin")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            from(components["java"])
+            artifact(sourcesJar.get())
+        }
+    }
 }
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
