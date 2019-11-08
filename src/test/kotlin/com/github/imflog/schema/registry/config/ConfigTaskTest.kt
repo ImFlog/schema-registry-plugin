@@ -119,7 +119,7 @@ class ConfigTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(CONFIG_SUBJECTS_TASK)
             .withPluginClasspath()
@@ -150,7 +150,7 @@ class ConfigTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(CONFIG_SUBJECTS_TASK)
             .withPluginClasspath()
@@ -180,7 +180,7 @@ class ConfigTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(CONFIG_SUBJECTS_TASK)
             .withPluginClasspath()
@@ -211,7 +211,7 @@ class ConfigTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(CONFIG_SUBJECTS_TASK)
             .withPluginClasspath()

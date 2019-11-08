@@ -2,16 +2,17 @@ group = "com.github.imflog"
 version = "0.8.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm").version("1.3.31")
+    kotlin("jvm").version("1.3.50")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.10.1"
     id("maven-publish")
+    id("com.github.ben-manes.versions") version "0.27.0"
 }
 
 val kotlinVersion: String? by extra {
     buildscript.configurations["classpath"]
-            .resolvedConfiguration.firstLevelModuleDependencies
-            .find { it.moduleName == "org.jetbrains.kotlin.jvm.gradle.plugin" }?.moduleVersion
+        .resolvedConfiguration.firstLevelModuleDependencies
+        .find { it.moduleName == "org.jetbrains.kotlin.jvm.gradle.plugin" }?.moduleVersion
 }
 repositories {
     jcenter()
@@ -20,21 +21,21 @@ repositories {
 }
 
 // Dependencies versions
-val confluentVersion = "5.0.0"
+val confluentVersion = "5.3.1"
 val avroVersion = "1.8.2"
-
-// Test versions
-val junitVersion = "5.4.2"
-val mockkVersion = "1.9"
-val wiremockVersion = "2.23.2"
-val assertJVersion = "3.12.2"
-
 dependencies {
     implementation(gradleApi())
     implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
     implementation("io.confluent", "kafka-schema-registry", confluentVersion)
-            .exclude("org.slf4j", "slf4j-log4j12")
+        .exclude("org.slf4j", "slf4j-log4j12")
+}
 
+// Test versions
+val junitVersion = "5.5.2"
+val mockkVersion = "1.9.3"
+val wiremockVersion = "2.25.1"
+val assertJVersion = "3.14.0"
+dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testRuntime("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
