@@ -156,7 +156,7 @@ class RegisterTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(REGISTER_SCHEMAS_TASK)
             .withPluginClasspath()
@@ -222,7 +222,7 @@ class RegisterTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(REGISTER_SCHEMAS_TASK)
             .withPluginClasspath()
@@ -268,7 +268,7 @@ class RegisterTaskTest {
         testAvsc.writeText(schemaTest)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("4.9")
+            .withGradleVersion("5.6.4")
             .withProjectDir(folderRule.root)
             .withArguments(REGISTER_SCHEMAS_TASK)
             .withPluginClasspath()

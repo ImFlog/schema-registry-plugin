@@ -65,7 +65,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("4.9")
+                .withGradleVersion("5.6.4")
                 .withProjectDir(folderRule.root)
                 .withArguments(DOWNLOAD_SCHEMAS_TASK)
                 .withPluginClasspath()
@@ -103,7 +103,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("4.9")
+                .withGradleVersion("5.6.4")
                 .withProjectDir(folderRule.root)
                 .withArguments(DOWNLOAD_SCHEMAS_TASK)
                 .withPluginClasspath()
