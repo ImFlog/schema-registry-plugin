@@ -32,6 +32,9 @@ class DownloadTaskTest {
     val schema =
         "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}"
 
+    val schemaOld =
+        "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }, { \"name\": \"description\", \"type\": \"string\" }]}"
+
     lateinit var buildFile: File
 
     val mapper = ObjectMapper()
@@ -88,6 +91,21 @@ class DownloadTaskTest {
                         .withBody(mapper.writeValueAsString(avroSchema))
                 )
         )
+        // Stub without authentication configuration for a specific schema id
+        val avroSchemaOld = Schema(subject, 1, 1, schemaOld)
+        wiremockServerItem.stubFor(
+            WireMock.get(
+                WireMock
+                    .urlMatching("/subjects/test-subject/versions/1")
+            )
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Accept", "application/json")
+                        .withBody(mapper.writeValueAsString(avroSchemaOld))
+                )
+        )
+
         // Stub with authentication configuration
         wiremockAuthServerItem.stubFor(
             WireMock.get(
@@ -233,5 +251,39 @@ class DownloadTaskTest {
             .withDebug(true)
             .buildAndFail()
         assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+    }
+
+    @Test
+    internal fun `DownloadSchemaTask should download specific schema version without credentials`() {
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                download {
+                    subject('test-subject', 'src/main/avro/test', 1)
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("5.6.4")
+            .withProjectDir(folderRule.root)
+            .withArguments(DOWNLOAD_SCHEMAS_TASK)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        assertThat(File(folderRule.root, "src/main/avro/test")).exists()
+        val resultFile = File(folderRule.root, "src/main/avro/test/test-subject.avsc")
+        assertThat(resultFile).exists()
+        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(resultFile.readText()).contains("desc")
     }
 }

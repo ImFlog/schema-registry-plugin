@@ -8,6 +8,7 @@ import com.github.imflog.schema.registry.config.ConfigSubjectExtension
 import com.github.imflog.schema.registry.config.ConfigTask
 import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
 import com.github.imflog.schema.registry.download.DownloadTask
+import com.github.imflog.schema.registry.download.DownloadSubjectExtension
 import com.github.imflog.schema.registry.register.REGISTER_SCHEMAS_TASK
 import com.github.imflog.schema.registry.register.RegisterSchemasTask
 import com.github.imflog.schema.registry.register.RegisterSubjectExtension
@@ -24,7 +25,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             )
             val downloadExtension = extensions.create(
                 "download",
-                SubjectExtension::class.java
+                DownloadSubjectExtension::class.java
             )
             val registerExtension = extensions.create(
                 "register",
