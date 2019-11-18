@@ -16,7 +16,7 @@ open class DownloadTask : DefaultTask() {
     }
 
     @Input
-    lateinit var subjects: List<Pair<String, String>>
+    lateinit var subjects: List<DownloadSubject>
 
     @Input
     lateinit var basicAuth: SchemaRegistryBasicAuthExtension
