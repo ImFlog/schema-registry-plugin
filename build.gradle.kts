@@ -1,5 +1,5 @@
 group = "com.github.imflog"
-version = "0.8.0-SNAPSHOT"
+version = "0.8.0"
 
 plugins {
     kotlin("jvm").version("1.3.50")
