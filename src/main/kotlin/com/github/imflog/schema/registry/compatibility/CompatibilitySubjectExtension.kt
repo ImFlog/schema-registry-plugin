@@ -1,13 +1,23 @@
 package com.github.imflog.schema.registry.compatibility
 
-open class CompatibilitySubjectExtension {
-    val subjects: ArrayList<Triple<String, String, List<String>>> = ArrayList()
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+
+
+open class CompatibilitySubjectExtension(objects: ObjectFactory) {
+    val subjects: ListProperty<CompatibilitySubject> = objects.listProperty(CompatibilitySubject::class.java)
 
     fun subject(inputSubject: String, file: String) {
-        subjects.add(Triple(inputSubject, file, emptyList()))
+        subjects.add(CompatibilitySubject(inputSubject, file, emptyList()))
     }
 
     fun subject(inputSubject: String, file: String, dependencies: List<String>) {
-        subjects.add(Triple(inputSubject, file, dependencies))
+        subjects.add(CompatibilitySubject(inputSubject, file, dependencies))
     }
 }
+
+data class CompatibilitySubject(
+    val inputSubject: String,
+    val file: String,
+    val dependencies: List<String>
+)

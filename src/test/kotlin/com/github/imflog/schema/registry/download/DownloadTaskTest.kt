@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
-import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -151,16 +151,16 @@ class DownloadTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(DOWNLOAD_SCHEMAS_TASK)
+            .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
 
-        assertThat(File(folderRule.root, "src/main/avro/test")).exists()
-        assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
-        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
     @Test
@@ -183,16 +183,16 @@ class DownloadTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(DOWNLOAD_SCHEMAS_TASK)
+            .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
 
-        assertThat(File(folderRule.root, "src/main/avro/test")).exists()
-        assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
-        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
     @Test
@@ -215,13 +215,13 @@ class DownloadTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(DOWNLOAD_SCHEMAS_TASK)
+            .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .buildAndFail()
-        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 
     @Test
@@ -244,13 +244,13 @@ class DownloadTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(DOWNLOAD_SCHEMAS_TASK)
+            .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .buildAndFail()
-        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 
     @Test
@@ -273,17 +273,17 @@ class DownloadTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(DOWNLOAD_SCHEMAS_TASK)
+            .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
 
-        assertThat(File(folderRule.root, "src/main/avro/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
         val resultFile = File(folderRule.root, "src/main/avro/test/test-subject.avsc")
-        assertThat(resultFile).exists()
-        assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        assertThat(resultFile.readText()).contains("desc")
+        Assertions.assertThat(resultFile).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(resultFile.readText()).contains("desc")
     }
 }

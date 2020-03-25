@@ -2,11 +2,11 @@ group = "com.github.imflog"
 version = "0.9.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm").version("1.3.50")
+    kotlin("jvm").version("1.3.71")
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.10.1"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.27.0"
+    id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 val kotlinVersion: String? by extra {
@@ -21,7 +21,7 @@ repositories {
 }
 
 // Dependencies versions
-val confluentVersion = "5.3.1"
+val confluentVersion = "5.4.1"
 val avroVersion = "1.8.2"
 dependencies {
     implementation(gradleApi())
@@ -31,10 +31,10 @@ dependencies {
 }
 
 // Test versions
-val junitVersion = "5.5.2"
+val junitVersion = "5.6.1"
 val mockkVersion = "1.9.3"
-val wiremockVersion = "2.25.1"
-val assertJVersion = "3.14.0"
+val wiremockVersion = "2.26.3"
+val assertJVersion = "3.15.0"
 dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)

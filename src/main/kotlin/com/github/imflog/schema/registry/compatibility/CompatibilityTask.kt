@@ -1,34 +1,40 @@
 package com.github.imflog.schema.registry.compatibility
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.SchemaRegistryBasicAuthExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import javax.inject.Inject
 
-const val TEST_SCHEMAS_TASK = "testSchemasTask"
 
-open class CompatibilityTask : DefaultTask() {
+open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     init {
         group = "registry"
         description = "Test compatibility against registry"
     }
 
-    @Input
-    lateinit var url: String
+    companion object {
+        const val TASK_NAME = "testSchemasTask"
+    }
 
     @Input
-    lateinit var auth: SchemaRegistryBasicAuthExtension
+    val url: Property<String> = objects.property(String::class.java)
 
     @Input
-    lateinit var subjects: List<Triple<String, String, List<String>>>
+    val basicAuth: Property<String> = objects.property(String::class.java)
+
+    @Input
+    val subjects: ListProperty<CompatibilitySubject> = objects.listProperty(CompatibilitySubject::class.java)
 
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
-            RegistryClientWrapper.client(url, auth),
-            subjects,
+            RegistryClientWrapper.client(url.get(), basicAuth.get()),
+            subjects.get(),
             project.rootDir
         ).run()
         if (errorCount > 0) {

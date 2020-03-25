@@ -2,14 +2,10 @@ package com.github.imflog.schema.registry
 
 import com.github.imflog.schema.registry.compatibility.CompatibilitySubjectExtension
 import com.github.imflog.schema.registry.compatibility.CompatibilityTask
-import com.github.imflog.schema.registry.compatibility.TEST_SCHEMAS_TASK
-import com.github.imflog.schema.registry.config.CONFIG_SUBJECTS_TASK
 import com.github.imflog.schema.registry.config.ConfigSubjectExtension
 import com.github.imflog.schema.registry.config.ConfigTask
-import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
-import com.github.imflog.schema.registry.download.DownloadTask
 import com.github.imflog.schema.registry.download.DownloadSubjectExtension
-import com.github.imflog.schema.registry.register.REGISTER_SCHEMAS_TASK
+import com.github.imflog.schema.registry.download.DownloadTask
 import com.github.imflog.schema.registry.register.RegisterSchemasTask
 import com.github.imflog.schema.registry.register.RegisterSubjectExtension
 import org.gradle.api.Plugin
@@ -23,6 +19,10 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 "schemaRegistry",
                 SchemaRegistryExtension::class.java
             )
+            val authExtension = extensions.create(
+                "credentials",
+                BasicAuthExtension::class.java
+            )
             val downloadExtension = extensions.create(
                 "download",
                 DownloadSubjectExtension::class.java
@@ -35,48 +35,38 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 "compatibility",
                 CompatibilitySubjectExtension::class.java
             )
-            val authExtension = extensions.create(
-                "credentials",
-                SchemaRegistryBasicAuthExtension::class.java
-            )
             val configExtension = extensions.create(
                 "config",
                 ConfigSubjectExtension::class.java
             )
 
-            afterEvaluate {
-                tasks.create(
-                    DOWNLOAD_SCHEMAS_TASK, DownloadTask::class.java
-                ).apply {
-                    url = globalExtension.url
-                    basicAuth = authExtension
-                    subjects = downloadExtension.subjects
+            tasks.register(DownloadTask.TASK_NAME, DownloadTask::class.java)
+                .configure {
+                    it.url.set(globalExtension.url)
+                    it.basicAuth.set(authExtension.basicAuth)
+                    it.subjects.set(downloadExtension.subjects)
                 }
 
-                tasks.create(
-                    REGISTER_SCHEMAS_TASK, RegisterSchemasTask::class.java
-                ).apply {
-                    url = globalExtension.url
-                    auth = authExtension
-                    subjects = registerExtension.subjects
+            tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
+                .configure {
+                    it.url.set(globalExtension.url)
+                    it.basicAuth.set(authExtension.basicAuth)
+                    it.subjects.set(registerExtension.subjects)
                 }
 
-                tasks.create(
-                    TEST_SCHEMAS_TASK, CompatibilityTask::class.java
-                ).apply {
-                    url = globalExtension.url
-                    auth = authExtension
-                    subjects = compatibilityExtension.subjects
+            tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
+                .configure {
+                    it.url.set(globalExtension.url)
+                    it.basicAuth.set(authExtension.basicAuth)
+                    it.subjects.set(compatibilityExtension.subjects)
                 }
 
-                tasks.create(
-                    CONFIG_SUBJECTS_TASK, ConfigTask::class.java
-                ).apply {
-                    url = globalExtension.url
-                    auth = authExtension
-                    subjects = configExtension.subjects
+            tasks.register(ConfigTask.TASK_NAME, ConfigTask::class.java)
+                .configure {
+                    it.url.set(globalExtension.url)
+                    it.basicAuth.set(authExtension.basicAuth)
+                    it.subjects.set(configExtension.subjects)
                 }
-            }
         }
     }
 }

@@ -9,7 +9,7 @@ import java.io.File
 
 class CompatibilityTaskAction(
     private val client: SchemaRegistryClient,
-    private val subjects: List<Triple<String, String, List<String>>>,
+    private val subjects: List<CompatibilitySubject>,
     private val rootDir: File
 ) {
 

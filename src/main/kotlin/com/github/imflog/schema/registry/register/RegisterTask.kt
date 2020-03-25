@@ -1,40 +1,44 @@
 package com.github.imflog.schema.registry.register
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.SchemaRegistryBasicAuthExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import javax.inject.Inject
 
-const val REGISTER_SCHEMAS_TASK = "registerSchemasTask"
+open class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
 
-open class RegisterSchemasTask : DefaultTask() {
+    companion object {
+        const val TASK_NAME = "registerSchemasTask"
+    }
+
     init {
         group = "registry"
         description = "Register schemas in the registry"
     }
 
     @Input
-    lateinit var url: String
+    val url: Property<String> = objects.property(String::class.java)
 
     @Input
-    lateinit var auth: SchemaRegistryBasicAuthExtension
+    val basicAuth: Property<String> = objects.property(String::class.java)
 
     @Input
-    lateinit var subjects: List<Triple<String, String, List<String>>>
+    val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)
 
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
-            RegistryClientWrapper.client(url, auth),
-            subjects,
+            RegistryClientWrapper.client(url.get(), basicAuth.get()),
+            subjects.get(),
             project.rootDir
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not registered, see logs for details", Throwable())
         }
     }
-
-
 }

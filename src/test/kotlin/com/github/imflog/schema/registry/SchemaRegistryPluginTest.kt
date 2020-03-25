@@ -1,8 +1,7 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.download.DOWNLOAD_SCHEMAS_TASK
+import com.github.imflog.schema.registry.download.DownloadTask
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.Assertions.assertThat
 import org.gradle.api.Project
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testfixtures.ProjectBuilder
@@ -39,8 +38,8 @@ class SchemaRegistryPluginTest {
     @Test
     fun `plugin should add tasks when applied`() {
         project.afterEvaluate {
-            val downloadSchemaTask = project.tasks.getByName(DOWNLOAD_SCHEMAS_TASK)
-            assertThat(downloadSchemaTask).isNotNull()
+            val downloadSchemaTask = project.tasks.getByName(DownloadTask.TASK_NAME)
+            Assertions.assertThat(downloadSchemaTask).isNotNull()
         }
     }
 
@@ -65,9 +64,9 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("5.6.4")
+                .withGradleVersion("6.2.2")
                 .withProjectDir(folderRule.root)
-                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()
@@ -103,9 +102,9 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("5.6.4")
+                .withGradleVersion("6.2.2")
                 .withProjectDir(folderRule.root)
-                .withArguments(DOWNLOAD_SCHEMAS_TASK)
+                .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()

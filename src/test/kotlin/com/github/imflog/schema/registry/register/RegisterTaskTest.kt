@@ -87,7 +87,6 @@ class RegisterTaskTest {
                         .withBody("{\"id\": 1}")
                 )
         )
-
     }
 
     @AfterEach
@@ -122,7 +121,7 @@ class RegisterTaskTest {
         )
 
         folderRule.newFolder("avro")
-        var testAvsc = folderRule.newFile("avro/test.avsc")
+        val testAvsc = folderRule.newFile("avro/test.avsc")
         val schemaTest = """
             {
                 "type":"record",
@@ -137,10 +136,10 @@ class RegisterTaskTest {
         """.trimIndent()
         testAvsc.writeText(schemaTest)
 
-        var testAvsc2 = folderRule.newFile("avro/other_test.avsc")
+        val testAvsc2 = folderRule.newFile("avro/other_test.avsc")
         testAvsc2.writeText(schemaTest)
 
-        var depAvsc = folderRule.newFile("avro/dependency_test.avsc")
+        val depAvsc = folderRule.newFile("avro/dependency_test.avsc")
         val depSchema = """
             {
                 "type":"record",
@@ -156,9 +155,9 @@ class RegisterTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(REGISTER_SCHEMAS_TASK)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
@@ -188,7 +187,7 @@ class RegisterTaskTest {
         )
 
         folderRule.newFolder("avro")
-        var testAvsc = folderRule.newFile("avro/test.avsc")
+        val testAvsc = folderRule.newFile("avro/test.avsc")
         val schemaTest = """
             {
                 "type":"record",
@@ -203,10 +202,10 @@ class RegisterTaskTest {
         """.trimIndent()
         testAvsc.writeText(schemaTest)
 
-        var testAvsc2 = folderRule.newFile("avro/other_test.avsc")
+        val testAvsc2 = folderRule.newFile("avro/other_test.avsc")
         testAvsc2.writeText(schemaTest)
 
-        var depAvsc = folderRule.newFile("avro/dependency_test.avsc")
+        val depAvsc = folderRule.newFile("avro/dependency_test.avsc")
         val depSchema = """
             {
                 "type":"record",
@@ -222,9 +221,9 @@ class RegisterTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(REGISTER_SCHEMAS_TASK)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
@@ -268,9 +267,9 @@ class RegisterTaskTest {
         testAvsc.writeText(schemaTest)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.6.4")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(REGISTER_SCHEMAS_TASK)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .buildAndFail()
