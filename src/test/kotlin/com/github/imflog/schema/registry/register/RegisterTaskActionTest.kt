@@ -41,10 +41,10 @@ class RegisterTaskActionTest {
         )
 
         val subjects = listOf(
-            Triple(
+            RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                listOf<String>()
+                listOf()
             )
         )
 
@@ -82,7 +82,7 @@ class RegisterTaskActionTest {
         )
 
         val subjects = listOf(
-            Triple(
+            RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
                 listOf<String>()
@@ -149,7 +149,7 @@ class RegisterTaskActionTest {
 
 
         val subjects = listOf(
-            Triple(
+            RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
                 listOf(

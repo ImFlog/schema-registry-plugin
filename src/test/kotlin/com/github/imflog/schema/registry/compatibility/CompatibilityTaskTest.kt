@@ -65,9 +65,9 @@ class CompatibilityTaskTest {
         // Stub without authentication configuration
         wireMockServerItem.stubFor(
             WireMock.post(
-                WireMock
-                    .urlMatching("/compatibility/subjects/.*/versions/.*")
-            )
+                    WireMock
+                        .urlMatching("/compatibility/subjects/.*/versions/.*")
+                )
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -79,9 +79,9 @@ class CompatibilityTaskTest {
         // Stub with authentication configuration
         wireMockAuthServerItem.stubFor(
             WireMock.post(
-                WireMock
-                    .urlMatching("/compatibility/subjects/.*/versions/.*")
-            )
+                    WireMock
+                        .urlMatching("/compatibility/subjects/.*/versions/.*")
+                )
                 .withBasicAuth(username, password)
                 .willReturn(
                     WireMock.aResponse()
@@ -142,9 +142,9 @@ class CompatibilityTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.2")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(TEST_SCHEMAS_TASK)
+            .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
@@ -207,9 +207,9 @@ class CompatibilityTaskTest {
         depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.2")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(TEST_SCHEMAS_TASK)
+            .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
@@ -257,9 +257,9 @@ class CompatibilityTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.2")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(TEST_SCHEMAS_TASK)
+            .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .buildAndFail()
@@ -311,9 +311,9 @@ class CompatibilityTaskTest {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("5.2")
+            .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
-            .withArguments(TEST_SCHEMAS_TASK)
+            .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()

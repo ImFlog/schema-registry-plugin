@@ -7,7 +7,7 @@ import java.io.File
 
 class RegisterTaskAction(
     private val client: SchemaRegistryClient,
-    private val subjects: List<Triple<String, String, List<String>>>,
+    private val subjects: List<RegisterSubject>,
     private val rootDir: File
 ) {
 

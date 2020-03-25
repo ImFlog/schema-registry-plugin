@@ -7,7 +7,7 @@ import java.io.File
 
 class DownloadTaskAction(
     private val client: SchemaRegistryClient,
-    private val subjectPairs: List<DownloadSubject>,
+    private val subjects: List<DownloadSubject>,
     private val rootDir: File
 ) {
 
@@ -15,7 +15,7 @@ class DownloadTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjectPairs.forEach { downloadSubject ->
+        subjects.forEach { downloadSubject ->
             logger.info("Start loading schemas for ${downloadSubject.subject}")
             try {
                 val downloadedSchema = downloadSchema(downloadSubject)

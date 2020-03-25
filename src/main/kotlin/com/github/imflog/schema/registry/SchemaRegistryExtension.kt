@@ -1,6 +1,12 @@
 package com.github.imflog.schema.registry
 
-open class SchemaRegistryExtension {
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 
-    var url: String = "http://localhost:8081"
+open class SchemaRegistryExtension(objects: ObjectFactory) {
+
+    val url: Property<String> = objects.property(String::class.java).apply {
+        // Default value
+        convention("http://localhost:8081")
+    }
 }

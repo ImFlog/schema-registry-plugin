@@ -38,7 +38,8 @@ class CompatibilityTaskActionTest {
         registryClient.register("test", testSchema)
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(Triple("test", "src/main/avro/external/test.avsc", emptyList<String>()))
+        val subjects =
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", emptyList()))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -109,7 +110,7 @@ class CompatibilityTaskActionTest {
 
 
         val subjects = listOf(
-            Triple(
+            CompatibilitySubject(
                 "test",
                 "src/main/avro/external/test.avsc",
                 listOf(
@@ -140,7 +141,8 @@ class CompatibilityTaskActionTest {
         registryClient.register("test", testSchema)
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(Triple("test", "src/main/avro/external/test.avsc", emptyList<String>()))
+        val subjects =
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", emptyList()))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -174,7 +176,7 @@ class CompatibilityTaskActionTest {
 
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(Triple("test", "src/main/avro/external/test.avsc", emptyList<String>()))
+        val subjects = arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", emptyList()))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
