@@ -9,15 +9,14 @@ plugins {
     id("com.github.ben-manes.versions") version "0.28.0"
 }
 
-val kotlinVersion: String? by extra {
-    buildscript.configurations["classpath"]
-        .resolvedConfiguration.firstLevelModuleDependencies
-        .find { it.moduleName == "org.jetbrains.kotlin.jvm.gradle.plugin" }?.moduleVersion
-}
 repositories {
     jcenter()
     mavenCentral()
     maven("http://packages.confluent.io/maven/")
+}
+
+java {
+    withSourcesJar()
 }
 
 // Dependencies versions
@@ -25,9 +24,10 @@ val confluentVersion = "5.4.1"
 val avroVersion = "1.8.2"
 dependencies {
     implementation(gradleApi())
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib", kotlinVersion)
-    implementation("io.confluent", "kafka-schema-registry", confluentVersion)
-        .exclude("org.slf4j", "slf4j-log4j12")
+    implementation(kotlin("stdlib"))
+    implementation("io.confluent", "kafka-schema-registry", confluentVersion) {
+        exclude("org.slf4j", "slf4j-log4j12")
+    }
 }
 
 // Test versions
@@ -38,7 +38,7 @@ val assertJVersion = "3.15.0"
 dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
-    testRuntime("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
     testImplementation("org.assertj", "assertj-core", assertJVersion)
     testImplementation("io.mockk", "mockk", mockkVersion)
     testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
@@ -46,6 +46,19 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/ImFlog/schema-registry-plugin")
+            credentials {
+                username = System.getenv("GITHUB_USERNAME")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
 }
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
