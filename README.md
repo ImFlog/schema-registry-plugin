@@ -4,6 +4,7 @@
 # Schema-registry-plugin
 The aim of this plugin is to adapt the [Confluent schema registry maven plugin](https://docs.confluent.io/current/schema-registry/docs/maven-plugin.html) for Gradle builds.
 
+## Installing
 See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
 for instructions about how to add the plugin to your build configuration.
 
@@ -23,15 +24,15 @@ buildscript {
     }
 }
 ```
-
-When you do so, four tasks are added under registry group:
+## Tasks
+When you install the plugin, four tasks are added under `registry` group:
 * downloadSchemasTask
 * testSchemasTask
 * registerSchemasTask
 * configSubjectsTask
 
 What these tasks do and how to configure them is described in the following sections.
-## Download schemas
+### Download schemas
 Like the name of the task imply, this task is responsible of retrieving schemas from a schema registry.
 
 A DSL is available to configure the task:
@@ -54,7 +55,7 @@ You have to put the url where the script can reach the Schema Registry.
 You need to specify the pairs (subjectName, outputDir) for all the
 schemas you want to download. 
 
-## Test schemas compatibility
+### Test schemas compatibility
 This task test compatibility between local schemas and schemas stored in the Schema Registry.
 
 A DSL is available to specify what to test:
@@ -89,7 +90,7 @@ compatibility{
 }
 ```
 
-## Register schemas
+### Register schemas
 Once again the name speaks for itself.
 This task register schemas from a local path to a Schema Registry.
 
@@ -125,7 +126,7 @@ register{
 }
 ```
 
-## Configure subjects
+### Configure subjects
 
 This task sets the schema compatibility level for registered subjects.
 
@@ -151,4 +152,28 @@ for more information on valid compatibility levels.
 You have to put the URL where the script can reach the Schema Registry.
 
 You have to list the (subject, compatibility-level) 
+
+## Developing
+In order to build the plugin locally, you can run the following commands:
+```bash
+./gradlew build # To compile and test the code
+./gradlew publishToMavenLocal # To push the plugin to your mavenLocal
+```
+
+Once the plugin is pushed into your mavenLocal, you can use it by 
+adding the `mavenLocal` to the buildscript repositories like so:
+```groovy
+buildscript {
+    repositories {
+        // The new repository to import, you may not want this in your final gradle configuration.
+        mavenLocal()
+        maven {
+            url "http://packages.confluent.io/maven/"
+        }
+  }
+    dependencies {
+        classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X-SNAPSHOT"
+    }
+}
+```
 
