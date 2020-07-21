@@ -153,6 +153,9 @@ You have to put the URL where the script can reach the Schema Registry.
 
 You have to list the (subject, compatibility-level) 
 
+### Examples
+See the [examples](examples) directory to see the plugin in action !
+
 ## Developing
 In order to build the plugin locally, you can run the following commands:
 ```bash
