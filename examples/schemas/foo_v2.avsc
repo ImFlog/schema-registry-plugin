@@ -1,0 +1,10 @@
+{
+  "namespace": "com.github.imflog",
+  "name": "Foo",
+  "type": "record",
+  "fields": [
+    {"name": "name", "type": "string"},
+    {"name": "nickname", "type": ["null", "string"], "default": null},
+    {"name": "age", "type": "int"}
+  ]
+}
