@@ -17,7 +17,7 @@ Each subproject will define the extension configuration according to the use cas
 
 ## Basic
 This is the simplest example:
-* it register [schemas/foo.avsc]()
+* it register [schemas/foo.avsc](schemas/foo.avsc)
 * set the compatibility to `FULL_TRANSITIVE`
 * download the previously registered schema in [schemas/downloaded](schemas/downloaded)
 * test the compatibility with the [schemas/foo_v2.avsc](schemas/foo_v2.avsc) 
