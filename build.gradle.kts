@@ -6,13 +6,14 @@ plugins {
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.12.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.28.0"
+    id("com.github.ben-manes.versions") version "0.29.0"
 }
 
 repositories {
     jcenter()
     mavenCentral()
     maven("http://packages.confluent.io/maven/")
+    maven("https://jitpack.io")
 }
 
 java {
@@ -20,14 +21,15 @@ java {
 }
 
 // Dependencies versions
-val confluentVersion = "5.4.1"
+val confluentVersion = "5.5.1"
 val avroVersion = "1.8.2"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
-    implementation("io.confluent", "kafka-schema-registry", confluentVersion) {
-        exclude("org.slf4j", "slf4j-log4j12")
-    }
+    implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
+    implementation("io.confluent", "kafka-schema-registry")
+//    implementation("io.confluent", "kafka-json-schema-provider")
+//    implementation("io.confluent", "kafka-protobuf-provider")
 }
 
 // Test versions

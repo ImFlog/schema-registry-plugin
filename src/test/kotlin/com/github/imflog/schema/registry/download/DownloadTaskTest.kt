@@ -77,7 +77,7 @@ class DownloadTaskTest {
         folderRule.create()
 
         // Register schema
-        val avroSchema = Schema(subject, 1, 1, schema)
+        val avroSchema = Schema(subject, 1, 1, "AVRO", emptyList(), schema)
         // Stub without authentication configuration
         wiremockServerItem.stubFor(
             WireMock.get(
@@ -92,11 +92,11 @@ class DownloadTaskTest {
                 )
         )
         // Stub without authentication configuration for a specific schema id
-        val avroSchemaOld = Schema(subject, 1, 1, schemaOld)
+        val avroSchemaOld = Schema(subject, 1, 1, "AVRO", emptyList(), schemaOld)
         wiremockServerItem.stubFor(
             WireMock.get(
                 WireMock
-                    .urlMatching("/subjects/test-subject/versions/1")
+                    .urlMatching("/subjects/test-subject/versions/1.*")
             )
                 .willReturn(
                     WireMock.aResponse()

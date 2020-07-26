@@ -171,7 +171,7 @@ class CompatibilityTaskActionTest {
 
         val spySchemaRegistry = spyk<MockSchemaRegistryClient>()
         every {
-            spySchemaRegistry.testCompatibility(any(), any())
+            spySchemaRegistry.testCompatibility(any(), any<Schema>())
         } throws RestClientException("Subject not found", 404, Errors.SUBJECT_NOT_FOUND_ERROR_CODE)
 
         folderRule.newFolder("src", "main", "avro", "external")
