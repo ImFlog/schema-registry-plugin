@@ -6,6 +6,7 @@ import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
 import org.apache.avro.Schema
 import org.gradle.api.logging.Logging
 import java.io.File
+import java.io.IOException
 
 class CompatibilityTaskAction(
     private val client: SchemaRegistryClient,
@@ -20,12 +21,21 @@ class CompatibilityTaskAction(
         for ((subject, path, dependencies) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
             val parsedSchema: Schema = parseSchemas(path, dependencies)
-            val compatible = try {
+            val isCompatible = try {
                 client.testCompatibility(subject, parsedSchema)
-            } catch (ex: RestClientException) {
-                ex.errorCode == Errors.SUBJECT_NOT_FOUND_ERROR_CODE
+            } catch (ioEx: IOException) {
+                logger.error("", ioEx)
+                false
+            } catch (restEx: RestClientException) {
+                // If the subject does not exist, it is compatible
+                if (restEx.errorCode == Errors.SUBJECT_NOT_FOUND_ERROR_CODE) {
+                    true
+                } else {
+                    logger.error("", restEx)
+                    false
+                }
             }
-            if (compatible) {
+            if (isCompatible) {
                 logger.info("Schema $path is compatible with subject($subject)")
             } else {
                 logger.error("Schema $path is not compatible with subject($subject)")
