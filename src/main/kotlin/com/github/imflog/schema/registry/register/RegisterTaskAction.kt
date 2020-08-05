@@ -1,9 +1,10 @@
 package com.github.imflog.schema.registry.register
 
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import org.apache.avro.Schema
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
 import java.io.File
+
 
 class RegisterTaskAction(
     private val client: SchemaRegistryClient,
@@ -15,9 +16,9 @@ class RegisterTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path, dependencies) ->
+        subjects.forEach { (subject, path, type, dependencies) ->
             try {
-                registerSchema(subject, path, dependencies)
+                registerSchema(subject, path, type, dependencies)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)
                 errorCount++
@@ -26,25 +27,11 @@ class RegisterTaskAction(
         return errorCount
     }
 
-    private fun registerSchema(subject: String, path: String, dependencies: List<String>) {
-        val parser = Schema.Parser()
-        loadDependencies(dependencies, parser)
-        val schema = readSchema(parser, path)
+    private fun registerSchema(subject: String, path: String, type: String, dependencies: List<SchemaReference>) {
+        val schemaString = File(rootDir, path).readText()
+        val parsedSchema = client.parseSchema(type, schemaString, dependencies)
         logger.debug("Calling register ($subject, $path)")
-        client.register(subject, schema)
-    }
-
-    /**
-     * This adds all record names to the current parser known types.
-     */
-    private fun loadDependencies(dependencies: List<String>, parser: Schema.Parser) {
-        dependencies.reversed().forEach {
-            readSchema(parser, it)
-        }
-    }
-
-    private fun readSchema(parser: Schema.Parser, path: String): Schema {
-        val schemaContent = File(rootDir, path).readText()
-        return parser.parse(schemaContent)
+        // TODO: Handle optional
+        client.register(subject, parsedSchema.get())
     }
 }

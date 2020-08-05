@@ -1,6 +1,8 @@
 package com.github.imflog.schema.registry.register
 
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
@@ -26,6 +28,8 @@ class RegisterTaskActionTest {
     @Test
     fun `Should register new schema`() {
         // given
+
+        // TODO: Update README and examples.
         val registryClient = MockSchemaRegistryClient()
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
@@ -41,11 +45,7 @@ class RegisterTaskActionTest {
         )
 
         val subjects = listOf(
-            RegisterSubject(
-                "test",
-                "src/main/avro/external/test.avsc",
-                listOf()
-            )
+            RegisterSubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE, listOf())
         )
 
         // when
@@ -85,7 +85,8 @@ class RegisterTaskActionTest {
             RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                listOf<String>()
+                AvroSchema.TYPE,
+                listOf()
             )
         )
 
@@ -112,6 +113,39 @@ class RegisterTaskActionTest {
         registryClient.register("test", testSchema)
 
         folderRule.newFolder("src", "main", "avro", "external")
+
+        // Register dependency
+        registryClient.register(
+            "Street",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Street",
+                    "fields": [
+                        {"name": "street", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            "Address",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Address",
+                    "fields": [
+                        {"name": "city", "type": "string" },
+                        {"name": "street", "type": "Street" }
+                    ]
+                }""",
+                listOf(SchemaReference("Street", "Street", 1))
+            ).get()
+        )
+
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -124,37 +158,15 @@ class RegisterTaskActionTest {
         """.trimIndent()
         )
 
-        File(folderRule.root, "src/main/avro/external/directDependency.avsc").writeText(
-            """
-            {"type": "record",
-             "name": "Address",
-             "fields": [
-                {"name": "city", "type": "string" },
-                {"name": "street", "type": "Street" }
-             ]
-            }
-        """.trimIndent()
-        )
-
-        File(folderRule.root, "src/main/avro/external/undirectDependency.avsc").writeText(
-            """
-            {"type": "record",
-             "name": "Street",
-             "fields": [
-                {"name": "street", "type": "string" }
-             ]
-            }
-        """.trimIndent()
-        )
-
 
         val subjects = listOf(
             RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
+                AvroSchema.TYPE,
                 listOf(
-                    "src/main/avro/external/directDependency.avsc",
-                    "src/main/avro/external/undirectDependency.avsc"
+                    SchemaReference("Address", "Address", 1),
+                    SchemaReference("Street", "Street", 1)
                 )
             )
         )

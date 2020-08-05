@@ -1,11 +1,14 @@
 package com.github.imflog.schema.registry.register
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -25,6 +28,8 @@ class RegisterTaskTest {
 
     val username: String = "user"
     val password: String = "pass"
+
+    val mapper = ObjectMapper()
 
     companion object {
         lateinit var wiremockServerItem: WireMockServer
@@ -64,10 +69,8 @@ class RegisterTaskTest {
         folderRule = TemporaryFolder()
         // Stub without authentication configuration
         wiremockServerItem.stubFor(
-            WireMock.post(
-                WireMock
-                    .urlMatching("/subjects/.*/versions")
-            )
+            WireMock
+                .post(WireMock.urlMatching("/subjects/.*/versions"))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -76,15 +79,45 @@ class RegisterTaskTest {
         )
         // Stub with authentication configuration
         wiremockAuthServerItem.stubFor(
-            WireMock.post(
-                WireMock
-                    .urlMatching("/subjects/.*/versions")
-            )
+            WireMock
+                .post(WireMock.urlMatching("/subjects/.*/versions"))
                 .withBasicAuth(username, password)
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withBody("{\"id\": 1}")
+                )
+        )
+        // Stub for get subject dependencies
+        val schema = Schema(
+            "testSubject1", 1, 1, AvroSchema.TYPE, listOf(), """{
+                "type":"record",
+                "name":"Blah",
+                "fields":[
+                    {
+                        "name":"name",
+                        "type":"string"
+                    }
+                ]
+            }"""
+        )
+        wiremockAuthServerItem.stubFor(
+            WireMock
+                .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(mapper.writeValueAsString(schema))
+                )
+        )
+
+        wiremockServerItem.stubFor(
+            WireMock
+                .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(mapper.writeValueAsString(schema))
                 )
         )
     }
@@ -100,6 +133,8 @@ class RegisterTaskTest {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
             """
+            import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+            
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -114,7 +149,7 @@ class RegisterTaskTest {
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
-                    subject('testSubject3', 'avro/dependency_test.avsc', ['avro/test.avsc'])
+                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO", new SchemaReference('testSubject1','testSubject1', 1))
                 }
             }
         """
@@ -170,6 +205,8 @@ class RegisterTaskTest {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
             """
+            import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+            
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -180,7 +217,7 @@ class RegisterTaskTest {
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
-                    subject('testSubject3', 'avro/dependency_test.avsc', ['avro/test.avsc'])
+                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO", new SchemaReference('testSubject1', 'testSubject1', 1))
                 }
             }
         """
