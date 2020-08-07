@@ -1,7 +1,10 @@
 package com.github.imflog.schema.registry.download
 
+import com.github.imflog.schema.registry.schemaTypeToExtension
+import com.github.imflog.schema.registry.toNullable
+import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import org.apache.avro.Schema
+import org.gradle.api.GradleException
 import org.gradle.api.logging.Logging
 import java.io.File
 
@@ -18,7 +21,9 @@ class DownloadTaskAction(
         subjects.forEach { downloadSubject ->
             logger.info("Start loading schemas for ${downloadSubject.subject}")
             try {
-                val downloadedSchema = downloadSchema(downloadSubject)
+                // TODO : Better error handling ?
+                val downloadedSchema =
+                    downloadSchema(downloadSubject) ?: throw GradleException("Could not find the requested schema")
                 writeSchemaFiles(downloadSubject, downloadedSchema)
             } catch (e: Exception) {
                 logger.error("Error during schema retrieval for ${downloadSubject.subject}", e)
@@ -28,23 +33,29 @@ class DownloadTaskAction(
         return errorCount
     }
 
-    private fun downloadSchema(subject: DownloadSubject): Schema {
+    private fun downloadSchema(subject: DownloadSubject): ParsedSchema? {
         val schemaMetadata = if (subject.version == null) {
             client.getLatestSchemaMetadata(subject.subject)
         } else {
             client.getSchemaMetadata(subject.subject, subject.version)
         }
-        return Schema.Parser().parse(schemaMetadata.schema)
+        return client.parseSchema(
+            schemaMetadata.schemaType,
+            schemaMetadata.schema,
+            schemaMetadata.references
+        ).toNullable()
     }
 
-    private fun writeSchemaFiles(downloadSubject: DownloadSubject, schemas: Schema) {
+    private fun writeSchemaFiles(downloadSubject: DownloadSubject, schema: ParsedSchema) {
         val outputDir = File(rootDir, downloadSubject.file)
         outputDir.mkdirs()
-        val outputFile = File(outputDir, "${downloadSubject.subject}.avsc")
+        // TODO: Handle error
+        val extension = schemaTypeToExtension(schema.schemaType()) ?: throw Exception("Unknown type provided")
+        val outputFile = File(outputDir, "${downloadSubject.subject}.$extension")
         outputFile.createNewFile()
         logger.info("Writing file  $outputFile")
         outputFile.printWriter().use { out ->
-            out.println(schemas.toString(true))
+            out.println(schema.toString())
         }
     }
 }
