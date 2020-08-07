@@ -3,6 +3,7 @@ package com.github.imflog.schema.registry
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
+import java.io.File
 import java.util.Optional
 
 /**

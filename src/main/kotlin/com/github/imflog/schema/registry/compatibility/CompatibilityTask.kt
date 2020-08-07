@@ -34,8 +34,8 @@ open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : Defau
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get()),
-            subjects.get(),
-            project.rootDir
+            project.rootDir,
+            subjects.get()
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not compatible, see logs for details.", Throwable())

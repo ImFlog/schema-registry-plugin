@@ -51,8 +51,8 @@ class RegisterTaskActionTest {
         // when
         val errorCount = RegisterTaskAction(
             registryClient,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then
@@ -93,8 +93,8 @@ class RegisterTaskActionTest {
         // when
         val errorCount = RegisterTaskAction(
             registryClient,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then
@@ -104,7 +104,7 @@ class RegisterTaskActionTest {
     }
 
     @Test
-    internal fun `Should register schema with dependencies in another file`() {
+    internal fun `Should register schema with dependencies`() {
         // given
         val parser = Schema.Parser()
         val testSchema =
@@ -174,8 +174,8 @@ class RegisterTaskActionTest {
         // when
         val errorCount = RegisterTaskAction(
             registryClient,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then

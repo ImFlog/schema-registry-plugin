@@ -1,5 +1,7 @@
 package com.github.imflog.schema.registry.register
 
+import com.github.imflog.schema.registry.BaseTaskAction
+import com.github.imflog.schema.registry.toNullable
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
@@ -7,10 +9,10 @@ import java.io.File
 
 
 class RegisterTaskAction(
-    private val client: SchemaRegistryClient,
-    private val subjects: List<RegisterSubject>,
-    private val rootDir: File
-) {
+    client: SchemaRegistryClient,
+    rootDir: File,
+    private val subjects: List<RegisterSubject>
+) : BaseTaskAction(client, rootDir) {
 
     private val logger = Logging.getLogger(RegisterTaskAction::class.java)
 
@@ -28,10 +30,9 @@ class RegisterTaskAction(
     }
 
     private fun registerSchema(subject: String, path: String, type: String, dependencies: List<SchemaReference>) {
-        val schemaString = File(rootDir, path).readText()
-        val parsedSchema = client.parseSchema(type, schemaString, dependencies)
+        // TODO: Error handling
+        val parsedSchema = parseSchema(path, type, dependencies) ?: throw Exception("Could not parse schema")
         logger.debug("Calling register ($subject, $path)")
-        // TODO: Handle optional
-        client.register(subject, parsedSchema.get())
+        client.register(subject, parsedSchema)
     }
 }

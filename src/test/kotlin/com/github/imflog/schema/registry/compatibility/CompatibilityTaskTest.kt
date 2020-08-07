@@ -1,11 +1,14 @@
 package com.github.imflog.schema.registry.compatibility
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
 import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -25,6 +28,10 @@ class CompatibilityTaskTest {
     val username: String = "user"
 
     val password: String = "pass"
+
+    // TODO: Lots of bootstrapping is common.
+    // Refacto this when pass to TestContainers.
+    val mapper = ObjectMapper()
 
     companion object {
         lateinit var wireMockServerItem: WireMockServer
@@ -65,9 +72,9 @@ class CompatibilityTaskTest {
         // Stub without authentication configuration
         wireMockServerItem.stubFor(
             WireMock.post(
-                    WireMock
-                        .urlMatching("/compatibility/subjects/.*/versions/.*")
-                )
+                WireMock
+                    .urlMatching("/compatibility/subjects/.*/versions/.*")
+            )
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -79,15 +86,47 @@ class CompatibilityTaskTest {
         // Stub with authentication configuration
         wireMockAuthServerItem.stubFor(
             WireMock.post(
-                    WireMock
-                        .urlMatching("/compatibility/subjects/.*/versions/.*")
-                )
+                WireMock
+                    .urlMatching("/compatibility/subjects/.*/versions/.*")
+            )
                 .withBasicAuth(username, password)
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
                         .withBody("{\"is_compatible\": true}")
+                )
+        )
+
+        val schema = Schema(
+            "Dependency", 1, 1, AvroSchema.TYPE, listOf(), """{
+                "type":"record",
+                "name":"Dependency",
+                "fields":[
+                    {
+                        "name":"name",
+                        "type":"string"
+                    }
+                ]
+            }"""
+        )
+        wireMockAuthServerItem.stubFor(
+            WireMock
+                .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(mapper.writeValueAsString(schema))
+                )
+        )
+
+        wireMockServerItem.stubFor(
+            WireMock
+                .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(mapper.writeValueAsString(schema))
                 )
         )
     }
@@ -157,6 +196,8 @@ class CompatibilityTaskTest {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
             """
+            import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+
             plugins {
                 id 'java'
                 id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
@@ -169,7 +210,7 @@ class CompatibilityTaskTest {
                     password = '$password'
                 }
                 compatibility {
-                    subject('testSubject', 'avro/core.avsc', ['avro/dependency.avsc'])
+                    subject('testSubject', 'avro/core.avsc', "AVRO", new SchemaReference('Dependency', 'Dependency', 1))
                 }
             }
         """
@@ -190,21 +231,6 @@ class CompatibilityTaskTest {
             }
         """.trimIndent()
         coreAvsc.writeText(coreSchema)
-
-        val depAvsc = folderRule.newFile("avro/dependency.avsc")
-        val depSchema = """
-            {
-                "type":"record",
-                "name":"Dependency",
-                "fields":[
-                    {
-                        "name":"name",
-                        "type":"string"
-                    }
-                ]
-            }
-        """.trimIndent()
-        depAvsc.writeText(depSchema)
 
         val result: BuildResult? = GradleRunner.create()
             .withGradleVersion("6.2.2")

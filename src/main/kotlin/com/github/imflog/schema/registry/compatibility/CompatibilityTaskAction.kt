@@ -1,26 +1,27 @@
 package com.github.imflog.schema.registry.compatibility
 
+import com.github.imflog.schema.registry.BaseTaskAction
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
-import org.apache.avro.Schema
 import org.gradle.api.logging.Logging
 import java.io.File
 import java.io.IOException
 
 class CompatibilityTaskAction(
-    private val client: SchemaRegistryClient,
-    private val subjects: List<CompatibilitySubject>,
-    private val rootDir: File
-) {
+    client: SchemaRegistryClient,
+    rootDir: File,
+    private val subjects: List<CompatibilitySubject>
+) : BaseTaskAction(client, rootDir) {
 
     private val logger = Logging.getLogger(CompatibilityTaskAction::class.java)
 
     fun run(): Int {
         var errorCount = 0
-        for ((subject, path, dependencies) in subjects) {
+        for ((subject, path, type, dependencies) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
-            val parsedSchema: Schema = parseSchemas(path, dependencies)
+            // TODO: Error handling
+            val parsedSchema = parseSchema(path, type, dependencies) ?: throw Exception("Could not parse schema")
             val isCompatible = try {
                 client.testCompatibility(subject, parsedSchema)
             } catch (ioEx: IOException) {
@@ -43,25 +44,5 @@ class CompatibilityTaskAction(
             }
         }
         return errorCount
-    }
-
-    private fun parseSchemas(path: String, dependencies: List<String>): Schema {
-        val parser = Schema.Parser()
-        loadDependencies(dependencies, parser)
-        return parseSchema(parser, path)
-    }
-
-    /**
-     * This adds all record names to the current parser known types.
-     */
-    private fun loadDependencies(dependencies: List<String>, parser: Schema.Parser) {
-        dependencies.reversed().forEach {
-            parseSchema(parser, it)
-        }
-    }
-
-    private fun parseSchema(parser: Schema.Parser, path: String): Schema {
-        val schemaContent = File(rootDir, path).readText()
-        return parser.parse(schemaContent)
     }
 }
