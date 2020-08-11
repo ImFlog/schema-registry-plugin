@@ -1,7 +1,6 @@
 package com.github.imflog.schema.registry.config
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import io.confluent.kafka.schemaregistry.avro.AvroCompatibilityLevel
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.model.ObjectFactory

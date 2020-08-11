@@ -33,7 +33,7 @@ When you install the plugin, four tasks are added under `registry` group:
 
 What these tasks do and how to configure them is described in the following sections.
 ### Download schemas
-Like the name of the task imply, this task is responsible of retrieving schemas from a schema registry.
+Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
 
 A DSL is available to configure the task:
 ```groovy
@@ -45,21 +45,24 @@ schemaRegistry {
     } //optional
     
     download {
-        subject('topic1-key', 'src/main/avro')
-        subject('topic1-value', 'src/main/avro/values')
+        // extension of the output file depends on the the schema type
+        subject('avroSubject', 'src/main/avro')
+        subject('protoSubject', 'src/main/proto')
+        subject('jsonSubject', 'src/main/json')
     }
 }
 ```
 You have to put the url where the script can reach the Schema Registry.
 
-You need to specify the pairs (subjectName, outputDir) for all the
-schemas you want to download. 
+You need to specify the pairs (subjectName, outputDir) for all the schemas you want to download. 
 
 ### Test schemas compatibility
 This task test compatibility between local schemas and schemas stored in the Schema Registry.
 
 A DSL is available to specify what to test:
 ```groovy
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+
 schemaRegistry {
     url = 'http://localhost:8081'
     credentials {
@@ -67,9 +70,15 @@ schemaRegistry {
         password = 'basicauthentication-password'
     } //optional
     compatibility {
-        subject('mySubject', 'file/path.avsc')
-        subject('otherSubject', 'other/path.avsc')
-        subject('subjectWithDependencies', 'dependent/path.avsc', ['firstDependency/path.avsc', 'secondDependency/path.avsc'])
+        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO", [
+            new SchemaReference('avroSubject', 'avroSubjectType', 1)
+        ])
+        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF", [
+            new SchemaReference('protoSubject', 'protoSubjectType', 1)
+        ])
+        subject('jsonWithDependencies', 'dependent/path.json', "JSON", [
+            new SchemaReference('jsonSubject', 'jsonSubjectType', 1)
+        ])
     }
 }
 ```
@@ -78,17 +87,7 @@ You have to put the url where the script can reach the Schema Registry.
 You have to list all the (subject, avsc file path) pairs that you want to test. 
 
 If you have dependencies with other schemas required before the compatibility check,
-you can add a third parameter with the needed paths.
-
-The order of the file paths in the list is significant.
-Basically you need to follow the logical order of the types used.
-If an `User` need an `Address` record which itself needs a `Street` record
-you will need to define the dependencies like this:
-```groovy
-compatibility{
-    subject('userSubject', 'path/user.avsc', ['path/address.avsc', 'path/street.avsc'])
-}
-```
+you can add a third parameter with the list of schemaReferences stored in the registry, they will be fetched dynamically.
 
 ### Register schemas
 Once again the name speaks for itself.
@@ -96,6 +95,8 @@ This task register schemas from a local path to a Schema Registry.
 
 A DSL is available to specify what to register:
 ```groovy
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+
 schemaRegistry {
     url = 'http://localhost:8081'
     credentials {
@@ -103,9 +104,15 @@ schemaRegistry {
         password = 'basicauthentication-password'
     } //optional
     register {
-        subject('mySubject', 'file/path.avsc')
-        subject('otherSubject', 'other/path.avsc')
-        subject('subjectWithDependencies', 'dependent/path.avsc', ['firstDependency/path.avsc', 'secondDependency/path.avsc'])
+        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO", [
+            new SchemaReference('avroSubject', 'avroSubjectType', 1)
+        ])
+        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF", [
+            new SchemaReference('protoSubject', 'protoSubjectType', 1)
+        ])
+        subject('jsonWithDependencies', 'dependent/path.json', "JSON", [
+            new SchemaReference('jsonSubject', 'jsonSubjectType', 1)
+        ])
     }
 }
 ```
@@ -113,18 +120,7 @@ You have to put the url where the script can reach the Schema Registry.
 
 You have to list all the (subject, avsc file path) pairs that you want to send.
 
-If you have dependencies with other schemas required before the register phase,
-you can add a third parameter with the needed paths.
-
-The order of the file paths in the list is significant.
-Basically you need to follow the logical order of the types used.
-If an `User` need an `Address` record which itself needs a `Street` record
-you will need to define the dependencies like this:
-```groovy
-register{
-    subject('userSubject', 'path/user.avsc', ['path/address.avsc', 'path/street.avsc'])
-}
-```
+you can add a third parameter with the list of schemaReferences stored in the registry, they will be fetched dynamically.
 
 ### Configure subjects
 

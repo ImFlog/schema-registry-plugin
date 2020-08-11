@@ -20,9 +20,8 @@ class CompatibilityTaskAction(
         var errorCount = 0
         for ((subject, path, type, dependencies) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
-            // TODO: Error handling
-            val parsedSchema = parseSchema(path, type, dependencies) ?: throw Exception("Could not parse schema")
             val isCompatible = try {
+                val parsedSchema = parseSchemaFromFile(path, type, dependencies)
                 client.testCompatibility(subject, parsedSchema)
             } catch (ioEx: IOException) {
                 logger.error("", ioEx)

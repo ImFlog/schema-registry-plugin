@@ -1,9 +1,11 @@
 package com.github.imflog.schema.registry.register
 
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
-import org.apache.avro.Schema
+import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
+import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.junit.jupiter.api.AfterEach
@@ -28,9 +30,8 @@ class RegisterTaskActionTest {
     @Test
     fun `Should register new schema`() {
         // given
-
-        // TODO: Update README and examples.
-        val registryClient = MockSchemaRegistryClient()
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
@@ -62,11 +63,17 @@ class RegisterTaskActionTest {
     @Test
     fun `Should update version for same schema`() {
         // given
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{"type": "record", "name": "test", "fields": [{ "name": "name", "type": "string" }]}""",
+                listOf()
+            ).get()
+        )
 
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
@@ -106,11 +113,16 @@ class RegisterTaskActionTest {
     @Test
     internal fun `Should register schema with dependencies`() {
         // given
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{"type": "record", "name": "test", "fields": [{ "name": "name", "type": "string" }]}""",
+                listOf()
+            ).get()
+        )
 
         folderRule.newFolder("src", "main", "avro", "external")
 

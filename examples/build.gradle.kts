@@ -7,12 +7,15 @@ buildscript {
         maven {
             url = uri("https://plugins.gradle.org/m2/")
         }
+        maven {
+            url = uri("https://jitpack.io")
+        }
     }
 }
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "0.9.0" apply false
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.0.0-SNAPSHOT" apply false
     id("com.avast.gradle.docker-compose") version "0.13.0" apply true
 }
 

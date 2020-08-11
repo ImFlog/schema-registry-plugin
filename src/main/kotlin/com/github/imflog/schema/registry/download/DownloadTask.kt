@@ -36,8 +36,8 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get()),
-            subjects.get(),
-            project.rootDir
+            project.rootDir,
+            subjects.get()
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not downloaded, see logs for details", Throwable())

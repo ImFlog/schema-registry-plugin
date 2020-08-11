@@ -8,7 +8,6 @@ import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientExcept
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
 import io.mockk.every
 import io.mockk.spyk
-import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.junit.jupiter.api.AfterEach
@@ -34,7 +33,6 @@ class CompatibilityTaskActionTest {
     @Test
     fun `Should verify compatibility with no dependencies`() {
         // given
-        val parser = Schema.Parser()
         val registryClient = MockSchemaRegistryClient()
         registryClient.register(
             "test",
@@ -167,7 +165,7 @@ class CompatibilityTaskActionTest {
     @Test
     fun `Should fail on incompatible schemas`() {
         // given
-        val registryClient = MockSchemaRegistryClient()
+        val registryClient = MockSchemaRegistryClient(listOf())
         registryClient.register(
             "test",
             registryClient.parseSchema(

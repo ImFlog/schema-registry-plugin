@@ -6,7 +6,6 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 
 
-// TODO: Define a type for AVRO / PROTOBUF / JSON ?
 // TODO : Add tests for JSON / PROTOBUF
 open class CompatibilitySubjectExtension(objects: ObjectFactory) {
     val subjects: ListProperty<CompatibilitySubject> = objects.listProperty(CompatibilitySubject::class.java)

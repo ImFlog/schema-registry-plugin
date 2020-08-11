@@ -19,7 +19,6 @@ plugins {
     id("com.github.imflog.kafka-schema-registry-gradle-plugin")
 }
 
-
 schemaRegistry {
     url.set("http://localhost:8081")
 

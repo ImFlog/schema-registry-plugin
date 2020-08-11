@@ -1,5 +1,5 @@
 group = "com.github.imflog"
-version = "0.10.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 plugins {
     kotlin("jvm").version("1.3.72")
@@ -22,14 +22,13 @@ java {
 
 // Dependencies versions
 val confluentVersion = "5.5.1"
-val avroVersion = "1.8.2"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
     implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
     implementation("io.confluent", "kafka-schema-registry")
-//    implementation("io.confluent", "kafka-json-schema-provider")
-//    implementation("io.confluent", "kafka-protobuf-provider")
+    implementation("io.confluent", "kafka-json-schema-provider")
+    implementation("io.confluent", "kafka-protobuf-provider")
 }
 
 // Test versions
@@ -48,19 +47,6 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ImFlog/schema-registry-plugin")
-            credentials {
-                username = System.getenv("GITHUB_USERNAME")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
 }
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"

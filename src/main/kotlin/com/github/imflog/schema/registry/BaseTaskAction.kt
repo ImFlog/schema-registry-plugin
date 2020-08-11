@@ -10,8 +10,13 @@ abstract class BaseTaskAction(
     val rootDir: File
 ) {
 
-    fun parseSchema(schemaPath: String, schemaType: String, dependencies: List<SchemaReference>): ParsedSchema? {
+    fun parseSchemaFromFile(schemaPath: String, schemaType: String, dependencies: List<SchemaReference>): ParsedSchema {
         val schemaString = File(rootDir, schemaPath).readText()
-        return client.parseSchema(schemaType, schemaString, dependencies).toNullable()
+        return parseSchema(schemaPath, schemaString, schemaType, dependencies)
     }
+
+    fun parseSchema(subject: String, schemaContent: String, schemaType: String, dependencies: List<SchemaReference>) =
+        client.parseSchema(schemaType, schemaContent, dependencies).orElseThrow {
+            SchemaParsingException(subject, schemaType)
+        }
 }

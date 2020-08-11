@@ -25,13 +25,12 @@ class CompatibilityTaskTest {
     lateinit var folderRule: TemporaryFolder
     lateinit var buildFile: File
 
-    val username: String = "user"
+    private val username: String = "user"
 
-    val password: String = "pass"
+    private val password: String = "pass"
 
-    // TODO: Lots of bootstrapping is common.
-    // Refacto this when pass to TestContainers.
-    val mapper = ObjectMapper()
+    // Refacto this when switching to TestContainers.
+    private val mapper = ObjectMapper()
 
     companion object {
         lateinit var wireMockServerItem: WireMockServer
