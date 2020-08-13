@@ -46,7 +46,7 @@ class RegisterTaskActionTest {
         )
 
         val subjects = listOf(
-            RegisterSubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE, listOf())
+            RegisterSubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE)
         )
 
         // when
@@ -92,8 +92,7 @@ class RegisterTaskActionTest {
             RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE,
-                listOf()
+                AvroSchema.TYPE
             )
         )
 
@@ -175,12 +174,10 @@ class RegisterTaskActionTest {
             RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE,
-                listOf(
-                    SchemaReference("Address", "Address", 1),
-                    SchemaReference("Street", "Street", 1)
-                )
+                AvroSchema.TYPE
             )
+                .addReference("Address", "Address", 1)
+                .addReference("Street", "Street", 1)
         )
 
         // when

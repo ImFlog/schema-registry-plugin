@@ -61,24 +61,19 @@ This task test compatibility between local schemas and schemas stored in the Sch
 
 A DSL is available to specify what to test:
 ```groovy
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
-
 schemaRegistry {
     url = 'http://localhost:8081'
+    
+    //optional
     credentials {
         username = 'basicauthentication-username'
         password = 'basicauthentication-password'
-    } //optional
+    }
+    
     compatibility {
-        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO", [
-            new SchemaReference('avroSubject', 'avroSubjectType', 1)
-        ])
-        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF", [
-            new SchemaReference('protoSubject', 'protoSubjectType', 1)
-        ])
-        subject('jsonWithDependencies', 'dependent/path.json', "JSON", [
-            new SchemaReference('jsonSubject', 'jsonSubjectType', 1)
-        ])
+        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
+        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
+        subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
 }
 ```
@@ -87,7 +82,8 @@ You have to put the url where the script can reach the Schema Registry.
 You have to list all the (subject, avsc file path) pairs that you want to test. 
 
 If you have dependencies with other schemas required before the compatibility check,
-you can add a third parameter with the list of schemaReferences stored in the registry, they will be fetched dynamically.
+you can call the `addReference("name", "subject", version)`, this will add a reference to fetch dynamically from the registry.
+The addReference calls can be chained.
 
 ### Register schemas
 Once again the name speaks for itself.
@@ -95,8 +91,6 @@ This task register schemas from a local path to a Schema Registry.
 
 A DSL is available to specify what to register:
 ```groovy
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
-
 schemaRegistry {
     url = 'http://localhost:8081'
     credentials {
@@ -104,15 +98,9 @@ schemaRegistry {
         password = 'basicauthentication-password'
     } //optional
     register {
-        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO", [
-            new SchemaReference('avroSubject', 'avroSubjectType', 1)
-        ])
-        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF", [
-            new SchemaReference('protoSubject', 'protoSubjectType', 1)
-        ])
-        subject('jsonWithDependencies', 'dependent/path.json', "JSON", [
-            new SchemaReference('jsonSubject', 'jsonSubjectType', 1)
-        ])
+        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
+        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
+        subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
 }
 ```
@@ -120,7 +108,9 @@ You have to put the url where the script can reach the Schema Registry.
 
 You have to list all the (subject, avsc file path) pairs that you want to send.
 
-you can add a third parameter with the list of schemaReferences stored in the registry, they will be fetched dynamically.
+If you have dependencies with other schemas required before the compatibility check,
+you can call the `addReference("name", "subject", version)`, this will add a reference to fetch dynamically from the registry.
+The addReference calls can be chained.
 
 ### Configure subjects
 

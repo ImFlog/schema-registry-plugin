@@ -22,14 +22,14 @@ import org.junit.jupiter.api.Test
 import java.io.File
 
 class RegisterTaskTest {
-    lateinit var folderRule: TemporaryFolder
+    private lateinit var folderRule: TemporaryFolder
 
-    lateinit var buildFile: File
+    private lateinit var buildFile: File
 
-    val username: String = "user"
-    val password: String = "pass"
+    private val username: String = "user"
+    private val password: String = "pass"
 
-    val mapper = ObjectMapper()
+    private val mapper = ObjectMapper()
 
     companion object {
         lateinit var wiremockServerItem: WireMockServer
@@ -37,7 +37,7 @@ class RegisterTaskTest {
 
         @BeforeAll
         @JvmStatic
-        fun initClass() {
+        fun beforeAll() {
             wiremockServerItem = WireMockServer(
                 WireMockConfiguration
                     .wireMockConfig()
@@ -58,14 +58,14 @@ class RegisterTaskTest {
 
         @AfterAll
         @JvmStatic
-        fun tearDown() {
+        fun afterAll() {
             wiremockServerItem.stop()
             wiremockAuthServerItem.stop()
         }
     }
 
     @BeforeEach
-    fun init() {
+    fun beforeEach() {
         folderRule = TemporaryFolder()
         // Stub without authentication configuration
         wiremockServerItem.stubFor(
@@ -123,7 +123,7 @@ class RegisterTaskTest {
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun afterEach() {
         folderRule.delete()
     }
 
@@ -149,7 +149,7 @@ class RegisterTaskTest {
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
-                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO", new SchemaReference('testSubject1','testSubject1', 1))
+                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO").addReference('testSubject1','testSubject1', 1)
                 }
             }
         """
@@ -217,7 +217,7 @@ class RegisterTaskTest {
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
-                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO", new SchemaReference('testSubject1', 'testSubject1', 1))
+                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO").addReference('testSubject1', 'testSubject1', 1)
                 }
             }
         """

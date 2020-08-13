@@ -9,17 +9,16 @@ import org.gradle.api.provider.ListProperty
 open class RegisterSubjectExtension(objects: ObjectFactory) {
     val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)
 
-    fun subject(inputSubject: String, file: String) {
-        subject(inputSubject, file, AvroSchema.TYPE)
-    }
+    fun subject(inputSubject: String, file: String) = subject(inputSubject, file, AvroSchema.TYPE)
 
     fun subject(
         inputSubject: String,
         file: String,
-        type: String = AvroSchema.TYPE,
-        vararg dependencies: SchemaReference
-    ) {
-        subjects.add(RegisterSubject(inputSubject, file, type, dependencies.toList()))
+        type: String
+    ): RegisterSubject {
+        val subject = RegisterSubject(inputSubject, file, type)
+        subjects.add(subject)
+        return subject
     }
 }
 
@@ -27,5 +26,10 @@ data class RegisterSubject(
     val inputSubject: String,
     val file: String,
     val type: String,
-    val references: List<SchemaReference>
-)
+    val references: MutableList<SchemaReference> = mutableListOf()
+) {
+    fun addReference(name: String, subject: String, version: Int): RegisterSubject {
+        references.add(SchemaReference(name, subject, version))
+        return this
+    }
+}

@@ -209,7 +209,7 @@ class CompatibilityTaskTest {
                     password = '$password'
                 }
                 compatibility {
-                    subject('testSubject', 'avro/core.avsc', "AVRO", new SchemaReference('Dependency', 'Dependency', 1))
+                    subject('testSubject', 'avro/core.avsc', "AVRO").addReference('Dependency', 'Dependency', 1)
                 }
             }
         """

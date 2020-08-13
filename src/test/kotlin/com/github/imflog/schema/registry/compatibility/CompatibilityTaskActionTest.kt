@@ -51,7 +51,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE, emptyList()))
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -143,12 +143,10 @@ class CompatibilityTaskActionTest {
             CompatibilitySubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE,
-                listOf(
-                    SchemaReference("Address", "Address", 1),
-                    SchemaReference("Street", "Street", 1)
-                )
+                AvroSchema.TYPE
             )
+                .addReference("Address", "Address", 1)
+                .addReference("Street", "Street", 1)
         )
 
         // when
@@ -183,7 +181,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE, emptyList()))
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -221,8 +219,7 @@ class CompatibilityTaskActionTest {
             CompatibilitySubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE,
-                emptyList()
+                AvroSchema.TYPE
             )
         )
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
