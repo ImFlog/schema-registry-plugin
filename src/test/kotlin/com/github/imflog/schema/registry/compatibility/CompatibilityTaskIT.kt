@@ -2,7 +2,7 @@ package com.github.imflog.schema.registry.compatibility
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
-import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
+import com.github.imflog.schema.registry.TestContainersUtils
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class CompatibilityTaskTest {
+class CompatibilityTaskIT: TestContainersUtils() {
     lateinit var folderRule: TemporaryFolder
     lateinit var buildFile: File
 
@@ -29,24 +29,26 @@ class CompatibilityTaskTest {
 
     private val password: String = "pass"
 
+    private val defaultSchema = """{
+        "type":"record",
+        "name":"Dependency",
+        "fields":[
+            {
+                "name":"name",
+                "type":"string"
+            }
+        ]
+    }"""
+
     // Refacto this when switching to TestContainers.
     private val mapper = ObjectMapper()
 
     companion object {
-        lateinit var wireMockServerItem: WireMockServer
         lateinit var wireMockAuthServerItem: WireMockServer
 
         @BeforeAll
         @JvmStatic
         fun initClass() {
-            wireMockServerItem = WireMockServer(
-                WireMockConfiguration
-                    .wireMockConfig()
-                    .port(REGISTRY_FAKE_PORT)
-                    .notifier(ConsoleNotifier(true))
-            )
-            wireMockServerItem.start()
-
             wireMockAuthServerItem = WireMockServer(
                 WireMockConfiguration
                     .wireMockConfig()
@@ -59,7 +61,6 @@ class CompatibilityTaskTest {
         @AfterAll
         @JvmStatic
         fun tearDown() {
-            wireMockServerItem.stop()
             wireMockAuthServerItem.stop()
         }
     }
@@ -68,19 +69,8 @@ class CompatibilityTaskTest {
     fun init() {
         // Reset the client before each test
         folderRule = TemporaryFolder()
-        // Stub without authentication configuration
-        wireMockServerItem.stubFor(
-            WireMock.post(
-                WireMock
-                    .urlMatching("/compatibility/subjects/.*/versions/.*")
-            )
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/vnd.schemaregistry.v1+json")
-                        .withBody("{\"is_compatible\": true}")
-                )
-        )
+
+        client.register("Dependency", AvroSchema(defaultSchema))
 
         // Stub with authentication configuration
         wireMockAuthServerItem.stubFor(
@@ -97,29 +87,8 @@ class CompatibilityTaskTest {
                 )
         )
 
-        val schema = Schema(
-            "Dependency", 1, 1, AvroSchema.TYPE, listOf(), """{
-                "type":"record",
-                "name":"Dependency",
-                "fields":[
-                    {
-                        "name":"name",
-                        "type":"string"
-                    }
-                ]
-            }"""
-        )
+        val schema = Schema("Dependency", 1, 1, AvroSchema.TYPE, listOf(), defaultSchema)
         wireMockAuthServerItem.stubFor(
-            WireMock
-                .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withBody(mapper.writeValueAsString(schema))
-                )
-        )
-
-        wireMockServerItem.stubFor(
             WireMock
                 .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
                 .willReturn(
@@ -322,7 +291,7 @@ class CompatibilityTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 credentials {
                     username = '$username'
                     password = '$password'

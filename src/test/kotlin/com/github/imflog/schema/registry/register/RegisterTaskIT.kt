@@ -2,7 +2,7 @@ package com.github.imflog.schema.registry.register
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
-import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
+import com.github.imflog.schema.registry.TestContainersUtils
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class RegisterTaskTest {
+class RegisterTaskIT : TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
 
     private lateinit var buildFile: File
@@ -32,21 +32,12 @@ class RegisterTaskTest {
     private val mapper = ObjectMapper()
 
     companion object {
-        lateinit var wiremockServerItem: WireMockServer
+        // TODO : We could put the init in the base class ?
         lateinit var wiremockAuthServerItem: WireMockServer
 
         @BeforeAll
         @JvmStatic
         fun beforeAll() {
-            wiremockServerItem = WireMockServer(
-                WireMockConfiguration
-                    .wireMockConfig()
-                    .port(REGISTRY_FAKE_PORT)
-                    .notifier(ConsoleNotifier(true))
-            )
-            wiremockServerItem.start()
-
-
             wiremockAuthServerItem = WireMockServer(
                 WireMockConfiguration
                     .wireMockConfig()
@@ -59,7 +50,6 @@ class RegisterTaskTest {
         @AfterAll
         @JvmStatic
         fun afterAll() {
-            wiremockServerItem.stop()
             wiremockAuthServerItem.stop()
         }
     }
@@ -67,16 +57,6 @@ class RegisterTaskTest {
     @BeforeEach
     fun beforeEach() {
         folderRule = TemporaryFolder()
-        // Stub without authentication configuration
-        wiremockServerItem.stubFor(
-            WireMock
-                .post(WireMock.urlMatching("/subjects/.*/versions"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withBody("{\"id\": 1}")
-                )
-        )
         // Stub with authentication configuration
         wiremockAuthServerItem.stubFor(
             WireMock
@@ -110,16 +90,6 @@ class RegisterTaskTest {
                         .withBody(mapper.writeValueAsString(schema))
                 )
         )
-
-        wiremockServerItem.stubFor(
-            WireMock
-                .get(WireMock.urlMatching("/subjects/.*/versions/1.*"))
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withBody(mapper.writeValueAsString(schema))
-                )
-        )
     }
 
     @AfterEach
@@ -141,7 +111,7 @@ class RegisterTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
+                url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT'
                 credentials {
                     username = '$username'
                     password = '$password'
@@ -149,7 +119,7 @@ class RegisterTaskTest {
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
-                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO").addReference('testSubject1','testSubject1', 1)
+                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO").addReference('Blah', 'testSubject1', 1)
                 }
             }
         """
@@ -213,11 +183,11 @@ class RegisterTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')
-                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO").addReference('testSubject1', 'testSubject1', 1)
+                    subject('testSubject3', 'avro/dependency_test.avsc', "AVRO").addReference('Blah', 'testSubject1', 1)
                 }
             }
         """

@@ -1,7 +1,7 @@
 package com.github.imflog.schema.registry.config
 
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
-import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
+import com.github.imflog.schema.registry.TestContainersUtils
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -18,29 +18,20 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class ConfigTaskTest {
-    lateinit var folderRule: TemporaryFolder
+class ConfigTaskIT : TestContainersUtils() {
+    private lateinit var folderRule: TemporaryFolder
 
-    lateinit var buildFile: File
+    private lateinit var buildFile: File
 
-    val username: String = "user"
-    val password: String = "pass"
+    private val username: String = "user"
+    private val password: String = "pass"
 
     companion object {
-        lateinit var wiremockServerItem: WireMockServer
         lateinit var wiremockAuthServerItem: WireMockServer
 
         @BeforeAll
         @JvmStatic
         fun initClass() {
-            wiremockServerItem = WireMockServer(
-                WireMockConfiguration
-                    .wireMockConfig()
-                    .port(REGISTRY_FAKE_PORT)
-                    .notifier(ConsoleNotifier(true))
-            )
-            wiremockServerItem.start()
-
             wiremockAuthServerItem = WireMockServer(
                 WireMockConfiguration
                     .wireMockConfig()
@@ -53,7 +44,6 @@ class ConfigTaskTest {
         @AfterAll
         @JvmStatic
         fun tearDown() {
-            wiremockServerItem.stop()
             wiremockAuthServerItem.stop()
         }
     }
@@ -61,19 +51,6 @@ class ConfigTaskTest {
     @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
-        // Stub without authentication configuration
-        wiremockServerItem.stubFor(
-            WireMock.put(
-                WireMock
-                    .urlMatching("/config/.*")
-            )
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withBody("""{ "compatibility": "FULL_TRANSITIVE" }""")
-                )
-        )
-
         // Stub with authentication configuration
         wiremockAuthServerItem.stubFor(
             WireMock.put(
@@ -141,7 +118,7 @@ class ConfigTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 config {
                     subject('testSubject1', 'FULL_TRANSITIVE')
                 }
@@ -201,7 +178,7 @@ class ConfigTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 config {
                     subject('testSubject1', 'FULL_TRANSITIVE')
                     subject('testSubject2', 'FUL_TRANSITIVE') // intentionally broken

@@ -1,7 +1,6 @@
 package com.github.imflog.schema.registry.download
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import com.github.imflog.schema.registry.BasicAuthExtension
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.model.ObjectFactory

@@ -2,11 +2,12 @@ package com.github.imflog.schema.registry.download
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.imflog.schema.registry.REGISTRY_FAKE_AUTH_PORT
-import com.github.imflog.schema.registry.REGISTRY_FAKE_PORT
+import com.github.imflog.schema.registry.TestContainersUtils
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
@@ -20,40 +21,31 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class DownloadTaskTest {
+class DownloadTaskIT : TestContainersUtils() {
 
-    lateinit var folderRule: TemporaryFolder
-    val subject = "test-subject"
+    private lateinit var folderRule: TemporaryFolder
+    private val subject = "test-subject"
 
-    val username: String = "user"
+    private val username: String = "user"
 
-    val password: String = "pass"
+    private val password: String = "pass"
 
     val schema =
         "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}"
 
-    val schemaOld =
+    private val schemaOld =
         "{\"type\": \"record\", \"name\": \"Blah\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }, { \"name\": \"description\", \"type\": \"string\" }]}"
 
-    lateinit var buildFile: File
+    private lateinit var buildFile: File
 
-    val mapper = ObjectMapper()
+    private val mapper = ObjectMapper()
 
     companion object {
-        lateinit var wiremockServerItem: WireMockServer
         lateinit var wiremockAuthServerItem: WireMockServer
 
         @BeforeAll
         @JvmStatic
         fun initClass() {
-            wiremockServerItem = WireMockServer(
-                WireMockConfiguration
-                    .wireMockConfig()
-                    .port(REGISTRY_FAKE_PORT)
-                    .notifier(ConsoleNotifier(true))
-            )
-            wiremockServerItem.start()
-
             wiremockAuthServerItem = WireMockServer(
                 WireMockConfiguration
                     .wireMockConfig()
@@ -66,7 +58,6 @@ class DownloadTaskTest {
         @AfterAll
         @JvmStatic
         fun tearDown() {
-            wiremockServerItem.stop()
             wiremockAuthServerItem.stop()
         }
     }
@@ -77,34 +68,8 @@ class DownloadTaskTest {
         folderRule.create()
 
         // Register schema
-        val avroSchema = Schema(subject, 1, 1, "AVRO", emptyList(), schema)
-        // Stub without authentication configuration
-        wiremockServerItem.stubFor(
-            WireMock.get(
-                WireMock
-                    .urlMatching("/subjects/test-subject/versions/latest")
-            )
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Accept", "application/json")
-                        .withBody(mapper.writeValueAsString(avroSchema))
-                )
-        )
-        // Stub without authentication configuration for a specific schema id
-        val avroSchemaOld = Schema(subject, 1, 1, "AVRO", emptyList(), schemaOld)
-        wiremockServerItem.stubFor(
-            WireMock.get(
-                WireMock
-                    .urlMatching("/subjects/test-subject/versions/1.*")
-            )
-                .willReturn(
-                    WireMock.aResponse()
-                        .withStatus(200)
-                        .withHeader("Accept", "application/json")
-                        .withBody(mapper.writeValueAsString(avroSchemaOld))
-                )
-        )
+        client.register(subject, AvroSchema(schemaOld))
+        client.register(subject, AvroSchema(schema))
 
         // Stub with authentication configuration
         wiremockAuthServerItem.stubFor(
@@ -117,7 +82,7 @@ class DownloadTaskTest {
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader("Accept", "application/json")
-                        .withBody(mapper.writeValueAsString(avroSchema))
+                        .withBody(mapper.writeValueAsString(Schema(subject, 1, 1, "AVRO", emptyList(), schema)))
                 )
         )
     }
@@ -174,7 +139,7 @@ class DownloadTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 download {
                     subject('test-subject', 'src/main/avro/test')
                 }
@@ -206,7 +171,7 @@ class DownloadTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 download {
                     subject('UNKNOWN', 'src/main/avro/test')
                 }
@@ -264,7 +229,7 @@ class DownloadTaskTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = '$schemaRegistryEndpoint'
                 download {
                     subject('test-subject', 'src/main/avro/test', 1)
                 }

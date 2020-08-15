@@ -12,16 +12,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-const val REGISTRY_FAKE_PORT = 6666
 const val REGISTRY_FAKE_AUTH_PORT = 7777
 
 class SchemaRegistryPluginTest {
     lateinit var project: Project
     lateinit var folderRule: TemporaryFolder
-
-    val subject = "test-subject"
-
     lateinit var buildFile: File
+
+    private val subject = "test-subject"
 
     @BeforeEach
     fun init() {
@@ -55,7 +53,7 @@ class SchemaRegistryPluginTest {
             }
 
             schemaRegistry {
-                urlFoo = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                urlFoo = 'http://localhost:1234/'
                 output = 'src/main/avro'
                 subjects = ['$subject']
             }
@@ -88,7 +86,7 @@ class SchemaRegistryPluginTest {
             }
 
             schemaRegistry {
-                url = 'http://localhost:$REGISTRY_FAKE_PORT/'
+                url = 'http://localhost:1234/'
                 credentials {
                     username = 'user'
                     password = 'pass'
