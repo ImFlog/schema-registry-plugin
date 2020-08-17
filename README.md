@@ -1,4 +1,3 @@
-[![CircleCI](https://circleci.com/gh/ImFlog/schema-registry-plugin/tree/master.svg?style=svg)](https://circleci.com/gh/ImFlog/schema-registry-plugin/tree/master)
 ![Github Actions](https://github.com/ImFlog/schema-registry-plugin/workflows/Master/badge.svg)
 
 # Schema-registry-plugin
