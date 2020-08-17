@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-const val REGISTRY_FAKE_AUTH_PORT = 7777
-
 class SchemaRegistryPluginTest {
     lateinit var project: Project
     lateinit var folderRule: TemporaryFolder
@@ -29,7 +27,7 @@ class SchemaRegistryPluginTest {
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         folderRule.delete()
     }
 

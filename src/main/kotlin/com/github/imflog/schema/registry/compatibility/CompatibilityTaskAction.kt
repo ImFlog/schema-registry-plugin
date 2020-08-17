@@ -36,9 +36,9 @@ class CompatibilityTaskAction(
                 }
             }
             if (isCompatible) {
-                logger.info("Schema $path is compatible with subject($subject)")
+                logger.info("Schema $path is compatible with subject: $subject")
             } else {
-                logger.error("Schema $path is not compatible with subject($subject)")
+                logger.error("Schema $path is not compatible with subject: $subject")
                 errorCount++
             }
         }

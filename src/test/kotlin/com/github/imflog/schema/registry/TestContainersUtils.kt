@@ -33,7 +33,6 @@ abstract class TestContainersUtils {
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://${KAFKA_NETWORK_ALIAS}:9092")
                 .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
         }
-        // TODO: Create the schema registry container with authentication
 
         @JvmStatic
         @BeforeAll
@@ -50,20 +49,15 @@ abstract class TestContainersUtils {
         }
     }
 
-    @AfterEach
-    fun cleanRegistry() {
-        // Sort desc is useful as the subject are referenced by other subject (ex testSubject3 use testSubject1)
-        client.allSubjects.sortedDescending().forEach {subject-> client.deleteSubject(subject) }
-    }
-
     val schemaRegistryEndpoint: String by lazy {
         val port = schemaRegistryContainer.getMappedPort(SCHEMA_REGISTRY_INTERNAL_PORT)
         "http://${schemaRegistryContainer.host}:$port"
     }
+
     val client by lazy {
         CachedSchemaRegistryClient(
             listOf(schemaRegistryEndpoint),
-            1000,
+            100,
             listOf(AvroSchemaProvider(), ProtobufSchemaProvider(), JsonSchemaProvider()),
             mapOf<String, Any>()
         )

@@ -5,7 +5,6 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 
-// TODO : Add tests for JSON / PROTOBUF
 open class RegisterSubjectExtension(objects: ObjectFactory) {
     val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)
 

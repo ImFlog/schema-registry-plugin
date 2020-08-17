@@ -37,6 +37,7 @@ val mockkVersion = "1.10.0"
 val wiremockVersion = "2.27.1"
 val assertJVersion = "3.16.1"
 val testContainersVersion = "1.14.3"
+val awaitabilityVersion = "4.0.3"
 dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
@@ -45,6 +46,7 @@ dependencies {
     testImplementation("io.mockk", "mockk", mockkVersion)
     testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
     testImplementation("org.testcontainers", "kafka", testContainersVersion)
+    testImplementation("org.awaitility", "awaitility", awaitabilityVersion)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
