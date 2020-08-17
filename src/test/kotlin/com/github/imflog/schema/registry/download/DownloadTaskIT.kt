@@ -1,7 +1,10 @@
 package com.github.imflog.schema.registry.download
 
 import com.github.imflog.schema.registry.TestContainersUtils
+import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.json.JsonSchema
+import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -10,7 +13,13 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.ArgumentsProvider
+import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
+import java.util.stream.Stream
 
 class DownloadTaskIT : TestContainersUtils() {
 
@@ -51,8 +60,15 @@ class DownloadTaskIT : TestContainersUtils() {
         folderRule.delete()
     }
 
-    @Test
-    fun `DownloadSchemaTask should download last schema version`() {
+    @ParameterizedTest(name = "{0}")
+    @ArgumentsSource(SchemaArgumentProvider::class)
+    fun `Should download schemas`(type: String, oldSchema: ParsedSchema, newSchema: ParsedSchema) {
+        // Given
+        val subjectName = "parameterized-$type"
+
+        client.register(subjectName, oldSchema)
+        client.register(subjectName, newSchema)
+
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
             """
@@ -64,12 +80,15 @@ class DownloadTaskIT : TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subject('$subject', 'src/main/avro/test')
+                    subject('$subjectName', 'src/main/$type/test')
+                    subject('$subjectName', 'src/main/$type/test_v1', 1)
+                    subject('$subjectName', 'src/main/$type/test_v2', 2)
                 }
             }
         """
         )
 
+        // When
         val result: BuildResult? = GradleRunner.create()
             .withGradleVersion("6.2.2")
             .withProjectDir(folderRule.root)
@@ -78,9 +97,21 @@ class DownloadTaskIT : TestContainersUtils() {
             .withDebug(true)
             .build()
 
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
+        // Then
+        val schemaFile = "$subjectName.${oldSchema.extension()}"
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test_v1")).exists()
+        val resultFile1 = File(folderRule.root, "src/main/$type/test_v1/$schemaFile")
+        Assertions.assertThat(resultFile1).exists()
+        Assertions.assertThat(resultFile1.readText()).doesNotContain("description")
+
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test_v2")).exists()
+        val resultFile2 = File(folderRule.root, "src/main/$type/test_v2/$schemaFile")
+        Assertions.assertThat(resultFile2).exists()
+        Assertions.assertThat(resultFile2.readText()).contains("description")
     }
 
     @Test
@@ -112,44 +143,82 @@ class DownloadTaskIT : TestContainersUtils() {
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 
-    @Test
-    fun `DownloadSchemaTask should download specific schema version`() {
-        buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText(
-            """
-            plugins {
-                id 'java'
-                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
-            }
+    private class SchemaArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    AvroSchema.TYPE,
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }"""
+                    ),
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }, 
+                            { "name": "description", "type": ["null", "string"], "default": null }
+                        ]
+                    }"""
+                    )
+                ),
+                Arguments.of(
+                    JsonSchema.TYPE,
+                    JsonSchema(
+                        """{
+                        "properties": {
+                            "name": {"type": "string"}
+                        },
+                        "additionalProperties": false
+                    }"""
+                    ),
+                    JsonSchema(
+                        """{
+                        "properties": {
+                            "name": {"type": "string"},
+                            "description": {"type": "string"}
+                        },
+                        "additionalProperties": false
+                    }"""
+                    )
+                ),
 
-            schemaRegistry {
-                url = '$schemaRegistryEndpoint'
-                download {
-                    subject('$subject', 'src/main/avro/test_v1', 1)
-                    subject('$subject', 'src/main/avro/test_v2', 2)
-                }
-            }
-        """
-        )
-
-        val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.2.2")
-            .withProjectDir(folderRule.root)
-            .withArguments(DownloadTask.TASK_NAME)
-            .withPluginClasspath()
-            .withDebug(true)
-            .build()
-
-        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test_v1")).exists()
-        val resultFile1 = File(folderRule.root, "src/main/avro/test_v1/test-subject.avsc")
-        Assertions.assertThat(resultFile1).exists()
-        Assertions.assertThat(resultFile1.readText()).doesNotContain("desc")
-
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test_v2")).exists()
-        val resultFile2 = File(folderRule.root, "src/main/avro/test_v2/test-subject.avsc")
-        Assertions.assertThat(resultFile2).exists()
-        Assertions.assertThat(resultFile2.readText()).contains("desc")
+                Arguments.of(
+                    ProtobufSchema.TYPE,
+                    ProtobufSchema(
+                        """
+                        syntax = "proto3";
+                        option java_package = "io.confluent.kafka.serializers.protobuf.test";
+                        option java_outer_classname = "User";
+                        
+                        import "google/protobuf/descriptor.proto";
+                        
+                        message TestMessage {
+                            string name = 1;
+                        }
+                    """
+                    ),
+                    ProtobufSchema(
+                        """
+                        syntax = "proto3";
+                        option java_package = "io.confluent.kafka.serializers.protobuf.test";
+                        option java_outer_classname = "User";
+                        
+                        import "google/protobuf/descriptor.proto";
+                        
+                        message TestMessage {
+                            string name = 1;
+                            string description = 2;
+                        }
+                    """
+                    )
+                )
+            )
     }
 }

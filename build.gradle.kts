@@ -42,11 +42,11 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testImplementation("org.assertj", "assertj-core", assertJVersion)
     testImplementation("io.mockk", "mockk", mockkVersion)
     testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
     testImplementation("org.testcontainers", "kafka", testContainersVersion)
-    testImplementation("org.awaitility", "awaitility", awaitabilityVersion)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
