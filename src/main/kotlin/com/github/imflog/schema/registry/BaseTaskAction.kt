@@ -15,7 +15,12 @@ abstract class BaseTaskAction(
         return parseSchema(schemaPath, schemaString, schemaType, dependencies)
     }
 
-    fun parseSchema(subject: String, schemaContent: String, schemaType: String, dependencies: List<SchemaReference>) =
+    fun parseSchema(
+        subject: String,
+        schemaContent: String,
+        schemaType: String,
+        dependencies: List<SchemaReference>
+    ): ParsedSchema =
         client.parseSchema(schemaType, schemaContent, dependencies).orElseThrow {
             SchemaParsingException(subject, schemaType)
         }
