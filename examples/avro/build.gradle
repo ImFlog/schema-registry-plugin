@@ -1,0 +1,29 @@
+plugins {
+    id "com.github.imflog.kafka-schema-registry-gradle-plugin"
+}
+
+schemaRegistry {
+    url = 'http://localhost:8081'
+
+    register {
+        subject('company', 'schemas/avro/company.avsc', 'AVRO')
+        subject('user', 'schemas/avro/user.avsc', 'AVRO')
+                .addReference('company', 'company', 1)
+    }
+
+    config {
+        subject('company', 'FULL_TRANSITIVE')
+        subject('user', 'FULL_TRANSITIVE')
+    }
+
+    download {
+        subject('company', 'schemas/avro/downloaded')
+        subject('user', 'schemas/avro/downloaded')
+    }
+
+    compatibility {
+        subject('company', 'schemas/avro/company_v2.avsc', 'AVRO')
+        subject('user', 'schemas/avro/user.avsc', 'AVRO')
+                .addReference('company', 'company', 1)
+    }
+}

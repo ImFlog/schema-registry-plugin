@@ -1,50 +1,31 @@
 package com.github.imflog.schema.registry.register
 
+import com.github.imflog.schema.registry.BaseTaskAction
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import org.apache.avro.Schema
 import org.gradle.api.logging.Logging
 import java.io.File
 
+
 class RegisterTaskAction(
-    private val client: SchemaRegistryClient,
-    private val subjects: List<RegisterSubject>,
-    private val rootDir: File
-) {
+    client: SchemaRegistryClient,
+    rootDir: File,
+    private val subjects: List<RegisterSubject>
+) : BaseTaskAction(client, rootDir) {
 
     private val logger = Logging.getLogger(RegisterTaskAction::class.java)
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path, dependencies) ->
+        subjects.forEach { (subject, path, type, dependencies) ->
             try {
-                registerSchema(subject, path, dependencies)
+                val parsedSchema = parseSchemaFromFile(path, type, dependencies)
+                logger.debug("Calling register ($subject, $path)")
+                client.register(subject, parsedSchema)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)
                 errorCount++
             }
         }
         return errorCount
-    }
-
-    private fun registerSchema(subject: String, path: String, dependencies: List<String>) {
-        val parser = Schema.Parser()
-        loadDependencies(dependencies, parser)
-        val schema = readSchema(parser, path)
-        logger.debug("Calling register ($subject, $path)")
-        client.register(subject, schema)
-    }
-
-    /**
-     * This adds all record names to the current parser known types.
-     */
-    private fun loadDependencies(dependencies: List<String>, parser: Schema.Parser) {
-        dependencies.reversed().forEach {
-            readSchema(parser, it)
-        }
-    }
-
-    private fun readSchema(parser: Schema.Parser, path: String): Schema {
-        val schemaContent = File(rootDir, path).readText()
-        return parser.parse(schemaContent)
     }
 }

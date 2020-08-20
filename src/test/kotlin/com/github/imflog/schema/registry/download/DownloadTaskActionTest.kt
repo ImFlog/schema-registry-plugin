@@ -1,7 +1,10 @@
 package com.github.imflog.schema.registry.download
 
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
-import org.apache.avro.Schema
+import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
+import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.junit.jupiter.api.AfterEach
@@ -30,26 +33,46 @@ class DownloadTaskActionTest {
         val fooSubject = "foo"
         val outputDir = "src/main/avro/external"
 
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val fooSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
 
-        val registryClient = MockSchemaRegistryClient()
-        registryClient.register(testSubject, testSchema)
-        registryClient.register(fooSubject, fooSchema)
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+        registryClient.register(
+            fooSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "foo",
+                    "fields": [{ "name": "name", "type": "string" }]
+                }""",
+                listOf()
+            ).get()
+        )
 
         folderRule.newFolder("src", "main", "avro", "external")
 
         // when
         val errorCount = DownloadTaskAction(
             registryClient,
+            folderRule.root,
             arrayListOf(
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
-            ),
-            folderRule.root
+            )
         ).run()
 
         // then
@@ -68,23 +91,33 @@ class DownloadTaskActionTest {
         val subject = "oups"
         val outputDir = "src/main/avro/external"
 
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val fooSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"foo\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
 
-        val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
-        registryClient.register("foo", fooSchema)
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{"type": "record", "name": "test", "fields": [{ "name": "name", "type": "string" }]}""",
+                listOf()
+            ).get()
+        )
+        registryClient.register(
+            "foo",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{"type": "record", "name": "foo", "fields": [{ "name": "name", "type": "string" }]}""",
+                listOf()
+            ).get()
+        )
 
         folderRule.newFolder("src", "main", "avro", "external")
 
         // when
         val errorCount = DownloadTaskAction(
             registryClient,
-            arrayListOf(DownloadSubject(subject, outputDir)),
-            folderRule.root
+            folderRule.root,
+            arrayListOf(DownloadSubject(subject, outputDir))
         ).run()
 
         // then
@@ -92,44 +125,48 @@ class DownloadTaskActionTest {
     }
 
     @Test
-    internal fun `Should download a specific version`() {
+    fun `Should download a specific version`() {
         // Given
         val testSubject = "test"
         val outputDir = "src/main/avro/external"
 
-        val testSchemaV1 = Schema.Parser()
-            .parse("""{
-                "type": "record",
-                "name": "test",
-                "fields": [
-                   { "name": "name", "type": "string" }
-                ]}
-                """.trimIndent()
-            )
-        val testSchemaV2 = Schema.Parser()
-            .parse("""{
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+
+        val v1Id = registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{"type": "record", "name": "test", "fields": [{ "name": "name", "type": "string" }]}""",
+                listOf()
+            ).get()
+        )
+
+        val v2Id = registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
                 "type": "record",
                 "name": "test",
                 "fields": [
                    { "name": "name", "type": "string" },
                    { "name": "desc", "type": "string" }
-                ]}
-                """.trimIndent()
-            )
-
-        val registryClient = MockSchemaRegistryClient()
-        val v1Id = registryClient.register(testSubject, testSchemaV1)
-        val v2Id = registryClient.register(testSubject, testSchemaV2)
+                ]}""",
+                listOf()
+            ).get()
+        )
+        Assertions.assertThat(v1Id).isNotEqualTo(v2Id)
 
         folderRule.newFolder("src", "main", "avro", "external")
 
         // When
         val errorCount = DownloadTaskAction(
             registryClient,
+            folderRule.root,
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
-            ),
-            folderRule.root
+            )
         ).run()
 
         // Then

@@ -19,23 +19,22 @@ plugins {
     id("com.github.imflog.kafka-schema-registry-gradle-plugin")
 }
 
-
 schemaRegistry {
     url.set("http://localhost:8081")
 
     register {
-        subject("foo", "schemas/foo.avsc")
+        subject("company", "schemas/avro/company.avsc")
     }
 
     config {
-        subject("foo", "FULL_TRANSITIVE")
+        subject("company", "FULL_TRANSITIVE")
     }
 
     download {
-        subject("foo", "schemas/downloaded")
+        subject("company", "schemas/avro/downloaded")
     }
 
     compatibility {
-        subject("foo", "schemas/foo_v2.avsc")
+        subject("company", "schemas/avro/company_v2.avsc")
     }
 }

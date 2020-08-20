@@ -15,13 +15,14 @@ or prefix the task with `:project_name:` like this `./gradlew :basic:run` to run
 
 Each subproject will define the extension configuration according to the use case.
 
-## Basic
-This is the simplest example:
-* it register [schemas/foo.avsc](schemas/foo.avsc)
+## Avro / JSON / Protobuf
+Those are full example of how to use the plugin. They all do the same thing but with the different types:
+* register the schema `company` and the schema `user` (that use the type `Company`)
 * set the compatibility to `FULL_TRANSITIVE`
-* download the previously registered schema in [schemas/downloaded](schemas/downloaded)
-* test the compatibility with the [schemas/foo_v2.avsc](schemas/foo_v2.avsc) 
+* download the previously registered schema (in the downloaded folder)
+* test the compatibility with the `company_v2` 
+You can find the used schemas and the downloaded in [schemas/avro/company.avsc](schemas/avro/company.avsc) for instance.
 
 ## Override confluent version
 The goal is to show how it is possible to override the confluent version.
-The run task should work but you can run `./gradlew :override-confluent-version:buildEnvironment` to see the resolved confluent version.
+The run tasks should work but you can run `./gradlew :override-confluent-version:buildEnvironment` to see the resolved confluent version.

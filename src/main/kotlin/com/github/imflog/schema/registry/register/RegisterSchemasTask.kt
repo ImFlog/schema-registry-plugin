@@ -34,8 +34,8 @@ open class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) : Def
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get()),
-            subjects.get(),
-            project.rootDir
+            project.rootDir,
+            subjects.get()
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not registered, see logs for details", Throwable())

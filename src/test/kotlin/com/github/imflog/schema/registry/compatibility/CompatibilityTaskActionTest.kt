@@ -1,11 +1,13 @@
 package com.github.imflog.schema.registry.compatibility
 
+import io.confluent.kafka.schemaregistry.ParsedSchema
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
 import io.mockk.every
 import io.mockk.spyk
-import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.junit.jupiter.api.AfterEach
@@ -31,15 +33,25 @@ class CompatibilityTaskActionTest {
     @Test
     fun `Should verify compatibility with no dependencies`() {
         // given
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", emptyList()))
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -49,14 +61,14 @@ class CompatibilityTaskActionTest {
                 {"name": "newField", "type": "string", "default": ""}
              ]
             }
-        """.trimIndent()
+        """
         )
 
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then
@@ -66,11 +78,53 @@ class CompatibilityTaskActionTest {
     @Test
     fun `Should verify compatibility with dependencies`() {
         // given
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
         val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        // Register dependency
+        registryClient.register(
+            "Street",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Street",
+                    "fields": [
+                        {"name": "street", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            "Address",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Address",
+                    "fields": [
+                        {"name": "city", "type": "string" },
+                        {"name": "street", "type": "Street" }
+                    ]
+                }""",
+                listOf(SchemaReference("Street", "Street", 1))
+            ).get()
+        )
 
         folderRule.newFolder("src", "main", "avro", "external")
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
@@ -82,49 +136,24 @@ class CompatibilityTaskActionTest {
                 {"name": "address", "type": [ "null", "Address" ], "default": null}
              ]
             }
-        """.trimIndent()
+        """
         )
-
-        File(folderRule.root, "src/main/avro/external/directDependency.avsc").writeText(
-            """
-            {"type": "record",
-             "name": "Address",
-             "fields": [
-                {"name": "city", "type": "string" },
-                {"name": "street", "type": [ "null", "Street" ] }
-             ]
-            }
-        """.trimIndent()
-        )
-
-        File(folderRule.root, "src/main/avro/external/undirectDependency.avsc").writeText(
-            """
-            {"type": "record",
-             "name": "Street",
-             "fields": [
-                {"name": "street", "type": "string", "default": "" }
-             ]
-            }
-        """.trimIndent()
-        )
-
 
         val subjects = listOf(
             CompatibilitySubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                listOf(
-                    "src/main/avro/external/directDependency.avsc",
-                    "src/main/avro/external/undirectDependency.avsc"
-                )
+                AvroSchema.TYPE
             )
+                .addReference("Address", "Address", 1)
+                .addReference("Street", "Street", 1)
         )
 
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then
@@ -134,15 +163,25 @@ class CompatibilityTaskActionTest {
     @Test
     fun `Should fail on incompatible schemas`() {
         // given
-        val parser = Schema.Parser()
-        val testSchema =
-            parser.parse("{\"type\": \"record\", \"name\": \"test\", \"fields\": [{ \"name\": \"name\", \"type\": \"string\" }]}")
-        val registryClient = MockSchemaRegistryClient()
-        registryClient.register("test", testSchema)
+        val registryClient = MockSchemaRegistryClient(listOf())
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", emptyList()))
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -151,14 +190,14 @@ class CompatibilityTaskActionTest {
                 {"name": "name", "type": "boolean" }
              ]
             }
-        """.trimIndent()
+        """
         )
 
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then
@@ -171,12 +210,18 @@ class CompatibilityTaskActionTest {
 
         val spySchemaRegistry = spyk<MockSchemaRegistryClient>()
         every {
-            spySchemaRegistry.testCompatibility(any(), any())
+            spySchemaRegistry.testCompatibility(any(), any<ParsedSchema>())
         } throws RestClientException("Subject not found", 404, Errors.SUBJECT_NOT_FOUND_ERROR_CODE)
 
         folderRule.newFolder("src", "main", "avro", "external")
 
-        val subjects = arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", emptyList()))
+        val subjects = listOf(
+            CompatibilitySubject(
+                "test",
+                "src/main/avro/external/test.avsc",
+                AvroSchema.TYPE
+            )
+        )
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -185,14 +230,14 @@ class CompatibilityTaskActionTest {
                 {"name": "name", "type": "boolean" }
              ]
             }
-        """.trimIndent()
+        """
         )
 
         // when
         val errorCount = CompatibilityTaskAction(
             spySchemaRegistry,
-            subjects,
-            folderRule.root
+            folderRule.root,
+            subjects
         ).run()
 
         // then

@@ -1,0 +1,29 @@
+plugins {
+    id "com.github.imflog.kafka-schema-registry-gradle-plugin"
+}
+
+schemaRegistry {
+    url = 'http://localhost:8081'
+
+    register {
+        subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
+        subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
+        .addReference('company', 'company', 1)
+    }
+
+    config {
+        subject('company', 'FULL_TRANSITIVE')
+        subject('user', 'FULL_TRANSITIVE')
+    }
+
+    download {
+        subject('company', 'schemas/protobuf/downloaded')
+        subject('user', 'schemas/protobuf/downloaded')
+    }
+
+    compatibility {
+        subject('company', 'schemas/protobuf/com/example/company_v2.proto', 'PROTOBUF')
+        subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
+        .addReference('company', 'company', 1)
+    }
+}

@@ -1,18 +1,19 @@
 group = "com.github.imflog"
-version = "0.10.0-SNAPSHOT"
+version = "1.0.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm").version("1.3.72")
+    kotlin("jvm") version "1.4.0"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.12.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.28.0"
+    id("com.github.ben-manes.versions") version "0.29.0"
 }
 
 repositories {
     jcenter()
     mavenCentral()
     maven("http://packages.confluent.io/maven/")
+    maven("https://jitpack.io")
 }
 
 java {
@@ -20,14 +21,14 @@ java {
 }
 
 // Dependencies versions
-val confluentVersion = "5.4.1"
-val avroVersion = "1.8.2"
+val confluentVersion = "5.5.1"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
-    implementation("io.confluent", "kafka-schema-registry", confluentVersion) {
-        exclude("org.slf4j", "slf4j-log4j12")
-    }
+    implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
+    implementation("io.confluent", "kafka-schema-registry")
+    implementation("io.confluent", "kafka-json-schema-provider")
+    implementation("io.confluent", "kafka-protobuf-provider")
 }
 
 // Test versions
@@ -35,30 +36,25 @@ val junitVersion = "5.6.2"
 val mockkVersion = "1.10.0"
 val wiremockVersion = "2.27.1"
 val assertJVersion = "3.16.1"
+val testContainersVersion = "1.14.3"
+val awaitabilityVersion = "4.0.3"
 dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
     testImplementation("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
     testImplementation("org.assertj", "assertj-core", assertJVersion)
     testImplementation("io.mockk", "mockk", mockkVersion)
     testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
+    testImplementation("org.testcontainers", "kafka", testContainersVersion)
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/ImFlog/schema-registry-plugin")
-            credentials {
-                username = System.getenv("GITHUB_USERNAME")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
 }
 
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"

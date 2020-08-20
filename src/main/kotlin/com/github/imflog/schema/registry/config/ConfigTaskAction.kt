@@ -12,13 +12,14 @@ class ConfigTaskAction(
 
     private val logger = Logging.getLogger(ConfigTaskAction::class.java)
 
-    fun run() : Int {
+    fun run(): Int {
         var errorCount = 0
         for ((subject, config) in subjects) {
             logger.debug("$subject: setting config $config")
             try {
                 // validate that subject pair includes a valid AvroCompatibilityValue:
                 // can't use the enum directly due to https://youtrack.jetbrains.net/issue/KT-31244
+                @Suppress("DEPRECATION")
                 AvroCompatibilityLevel.valueOf(config)
                 client.updateCompatibility(subject, config)
             } catch (ex: IllegalArgumentException) {

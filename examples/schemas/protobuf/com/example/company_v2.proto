@@ -1,0 +1,24 @@
+// [START declaration]
+syntax = "proto3";
+package proto;
+// [END declaration]
+
+// [START java_declaration]
+option java_package = "com.example";
+option java_outer_classname = "CompanyProtos";
+// [END java_declaration]
+
+message Company {
+  enum CompanyTypeEnum {
+    COMPANY_TYPE_NOT_DEFINED = 0;
+    CLIENT = 1;
+    SERVICEPROVIDER = 2;
+  }
+
+  string id = 1;
+  string name = 2;
+  string thumbnail_url = 3;
+  CompanyTypeEnum company_type = 4;
+  repeated string sectors = 5;
+  repeated string sub_sectors = 6;
+}
