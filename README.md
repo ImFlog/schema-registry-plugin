@@ -23,6 +23,7 @@ buildscript {
     }
 }
 ```
+
 ## Tasks
 When you install the plugin, four tasks are added under `registry` group:
 * downloadSchemasTask
@@ -31,6 +32,7 @@ When you install the plugin, four tasks are added under `registry` group:
 * configSubjectsTask
 
 What these tasks do and how to configure them is described in the following sections.
+
 ### Download schemas
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
 
@@ -112,7 +114,6 @@ you can call the `addReference("name", "subject", version)`, this will add a ref
 The addReference calls can be chained.
 
 ### Configure subjects
-
 This task sets the schema compatibility level for registered subjects.
 
 A DSL is available to specify which subjects to configure:
@@ -140,6 +141,17 @@ You have to list the (subject, compatibility-level)
 
 ### Examples
 See the [examples](examples) directory to see the plugin in action !
+
+## Version compatibility
+When using the plugin, a default version of the confluent Schema registry is use.
+The 5.5.X version of the schema-registry introduced changes that made the older version of the plugin obsolete.
+
+It was easier to introduce all the changes in one shot instead of supporting both version. Here is what it implies for users:
+* plugin versions above 1.X.X support the confluent version 5.5.X (Avro / Json / Protobuf)
+* plugin versions should supports anything below 5.4.X
+
+We are not strictly following confluent version so if you need to change the confluent version for some reason,
+take a look at [examples/override-confluent-version](examples/override-confluent-version).
 
 ## Developing
 In order to build the plugin locally, you can run the following commands:
