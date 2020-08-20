@@ -1,7 +1,10 @@
 package com.github.imflog.schema.registry.compatibility
 
 import com.github.imflog.schema.registry.TestContainersUtils
+import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.json.JsonSchema
+import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -9,62 +12,63 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.ArgumentsProvider
+import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
+import java.util.stream.Stream
 
 class CompatibilityTaskIT : TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
 
-    private val subject = "test-subject"
-
-    private val defaultSchema = """{
-        "type": "record",
-        "name": "User",
-        "fields":[
-            {
-                "name": "name",
-                "type": "string"
-            }
-        ]
-    }"""
-
     @BeforeEach
     fun init() {
-        // Reset the client before each test
         folderRule = TemporaryFolder()
-
-        client.register(subject, AvroSchema(defaultSchema))
     }
 
     @AfterEach
     internal fun tearDown() {
+        client.allSubjects.reversed().forEach {
+            client.deleteSubject(it)
+        }
         folderRule.delete()
     }
 
-    @Test
-    fun `CompatibilityTask should validate input schema with no dependencies`() {
+    @ParameterizedTest
+    @ArgumentsSource(SchemaSuccessArgumentProvider::class)
+    fun `CompatibilityTask should succeed for compatible schemas`(
+        type: String,
+        userSchema: ParsedSchema,
+        playerSchema: ParsedSchema,
+        playerSchemaUpdated: String
+    ) {
         folderRule.create()
-        folderRule.newFolder("avro")
-        val testAvsc = folderRule.newFile("avro/test.avsc")
-        val schemaTest = """
-            {
-                "type": "record",
-                "name": "User",
-                "fields": [
-                    {
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "name": "nickname",
-                        "type": ["null", "string"],
-                        "default": null
-                    }
-                ]
-            }
-        """
-        testAvsc.writeText(schemaTest)
+        folderRule.newFolder(type)
+
+        val subjectName = "parameterized-$type"
+
+        val userSubject = "$subjectName-user"
+        client.register(userSubject, userSchema)
+
+        val extension = when (type) {
+            AvroSchema.TYPE -> "avsc"
+            ProtobufSchema.TYPE -> "proto"
+            JsonSchema.TYPE -> "json"
+            else -> throw Exception("Should not happen")
+        }
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player"
+
+        client.register(playerSubject, playerSchema)
+
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchemaUpdated)
+
+        // Small trick, for protobuf the name to import is not User but user.proto
+        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -77,7 +81,7 @@ class CompatibilityTaskIT : TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$subject', 'avro/test.avsc')
+                    subject('$playerSubject', '$playerPath', "$type").addReference('$referenceName', '$userSubject', 1)
                 }
             }
         """
@@ -93,9 +97,39 @@ class CompatibilityTaskIT : TestContainersUtils() {
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
-    @Test
-    fun `CompatibilityTask should validate input schema with dependencies`() {
+    @ParameterizedTest
+    @ArgumentsSource(SchemaFailureArgumentProvider::class)
+    fun `CompatibilityTask should fail for incompatible schemas`(
+        type: String,
+        userSchema: ParsedSchema,
+        playerSchema: ParsedSchema,
+        playerSchemaUpdated: String
+    ) {
         folderRule.create()
+        folderRule.newFolder(type)
+
+        val subjectName = "parameterized-$type"
+
+        val userSubject = "$subjectName-user"
+        client.register(userSubject, userSchema)
+
+        val extension = when (type) {
+            AvroSchema.TYPE -> "avsc"
+            ProtobufSchema.TYPE -> "proto"
+            JsonSchema.TYPE -> "json"
+            else -> throw Exception("Should not happen")
+        }
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player"
+
+        client.register(playerSubject, playerSchema)
+
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchemaUpdated)
+
+        // Small trick, for protobuf the name to import is not User but user.proto
+        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
             """
@@ -107,45 +141,11 @@ class CompatibilityTaskIT : TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$subject', 'avro/test.avsc', "AVRO").addReference('Address', 'Address', 1)
+                    subject('$playerSubject', '$playerPath', "$type").addReference('$referenceName', '$userSubject', 1)
                 }
             }
         """
         )
-
-        client.register("Address", AvroSchema("""
-            {
-                "type": "record",
-                "name": "Address",
-                "fields": [
-                    {
-                        "name": "street",
-                        "type": "string"
-                    }
-                ]
-            }
-        """))
-
-        folderRule.newFolder("avro")
-        val testAvsc = folderRule.newFile("avro/test.avsc")
-        val schemaTest = """
-            {
-                "type":"record",
-                "name":"User",
-                "fields":[
-                    {
-                        "name": "name",
-                        "type": "string"
-                    },
-                    {
-                        "name": "address",
-                        "type": ["null", "Address"],
-                        "default": null
-                    }
-                ]
-            }
-        """
-        testAvsc.writeText(schemaTest)
 
         val result: BuildResult? = GradleRunner.create()
             .withGradleVersion("6.2.2")
@@ -153,7 +153,216 @@ class CompatibilityTaskIT : TestContainersUtils() {
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
-            .build()
-        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+            .buildAndFail()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+    }
+
+    private class SchemaSuccessArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    AvroSchema.TYPE,
+                    AvroSchema("""{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }"""),
+                    AvroSchema("""{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }
+                        ]
+                    }"""),
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" },
+                            { "name": "user", "type": ["null", "User"], "default": null}
+                        ]
+                    }"""
+                ),
+                Arguments.of(
+                    JsonSchema.TYPE,
+                    JsonSchema("""{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/user.json",
+    
+                        "definitions": {
+                            "User": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }"""),
+                    JsonSchema("""{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+    
+                        "definitions": {
+                            "Player": {
+                                "type": "object",
+                                "properties": {
+                                    "identifier": {"type": "string"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }"""),
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+    
+                        "definitions": {
+                            "Player": {
+                                "type": "object",
+                                "properties": {
+                                    "identifier": {"type": "string"},
+                                    "user": {"type": "User"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }"""
+                ),
+                Arguments.of(
+                    ProtobufSchema.TYPE,
+                    ProtobufSchema("""
+                    syntax = "proto3";
+                    package com.github.imflog;
+                    
+                    message User {
+                        string name = 1;
+                    }
+                    """),
+                    ProtobufSchema("""
+                    syntax = "proto3";
+                    package com.github.imflog;
+
+                    message Player {
+                        string identifier = 1;
+                    }
+                    """),
+                    """
+                    syntax = "proto3";
+                    package com.github.imflog;
+                    
+                    import "user.proto";
+                    
+                    message Player {
+                        string identifier = 1;
+                        User user = 2;
+                    }
+                    """
+                )
+            )
+    }
+
+    private class SchemaFailureArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    AvroSchema.TYPE,
+                    AvroSchema("""{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }"""),
+                    AvroSchema("""{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }
+                        ]
+                    }"""),
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" },
+                            { "name": "user", "type": "User"}
+                        ]
+                    }"""
+                ),
+                Arguments.of(
+                    JsonSchema.TYPE,
+                    JsonSchema("""{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/user.json",
+    
+                        "definitions": {
+                            "User": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }"""),
+                    JsonSchema("""{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+    
+                        "definitions": {
+                            "Player": {
+                                "type": "object",
+                                "properties": {
+                                    "identifier": {"type": "string"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }"""),
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+    
+                        "definitions": {
+                            "Player": {
+                                "type": "number"
+                            }
+                        }
+                    }"""
+                ),
+                Arguments.of(
+                    ProtobufSchema.TYPE,
+                    ProtobufSchema("""
+                    syntax = "proto3";
+                    package com.github.imflog;
+                    
+                    message User {
+                        string name = 1;
+                    }
+                    """),
+                    ProtobufSchema("""
+                    syntax = "proto3";
+                    package com.github.imflog;
+
+                    message Player {
+                        string identifier = 1;
+                    }
+                    """),
+                    """
+                    syntax = "proto3";
+                    package com.github.imflog;
+                    
+                    import "user.proto";
+                    
+                    message Player {
+                        User user = 1;
+                        string identifier = 2;
+                    }
+                    """
+                )
+            )
     }
 }

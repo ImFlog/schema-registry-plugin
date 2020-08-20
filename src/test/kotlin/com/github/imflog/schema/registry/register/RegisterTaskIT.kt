@@ -45,9 +45,9 @@ class RegisterTaskIT : TestContainersUtils() {
         folderRule.newFolder(type)
         val subjectName = "parameterized-$type"
         val extension = when (type) {
-            AvroSchema.TYPE -> ".avsc"
-            ProtobufSchema.TYPE -> ".proto"
-            JsonSchema.TYPE -> ".json"
+            AvroSchema.TYPE -> "avsc"
+            ProtobufSchema.TYPE -> "proto"
+            JsonSchema.TYPE -> "json"
             else -> throw Exception("Should not happen")
         }
 

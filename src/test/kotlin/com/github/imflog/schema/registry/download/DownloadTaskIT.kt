@@ -24,33 +24,10 @@ import java.util.stream.Stream
 class DownloadTaskIT : TestContainersUtils() {
 
     private lateinit var folderRule: TemporaryFolder
-    private val subject = "test-subject"
-
-    private val schemaOld = """{
-        "type": "record",
-        "name": "User",
-        "fields": [
-            { "name": "name", "type": "string" }
-        ]
-    }"""
-
-    private val schema = """{
-        "type": "record",
-        "name": "User",
-        "fields": [
-            { "name": "name", "type": "string" }, 
-            { "name": "description", "type": ["null", "string"], "default": null }
-        ]
-    }"""
-
     private lateinit var buildFile: File
 
     @BeforeEach
     fun init() {
-        // Register schema
-        client.register(subject, AvroSchema(schemaOld))
-        client.register(subject, AvroSchema(schema))
-
         folderRule = TemporaryFolder()
         folderRule.create()
     }
@@ -194,11 +171,8 @@ class DownloadTaskIT : TestContainersUtils() {
                     ProtobufSchema(
                         """
                         syntax = "proto3";
-                        option java_package = "io.confluent.kafka.serializers.protobuf.test";
                         option java_outer_classname = "User";
-                        
-                        import "google/protobuf/descriptor.proto";
-                        
+
                         message TestMessage {
                             string name = 1;
                         }
@@ -207,10 +181,7 @@ class DownloadTaskIT : TestContainersUtils() {
                     ProtobufSchema(
                         """
                         syntax = "proto3";
-                        option java_package = "io.confluent.kafka.serializers.protobuf.test";
                         option java_outer_classname = "User";
-                        
-                        import "google/protobuf/descriptor.proto";
                         
                         message TestMessage {
                             string name = 1;

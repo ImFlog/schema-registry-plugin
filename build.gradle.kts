@@ -2,7 +2,7 @@ group = "com.github.imflog"
 version = "1.0.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm").version("1.3.72")
+    kotlin("jvm") version "1.4.0"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.12.0"
     id("maven-publish")
