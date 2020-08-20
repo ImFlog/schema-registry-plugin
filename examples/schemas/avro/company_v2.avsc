@@ -1,0 +1,23 @@
+{
+  "namespace": "com.github.imflog",
+  "name": "Company",
+  "type": "record",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "name", "type": "string"},
+    {"name": "thumbnail_url", "type": "string" },
+    {"name": "company_type", "type": {
+        "type": "enum", "name": "companyTypes", "symbols": [
+            "COMPANY_TYPE_NOT_DEFINED",
+            "CLIENT",
+            "SERVICEPROVIDER"
+        ]}
+    },
+    {"name": "sectors", "type": {"type": "array", "name": "sectorList", "items": "string", "default": []}},
+    {
+        "name": "sub_sectors",
+        "type": ["null", {"type": "array", "name": "subSectorList", "items": "string", "default": []}],
+        "default": null
+    }
+  ]
+}

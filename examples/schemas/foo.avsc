@@ -1,9 +1,0 @@
-{
-  "namespace": "com.github.imflog",
-  "name": "Foo",
-  "type": "record",
-  "fields": [
-    {"name": "name", "type": "string"},
-    { "name": "age", "type": "int" }
-  ]
-}

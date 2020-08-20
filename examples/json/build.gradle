@@ -1,0 +1,29 @@
+plugins {
+    id "com.github.imflog.kafka-schema-registry-gradle-plugin"
+}
+
+schemaRegistry {
+    url = 'http://localhost:8081'
+
+    register {
+        subject('company', 'schemas/json/company.json', 'JSON')
+        subject('user', 'schemas/json/user.json', 'JSON')
+            .addReference('company', 'company', 1)
+    }
+
+    config {
+        subject('company', 'FULL_TRANSITIVE')
+        subject('user', 'FULL_TRANSITIVE')
+    }
+
+    download {
+        subject('company', 'schemas/json/downloaded')
+        subject('user', 'schemas/json/downloaded')
+    }
+
+    compatibility {
+        subject('company', 'schemas/json/company_v2.json', 'JSON')
+        subject('user', 'schemas/json/user.json', 'JSON')
+            .addReference('company', 'company', 1)
+    }
+}
