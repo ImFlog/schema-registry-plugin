@@ -8,7 +8,7 @@ schemaRegistry {
     register {
         subject('company', 'schemas/avro/company.avsc', 'AVRO')
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
-                .addReference('company', 'company', 1)
+                .addReference('company', 'company', -1)
     }
 
     config {
@@ -24,6 +24,6 @@ schemaRegistry {
     compatibility {
         subject('company', 'schemas/avro/company_v2.avsc', 'AVRO')
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
-                .addReference('company', 'company', 1)
+                .addReference('company', 'company', -1)
     }
 }

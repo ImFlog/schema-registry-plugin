@@ -4,7 +4,7 @@ This directory contains examples about how to use the schema-registry plugin.
 If you want to run the samples locally you need docker and docker-compose.
 Gradle will take care of starting the docker compose containers automatically.
 
-A composite task `run` will (in this order):
+A composite task `run` is available in the build group. It will (in this order):
 1. call the register task
 2. call the configure task
 3. call the download task

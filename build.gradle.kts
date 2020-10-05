@@ -1,12 +1,14 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 group = "com.github.imflog"
-version = "1.0.1-SNAPSHOT"
+version = "1.0.1"
 
 plugins {
-    kotlin("jvm") version "1.4.0"
+    kotlin("jvm") version "1.4.10"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.12.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.29.0"
+    id("com.github.ben-manes.versions") version "0.33.0"
 }
 
 repositories {
@@ -21,7 +23,7 @@ java {
 }
 
 // Dependencies versions
-val confluentVersion = "5.5.1"
+val confluentVersion = "6.0.0"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
@@ -32,10 +34,10 @@ dependencies {
 }
 
 // Test versions
-val junitVersion = "5.6.2"
-val mockkVersion = "1.10.0"
-val wiremockVersion = "2.27.1"
-val assertJVersion = "3.16.1"
+val junitVersion = "5.7.0"
+val mockkVersion = "1.10.2"
+val wiremockVersion = "2.27.2"
+val assertJVersion = "3.17.2"
 val testContainersVersion = "1.14.3"
 val awaitabilityVersion = "4.0.3"
 dependencies {
@@ -49,7 +51,7 @@ dependencies {
     testImplementation("org.testcontainers", "kafka", testContainersVersion)
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
