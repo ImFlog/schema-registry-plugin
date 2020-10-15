@@ -17,6 +17,9 @@ buildscript {
         maven {
             url "http://packages.confluent.io/maven/"
         }
+        maven {
+            url = uri("https://jitpack.io")
+        }
   }
     dependencies {
         classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X"
