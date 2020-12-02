@@ -11,7 +11,7 @@ abstract class BaseTaskAction(
 ) {
 
     fun parseSchemaFromFile(schemaPath: String, schemaType: String, dependencies: List<SchemaReference>): ParsedSchema {
-        val schemaString = File(rootDir, schemaPath).readText()
+        val schemaString = File(rootDir.toURI()).resolve(schemaPath).readText()
         return parseSchema(schemaPath, schemaString, schemaType, dependencies)
     }
 

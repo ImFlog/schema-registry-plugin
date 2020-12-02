@@ -51,7 +51,7 @@ class RegisterTaskIT : TestContainersUtils() {
             else -> throw Exception("Should not happen")
         }
 
-        val userPath = "$type/user.$extension"
+        val userPath = "${folderRule.root.absolutePath}/$type/user.$extension"
         val userSubject = "$subjectName-user"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema)

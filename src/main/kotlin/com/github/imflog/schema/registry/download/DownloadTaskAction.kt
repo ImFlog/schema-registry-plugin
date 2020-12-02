@@ -43,7 +43,7 @@ class DownloadTaskAction(
     }
 
     private fun writeSchemaFiles(downloadSubject: DownloadSubject, schema: ParsedSchema) {
-        val outputDir = File(rootDir, downloadSubject.file)
+        val outputDir = File(rootDir.toURI()).resolve(downloadSubject.file)
         outputDir.mkdirs()
         val outputFile = File(outputDir, "${downloadSubject.subject}.${schema.extension()}")
         outputFile.createNewFile()

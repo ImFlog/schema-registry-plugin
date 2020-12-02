@@ -57,7 +57,7 @@ class DownloadTaskIT : TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subject('$subjectName', 'src/main/$type/test')
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/$type/test')
                     subject('$subjectName', 'src/main/$type/test_v1', 1)
                     subject('$subjectName', 'src/main/$type/test_v2', 2)
                 }

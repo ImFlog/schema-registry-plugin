@@ -81,7 +81,7 @@ class CompatibilityTaskIT : TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$playerSubject', '$playerPath', "$type").addReference('$referenceName', '$userSubject', 1)
+                    subject('$playerSubject', '${playerFile.absolutePath}', "$type").addReference('$referenceName', '$userSubject', 1)
                 }
             }
         """
