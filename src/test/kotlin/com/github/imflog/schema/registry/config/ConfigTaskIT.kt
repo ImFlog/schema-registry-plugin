@@ -46,7 +46,7 @@ class ConfigTaskIT : TestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.2.2")
+            .withGradleVersion("6.7.1")
             .withProjectDir(folderRule.root)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
@@ -77,7 +77,7 @@ class ConfigTaskIT : TestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.2.2")
+            .withGradleVersion("6.7.1")
             .withProjectDir(folderRule.root)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()

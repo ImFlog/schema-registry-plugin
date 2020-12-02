@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.utility.DockerImageName
 
 
 abstract class TestContainersUtils {
@@ -22,12 +23,12 @@ abstract class TestContainersUtils {
 
         private val network: Network = Network.newNetwork()
         private val kafkaContainer: KafkaContainer by lazy {
-            KafkaContainer(CONFLUENT_VERSION)
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$CONFLUENT_VERSION"))
                 .withNetwork(network)
                 .withNetworkAliases(KAFKA_NETWORK_ALIAS)
         }
         val schemaRegistryContainer: KGenericContainer by lazy {
-            KGenericContainer("confluentinc/cp-schema-registry:5.5.1")
+            KGenericContainer("confluentinc/cp-schema-registry:$CONFLUENT_VERSION")
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://${KAFKA_NETWORK_ALIAS}:9092")

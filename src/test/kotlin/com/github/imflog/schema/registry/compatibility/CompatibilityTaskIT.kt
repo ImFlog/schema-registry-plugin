@@ -88,7 +88,7 @@ class CompatibilityTaskIT : TestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.2.2")
+            .withGradleVersion("6.7.1")
             .withProjectDir(folderRule.root)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
@@ -148,7 +148,7 @@ class CompatibilityTaskIT : TestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.2.2")
+            .withGradleVersion("6.7.1")
             .withProjectDir(folderRule.root)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()

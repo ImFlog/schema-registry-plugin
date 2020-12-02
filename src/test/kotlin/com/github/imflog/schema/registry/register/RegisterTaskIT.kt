@@ -51,7 +51,7 @@ class RegisterTaskIT : TestContainersUtils() {
             else -> throw Exception("Should not happen")
         }
 
-        val userPath = "${folderRule.root.absolutePath}/$type/user.$extension"
+        val userPath = "$type/user.$extension"
         val userSubject = "$subjectName-user"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema)
@@ -75,7 +75,7 @@ class RegisterTaskIT : TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 register {
-                    subject('$userSubject', '$userPath', '$type')
+                    subject('$userSubject', '${userFile.absolutePath}', '$type')
                     subject('$playerSubject', '$playerPath', '$type').addReference('$referenceName', '$userSubject', 1)
                 }
             }
@@ -83,7 +83,7 @@ class RegisterTaskIT : TestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.2.2")
+            .withGradleVersion("6.7.1")
             .withProjectDir(folderRule.root)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()

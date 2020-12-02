@@ -47,7 +47,7 @@ schemaRegistry {
     
     download {
         // extension of the output file depends on the the schema type
-        subject('avroSubject', 'src/main/avro')
+        subject('avroSubject', '/absolutPath/src/main/avro')
         subject('protoSubject', 'src/main/proto')
         subject('jsonSubject', 'src/main/json')
     }
@@ -72,7 +72,7 @@ schemaRegistry {
     }
     
     compatibility {
-        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
+        subject('avroWithDependencies', '/absolutPath/dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
         subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
@@ -99,7 +99,7 @@ schemaRegistry {
         password = 'basicauthentication-password'
     } //optional
     register {
-        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
+        subject('avroWithDependencies', '/absolutPath/dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
         subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }

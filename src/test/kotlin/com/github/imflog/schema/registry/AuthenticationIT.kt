@@ -125,7 +125,7 @@ class AuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(ConfigTask.TASK_NAME)
                 .withPluginClasspath()
@@ -154,7 +154,7 @@ class AuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(ConfigTask.TASK_NAME)
                 .withPluginClasspath()
@@ -233,7 +233,7 @@ class AuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(CompatibilityTask.TASK_NAME)
                 .withPluginClasspath()
@@ -286,7 +286,7 @@ class AuthenticationIT {
                 )
 
                 val result: BuildResult? = GradleRunner.create()
-                    .withGradleVersion("6.2.2")
+                    .withGradleVersion("6.7.1")
                     .withProjectDir(folderRule.root)
                     .withArguments(ConfigTask.TASK_NAME)
                     .withPluginClasspath()
@@ -315,7 +315,7 @@ class AuthenticationIT {
                 )
 
                 val result: BuildResult? = GradleRunner.create()
-                    .withGradleVersion("6.2.2")
+                    .withGradleVersion("6.7.1")
                     .withProjectDir(folderRule.root)
                     .withArguments(ConfigTask.TASK_NAME)
                     .withPluginClasspath()
@@ -365,7 +365,7 @@ class AuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(CompatibilityTask.TASK_NAME)
                 .withPluginClasspath()
@@ -423,7 +423,7 @@ class AuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
@@ -455,7 +455,7 @@ class AuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
@@ -566,7 +566,7 @@ class AuthenticationIT {
             depAvsc.writeText(depSchema)
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(RegisterSchemasTask.TASK_NAME)
                 .withPluginClasspath()
@@ -611,7 +611,7 @@ class AuthenticationIT {
             testAvsc.writeText(schemaTest)
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(RegisterSchemasTask.TASK_NAME)
                 .withPluginClasspath()
