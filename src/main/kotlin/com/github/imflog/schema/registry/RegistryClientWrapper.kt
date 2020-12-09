@@ -6,6 +6,8 @@ import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
+import org.gradle.api.GradleException
+import org.slf4j.LoggerFactory
 
 
 /**
@@ -14,14 +16,16 @@ import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
  */
 object RegistryClientWrapper {
 
+    private val logger = LoggerFactory.getLogger(RegistryClientWrapper::class.java)
+
     private const val BASIC_AUTH_SOURCE: String = "USER_INFO"
 
-    fun client(url: String, basicAuth: String): SchemaRegistryClient =
+    fun client(url: String, basicAuth: String, sslConfigs: Map<String, Any>): SchemaRegistryClient =
         CachedSchemaRegistryClient(
             listOf(url),
             100,
             listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()),
-            getConfig(basicAuth)
+            getConfig(basicAuth) + getValidatedSslConfig(sslConfigs)
         )
 
     /**
@@ -36,4 +40,23 @@ object RegistryClientWrapper {
             SchemaRegistryClientConfig.BASIC_AUTH_CREDENTIALS_SOURCE to BASIC_AUTH_SOURCE,
             SchemaRegistryClientConfig.USER_INFO_CONFIG to basicAuth
         )
+
+    /**
+     * Validates that an SSLConfig map only contains only keys that starts with "ssl.xxx".
+     * @see org.apache.kafka.common.config.SslConfigs
+     */
+    private fun getValidatedSslConfig(sslConfigs: Map<String, Any>): Map<String, Any> {
+        sslConfigs
+            .keys
+            .filterNot { property -> property.startsWith("ssl.") }
+            .let { wrongProperties ->
+                if (wrongProperties.any()) {
+                    wrongProperties.forEach { property -> logger.error("$property is not a valid sslConfig") }
+                    throw GradleException(
+                        "SSL configuration only accept keys from org.apache.kafka.common.config.SslConfigs"
+                    )
+                }
+            }
+        return sslConfigs
+    }
 }

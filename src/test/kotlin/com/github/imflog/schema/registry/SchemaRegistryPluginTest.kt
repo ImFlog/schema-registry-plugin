@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.download.DownloadTask
+import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import org.assertj.core.api.Assertions
 import org.gradle.api.Project
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
