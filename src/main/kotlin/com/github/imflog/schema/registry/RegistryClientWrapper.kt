@@ -4,6 +4,7 @@ import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig.CLIENT_NAMESPACE
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.gradle.api.GradleException
@@ -20,7 +21,7 @@ object RegistryClientWrapper {
 
     private const val BASIC_AUTH_SOURCE: String = "USER_INFO"
 
-    fun client(url: String, basicAuth: String, sslConfigs: Map<String, Any>): SchemaRegistryClient =
+    fun client(url: String, basicAuth: String, sslConfigs: Map<String, String>): SchemaRegistryClient =
         CachedSchemaRegistryClient(
             listOf(url),
             100,
@@ -33,7 +34,7 @@ object RegistryClientWrapper {
      * Note that BASIC_AUTH_CREDENTIALS_SOURCE is not configurable as the plugin only supports
      * a single schema registry URL, so there is no additional utility of the URL source.
      */
-    private fun getConfig(basicAuth: String): Map<String, Any> = if (basicAuth == ":")
+    private fun getConfig(basicAuth: String): Map<String, String> = if (basicAuth == ":")
         mapOf()
     else
         mapOf(
@@ -57,6 +58,6 @@ object RegistryClientWrapper {
                     )
                 }
             }
-        return sslConfigs
+        return sslConfigs.mapKeys { CLIENT_NAMESPACE + it.key }
     }
 }

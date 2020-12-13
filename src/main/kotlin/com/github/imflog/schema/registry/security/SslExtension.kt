@@ -5,7 +5,7 @@ import org.gradle.api.provider.MapProperty
 
 open class SslExtension(objects: ObjectFactory) {
 
-    val configs: MapProperty<String, Any> = objects.mapProperty(String::class.java, Any::class.java).apply {
+    val configs: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java).apply {
         convention(mapOf())
     }
 }

@@ -29,7 +29,7 @@ open class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) : Def
     val basicAuth: Property<String> = objects.property(String::class.java)
 
     @Input
-    val ssl: MapProperty<String, Any> = objects.mapProperty(String::class.java, Any::class.java)
+    val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
     val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)

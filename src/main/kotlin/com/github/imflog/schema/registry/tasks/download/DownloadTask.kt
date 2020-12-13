@@ -33,7 +33,7 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     val basicAuth: Property<String> = objects.property(String::class.java)
 
     @Input
-    val ssl: MapProperty<String, Any> = objects.mapProperty(String::class.java, Any::class.java)
+    val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @TaskAction
     fun downloadSchemas() {

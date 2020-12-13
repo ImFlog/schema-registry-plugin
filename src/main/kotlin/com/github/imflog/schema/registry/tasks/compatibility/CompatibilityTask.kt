@@ -29,7 +29,7 @@ open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : Defau
     val basicAuth: Property<String> = objects.property(String::class.java)
 
     @Input
-    val ssl: MapProperty<String, Any> = objects.mapProperty(String::class.java, Any::class.java)
+    val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
     val subjects: ListProperty<CompatibilitySubject> = objects.listProperty(CompatibilitySubject::class.java)
