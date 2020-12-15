@@ -1,0 +1,46 @@
+plugins {
+    id "com.github.imflog.kafka-schema-registry-gradle-plugin"
+}
+
+dockerCompose {
+    useComposeFiles = ["$project.rootDir/ssl/docker-compose.yml"]
+    captureContainersOutput = false
+    stopContainers = true
+    removeContainers = true
+    removeVolumes = true
+    removeOrphans = true
+    forceRecreate = true
+    projectName = project.name
+}
+
+schemaRegistry {
+    url = 'https://localhost:8181'
+    ssl {
+        configs = [
+                "ssl.truststore.location": "$project.rootDir/../src/test/resources/secrets/registry.truststore.jks",
+                "ssl.truststore.password": "registry",
+                "ssl.keystore.location"  : "$project.rootDir/../src/test/resources/secrets/registry.keystore.jks",
+                "ssl.keystore.password"  : "registry"
+        ]
+    }
+
+    register {
+        subject('company', 'schemas/avro/company.avsc', 'AVRO')
+        subject('user', 'schemas/avro/user.avsc', 'AVRO').addReference('company', 'company', -1)
+    }
+
+    config {
+        subject('company', 'FULL_TRANSITIVE')
+        subject('user', 'FULL_TRANSITIVE')
+    }
+
+    download {
+        subject('company', 'schemas/avro/downloaded')
+        subject('user', 'schemas/avro/downloaded')
+    }
+
+    compatibility {
+        subject('company', 'schemas/avro/company_v2.avsc', 'AVRO')
+        subject('user', 'schemas/avro/user.avsc', 'AVRO').addReference('company', 'company', -1)
+    }
+}

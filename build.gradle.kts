@@ -41,7 +41,7 @@ val junitVersion = "5.7.0"
 val mockkVersion = "1.10.2"
 val wiremockVersion = "2.27.2"
 val assertJVersion = "3.18.1"
-val testContainersVersion = "1.15.0"
+val testContainersVersion = "1.15.1"
 val awaitabilityVersion = "4.0.3"
 dependencies {
     testImplementation(gradleTestKit())

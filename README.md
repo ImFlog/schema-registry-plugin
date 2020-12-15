@@ -139,6 +139,14 @@ You have to put the URL where the script can reach the Schema Registry.
 
 You have to list the (subject, compatibility-level) 
 
+## Security
+
+### Basic authentication
+TODO()
+
+### Encryption (SSL)
+TODO()
+
 ### Examples
 See the [examples](examples) directory to see the plugin in action !
 
