@@ -1,2 +1,2 @@
 rootProject.name = "examples"
-include("avro", "protobuf", "json", "override-confluent-version")
+include("avro", "protobuf", "json", "override-confluent-version", "ssl")

@@ -15,7 +15,7 @@ buildscript {
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.0.1" apply false
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.1.0-SNAPSHOT" apply false
     id("com.avast.gradle.docker-compose") version "0.13.3" apply true
 }
 
@@ -40,6 +40,7 @@ subprojects {
     }
 
     dockerCompose {
+        useComposeFiles = listOf("${project.rootDir}/docker-compose.yml")
         captureContainersOutput = false
         stopContainers = true
         removeContainers = true

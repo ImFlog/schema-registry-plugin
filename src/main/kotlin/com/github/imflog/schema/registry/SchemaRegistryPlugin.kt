@@ -1,13 +1,15 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.compatibility.CompatibilitySubjectExtension
-import com.github.imflog.schema.registry.compatibility.CompatibilityTask
-import com.github.imflog.schema.registry.config.ConfigSubjectExtension
-import com.github.imflog.schema.registry.config.ConfigTask
-import com.github.imflog.schema.registry.download.DownloadSubjectExtension
-import com.github.imflog.schema.registry.download.DownloadTask
-import com.github.imflog.schema.registry.register.RegisterSchemasTask
-import com.github.imflog.schema.registry.register.RegisterSubjectExtension
+import com.github.imflog.schema.registry.tasks.compatibility.CompatibilitySubjectExtension
+import com.github.imflog.schema.registry.tasks.compatibility.CompatibilityTask
+import com.github.imflog.schema.registry.tasks.config.ConfigSubjectExtension
+import com.github.imflog.schema.registry.tasks.config.ConfigTask
+import com.github.imflog.schema.registry.tasks.download.DownloadSubjectExtension
+import com.github.imflog.schema.registry.tasks.download.DownloadTask
+import com.github.imflog.schema.registry.tasks.register.RegisterSchemasTask
+import com.github.imflog.schema.registry.tasks.register.RegisterSubjectExtension
+import com.github.imflog.schema.registry.security.BasicAuthExtension
+import com.github.imflog.schema.registry.security.SslExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -22,6 +24,10 @@ class SchemaRegistryPlugin : Plugin<Project> {
             val authExtension = extensions.create(
                 "credentials",
                 BasicAuthExtension::class.java
+            )
+            val sslExtension = extensions.create(
+                "ssl",
+                SslExtension::class.java
             )
             val downloadExtension = extensions.create(
                 "download",
@@ -44,6 +50,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure {
                     it.url.set(globalExtension.url)
                     it.basicAuth.set(authExtension.basicAuth)
+                    it.ssl.set(sslExtension.configs)
                     it.subjects.set(downloadExtension.subjects)
                 }
 
@@ -51,6 +58,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure {
                     it.url.set(globalExtension.url)
                     it.basicAuth.set(authExtension.basicAuth)
+                    it.ssl.set(sslExtension.configs)
                     it.subjects.set(registerExtension.subjects)
                 }
 
@@ -58,6 +66,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure {
                     it.url.set(globalExtension.url)
                     it.basicAuth.set(authExtension.basicAuth)
+                    it.ssl.set(sslExtension.configs)
                     it.subjects.set(compatibilityExtension.subjects)
                 }
 
@@ -65,6 +74,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure {
                     it.url.set(globalExtension.url)
                     it.basicAuth.set(authExtension.basicAuth)
+                    it.ssl.set(sslExtension.configs)
                     it.subjects.set(configExtension.subjects)
                 }
         }

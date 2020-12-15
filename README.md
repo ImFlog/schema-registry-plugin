@@ -3,7 +3,7 @@
 # Schema-registry-plugin
 The aim of this plugin is to adapt the [Confluent schema registry maven plugin](https://docs.confluent.io/current/schema-registry/docs/maven-plugin.html) for Gradle builds.
 
-## Installing
+## Usage
 See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
 for instructions about how to add the plugin to your build configuration.
 
@@ -42,15 +42,10 @@ Like the name of the task imply, this task is responsible for retrieving schemas
 A DSL is available to configure the task:
 ```groovy
 schemaRegistry {
-    url = 'http://localhost:8081/'
-    credentials {
-        username = 'basicauthentication-username'
-        password = 'basicauthentication-password'
-    } //optional
-    
+    url = 'http://registry-url:8081/'
     download {
         // extension of the output file depends on the the schema type
-        subject('avroSubject', 'src/main/avro')
+        subject('avroSubject', '/absolutPath/src/main/avro')
         subject('protoSubject', 'src/main/proto')
         subject('jsonSubject', 'src/main/json')
     }
@@ -66,16 +61,9 @@ This task test compatibility between local schemas and schemas stored in the Sch
 A DSL is available to specify what to test:
 ```groovy
 schemaRegistry {
-    url = 'http://localhost:8081'
-    
-    //optional
-    credentials {
-        username = 'basicauthentication-username'
-        password = 'basicauthentication-password'
-    }
-    
+    url = 'http://registry-url:8081'
     compatibility {
-        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
+        subject('avroWithDependencies', '/absolutPath/dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
         subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
@@ -96,13 +84,9 @@ This task register schemas from a local path to a Schema Registry.
 A DSL is available to specify what to register:
 ```groovy
 schemaRegistry {
-    url = 'http://localhost:8081'
-    credentials {
-        username = 'basicauthentication-username'
-        password = 'basicauthentication-password'
-    } //optional
+    url = 'http://registry-url:8081'
     register {
-        subject('avroWithDependencies', 'dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
+        subject('avroWithDependencies', '/absolutPath/dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
         subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
@@ -122,11 +106,7 @@ This task sets the schema compatibility level for registered subjects.
 A DSL is available to specify which subjects to configure:
 ```groovy
 schemaRegistry {
-    url = 'http://localhost:8081'
-    credentials {
-        username = 'basicauthentication-username'
-        password = 'basicauthentication-password'
-    } //optional
+    url = 'http://registry-url:8081'
     config {
         subject('mySubject', 'FULL_TRANSITIVE')
         subject('otherSubject', 'FORWARD')
@@ -141,6 +121,39 @@ for more information on valid compatibility levels.
 You have to put the URL where the script can reach the Schema Registry.
 
 You have to list the (subject, compatibility-level) 
+
+## Security
+According to how your schema registry instance security configuration,
+you can configure the plugin to access it securely.
+
+### Basic authentication
+An extension allow you to specify the basic authentication like so:
+```groovy
+schemaRegistry {
+    url = 'http://registry-url:8081'
+    credentials {
+        username = '$USERNAME'
+        password = '$PASSWORD'
+    }
+}
+```
+
+### Encryption (SSL)
+If you want to encrypt the traffic in transit (using SSL), use the following extension:
+```groovy
+schemaRegistry {
+    url = 'https://registry-url:8081'
+    ssl {
+        configs = [
+            "ssl.truststore.location": "/path/to/registry.truststore.jks",
+            "ssl.truststore.password": "truststorePassword",
+            "ssl.keystore.location": "/path/to/registry.keystore.jks",
+            "ssl.keystore.password": "keystorePassword"
+        ]
+    }
+}
+```
+Valid key values are listed here: [org.apache.kafka.common.config.SslConfigs](https://github.com/confluentinc/kafka/blob/master/clients/src/main/java/org/apache/kafka/common/config/SslConfigs.java)
 
 ### Examples
 See the [examples](examples) directory to see the plugin in action !

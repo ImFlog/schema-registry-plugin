@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.download.DownloadTask
+import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import org.assertj.core.api.Assertions
 import org.gradle.api.Project
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
@@ -60,7 +60,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
@@ -98,7 +98,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("6.2.2")
+                .withGradleVersion("6.7.1")
                 .withProjectDir(folderRule.root)
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()

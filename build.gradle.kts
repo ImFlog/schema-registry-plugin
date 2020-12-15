@@ -1,14 +1,14 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "1.0.2-SNAPSHOT"
+version = "1.1.0-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.4.10"
+    kotlin("jvm") version "1.4.20"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.12.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.33.0"
+    id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 repositories {
@@ -23,12 +23,15 @@ java {
 }
 
 // Dependencies versions
-val confluentVersion = "6.0.0"
+val confluentVersion = "6.0.1"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
-    implementation("io.confluent", "kafka-schema-registry")
+    implementation("io.confluent", "kafka-schema-registry") {
+        exclude("org.slf4j", "slf4j-log4j12")
+    }
     implementation("io.confluent", "kafka-json-schema-provider")
     implementation("io.confluent", "kafka-protobuf-provider")
 }
@@ -37,8 +40,8 @@ dependencies {
 val junitVersion = "5.7.0"
 val mockkVersion = "1.10.2"
 val wiremockVersion = "2.27.2"
-val assertJVersion = "3.17.2"
-val testContainersVersion = "1.14.3"
+val assertJVersion = "3.18.1"
+val testContainersVersion = "1.15.1"
 val awaitabilityVersion = "4.0.3"
 dependencies {
     testImplementation(gradleTestKit())
@@ -51,8 +54,10 @@ dependencies {
     testImplementation("org.testcontainers", "kafka", testContainersVersion)
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 tasks.withType<Test> {
