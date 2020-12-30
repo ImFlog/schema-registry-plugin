@@ -1,8 +1,11 @@
 package com.github.imflog.schema.registry
 
+import com.github.imflog.schema.registry.security.BasicAuthExtension
+import com.github.imflog.schema.registry.security.BasicAuthenticationIT
 import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import org.assertj.core.api.Assertions
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
@@ -107,6 +110,43 @@ class SchemaRegistryPluginTest {
             Assertions.fail<Any>("Should not reach this point")
         } catch (ex: UnexpectedBuildFailure) {
             Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'credentialsBar'")
+        }
+    }
+
+    @Test
+    fun `plugin should only parse nested extensions`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            // This should not be taken into account
+            credentials {
+                username = 'User'
+                password = 'Passw0rd'
+            }
+
+            schemaRegistry {
+                url = 'http://localhost:1234/'
+            }
+        """
+        )
+
+        try {
+            GradleRunner.create()
+                .withGradleVersion("6.7.1")
+                .withProjectDir(folderRule.root)
+                .withArguments(DownloadTask.TASK_NAME)
+                .withPluginClasspath()
+                .withDebug(true)
+                .build()
+            Assertions.fail<Any>("Should not reach this point")
+        } catch (ex: UnexpectedBuildFailure) {
+            Assertions.assertThat(ex.message).containsIgnoringCase("Could not find method credentials()")
         }
     }
 }

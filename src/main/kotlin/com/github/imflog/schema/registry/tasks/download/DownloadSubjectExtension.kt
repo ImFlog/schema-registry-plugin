@@ -4,6 +4,11 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 
 open class DownloadSubjectExtension(objects: ObjectFactory) {
+
+    companion object {
+        const val EXTENSION_NAME = "download"
+    }
+
     val subjects: ListProperty<DownloadSubject> = objects.listProperty(DownloadSubject::class.java).apply {
         convention(listOf())
     }

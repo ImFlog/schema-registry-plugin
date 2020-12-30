@@ -4,6 +4,11 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 
 open class ConfigSubjectExtension(objects: ObjectFactory) {
+
+    companion object {
+        const val EXTENSION_NAME = "config"
+    }
+
     val subjects: ListProperty<ConfigSubject> = objects.listProperty(ConfigSubject::class.java)
 
     fun subject(inputSubject: String, compatibility: String) {

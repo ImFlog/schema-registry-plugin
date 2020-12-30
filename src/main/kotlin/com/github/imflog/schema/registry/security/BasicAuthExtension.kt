@@ -6,6 +6,10 @@ import org.gradle.api.provider.Provider
 
 open class BasicAuthExtension(objects: ObjectFactory) {
 
+    companion object {
+        const val EXTENSION_NAME = "credentials"
+    }
+
     val username: Property<String> = objects.property(String::class.java).apply {
         convention("")
     }
