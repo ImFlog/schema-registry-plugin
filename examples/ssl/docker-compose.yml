@@ -50,4 +50,4 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC: '_ssl_schemas'
       SCHEMA_REGISTRY_SSL_CLIENT_AUTHENTICATION: 'REQUIRED'
     volumes:
-      - ../src/test/resources/secrets:/etc/schema-registry/secrets
+      - ./secrets:/etc/schema-registry/secrets

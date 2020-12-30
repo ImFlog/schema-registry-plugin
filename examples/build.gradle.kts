@@ -15,7 +15,7 @@ buildscript {
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.1.0" apply false
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.1.1" apply false
     id("com.avast.gradle.docker-compose") version "0.13.3" apply true
 }
 
