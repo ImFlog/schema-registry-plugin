@@ -7,6 +7,10 @@ import org.gradle.api.provider.ListProperty
 
 
 open class CompatibilitySubjectExtension(objects: ObjectFactory) {
+    companion object {
+        const val EXTENSION_NAME = "compatibility"
+    }
+
     val subjects: ListProperty<CompatibilitySubject> = objects.listProperty(CompatibilitySubject::class.java)
 
     fun subject(inputSubject: String, file: String) = subject(inputSubject, file, AvroSchema.TYPE)

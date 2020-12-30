@@ -6,6 +6,10 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 
 open class RegisterSubjectExtension(objects: ObjectFactory) {
+    companion object {
+        const val EXTENSION_NAME = "register"
+    }
+
     val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)
 
     fun subject(inputSubject: String, file: String) = subject(inputSubject, file, AvroSchema.TYPE)
