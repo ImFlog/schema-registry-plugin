@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry.security
 
-import com.github.imflog.schema.registry.TestContainersUtils
+import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
 import com.github.imflog.schema.registry.tasks.config.ConfigTask
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class SslIT : TestContainersUtils() {
+class SslIT : Kafka5TestContainersUtils() {
 
     private val folderRule: TemporaryFolder = TemporaryFolder()
     private lateinit var buildFile: File

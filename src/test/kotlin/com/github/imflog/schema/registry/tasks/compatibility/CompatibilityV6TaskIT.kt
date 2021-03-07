@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
-import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
+import com.github.imflog.schema.registry.utils.Kafka6TestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
@@ -20,7 +20,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
 import java.util.stream.Stream
 
-class CompatibilityTaskIT : Kafka5TestContainersUtils() {
+class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
 
@@ -30,7 +30,7 @@ class CompatibilityTaskIT : Kafka5TestContainersUtils() {
     }
 
     @AfterEach
-    internal fun tearDown() {
+    fun tearDown() {
         client.allSubjects.reversed().forEach {
             client.deleteSubject(it)
         }

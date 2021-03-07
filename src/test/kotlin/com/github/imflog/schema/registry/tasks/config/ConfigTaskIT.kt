@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry.tasks.config
 
-import com.github.imflog.schema.registry.TestContainersUtils
+import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class ConfigTaskIT : TestContainersUtils() {
+class ConfigTaskIT : Kafka5TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
 
