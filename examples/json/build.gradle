@@ -8,11 +8,11 @@ schemaRegistry {
     register {
         subject('company', 'schemas/json/company.json', 'JSON')
         subject('user', 'schemas/json/user.json', 'JSON')
-            .addReference('company', 'company', 1)
+            .addReference('company', 'company', -1)
     }
 
     config {
-        subject('company', 'FULL_TRANSITIVE')
+        subject('company', 'BACKWARD')
         subject('user', 'FULL_TRANSITIVE')
     }
 
@@ -24,6 +24,6 @@ schemaRegistry {
     compatibility {
         subject('company', 'schemas/json/company_v2.json', 'JSON')
         subject('user', 'schemas/json/user.json', 'JSON')
-            .addReference('company', 'company', 1)
+            .addReference('company', 'company', -1)
     }
 }

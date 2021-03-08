@@ -29,8 +29,7 @@ class CompatibilityTaskAction(
                             logger.error("Returned errors : $it")
                         }
                     } catch (_: Exception) {
-                        // If we use an old version this call may fail as the API response would be a boolean again
-                        // Instead of the await String list
+                        // If we use a confluent version < 6.1.0 this call may fail as the API response would be a boolean instead of the expected String list.
                     }
                 }
                 isCompatible

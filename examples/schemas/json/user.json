@@ -11,9 +11,13 @@
         "last_name": {"type": "string"},
         "thumbnail_url": {"type":  "string"},
         "email": {"type":  "string"},
-        "company": {"type": "Company"}
+        "company": {"$ref": "#company"}
       },
       "additionalProperties": false
     }
+  },
+
+  "properties": {
+
   }
 }
