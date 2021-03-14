@@ -4,11 +4,11 @@ group = "com.github.imflog"
 version = "1.1.2-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.4.21"
+    kotlin("jvm") version "1.4.31"
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "0.12.0"
+    id("com.gradle.plugin-publish") version "0.13.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.36.0"
+    id("com.github.ben-manes.versions") version "0.38.0"
 }
 
 repositories {
@@ -23,7 +23,7 @@ java {
 }
 
 // Dependencies versions
-val confluentVersion = "6.0.1"
+val confluentVersion = "6.1.0"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
@@ -37,11 +37,11 @@ dependencies {
 }
 
 // Test versions
-val junitVersion = "5.7.0"
-val mockkVersion = "1.10.2"
+val junitVersion = "5.7.1"
+val mockkVersion = "1.10.6"
 val wiremockVersion = "2.27.2"
-val assertJVersion = "3.18.1"
-val testContainersVersion = "1.15.1"
+val assertJVersion = "3.19.0"
+val testContainersVersion = "1.15.2"
 val awaitabilityVersion = "4.0.3"
 dependencies {
     testImplementation(gradleTestKit())

@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry.tasks.register
 
-import com.github.imflog.schema.registry.TestContainersUtils
+import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
@@ -19,7 +19,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
 import java.util.stream.Stream
 
-class RegisterTaskIT : TestContainersUtils() {
+class RegisterTaskIT : Kafka5TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
 

@@ -10,10 +10,25 @@
         "name": {"type": "string"},
         "thumbnail_url": {"type": "string"},
         "company_type": {"type":  "string"},
-        "sectors": {"type": "array"},
-        "sub_sectors": {"type": "array"}
+        "sectors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sub_sectors": {
+          "type": ["null", "array"],
+          "items": {
+            "type": "string"
+          }
+        }
       },
+      "required": ["id"],
       "additionalProperties": false
     }
+  },
+
+  "properties": {
+    "company": {"$ref":  "#/definitions/Company"}
   }
 }

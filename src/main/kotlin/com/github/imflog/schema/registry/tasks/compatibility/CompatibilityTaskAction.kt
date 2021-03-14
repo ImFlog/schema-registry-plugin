@@ -22,7 +22,17 @@ class CompatibilityTaskAction(
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
                 val parsedSchema = parseSchemaFromFile(path, type, dependencies)
-                client.testCompatibility(subject, parsedSchema)
+                val isCompatible = client.testCompatibility(subject, parsedSchema)
+                if (!isCompatible) {
+                    try {
+                        client.testCompatibilityVerbose(subject, parsedSchema).forEach {
+                            logger.error("Returned errors : $it")
+                        }
+                    } catch (_: Exception) {
+                        // If we use a confluent version < 6.1.0 this call may fail as the API response would be a boolean instead of the expected String list.
+                    }
+                }
+                isCompatible
             } catch (ioEx: IOException) {
                 logger.error("", ioEx)
                 false
