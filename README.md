@@ -48,6 +48,9 @@ schemaRegistry {
         subject('avroSubject', '/absolutPath/src/main/avro')
         subject('protoSubject', 'src/main/proto')
         subject('jsonSubject', 'src/main/json')
+        
+        // You can use a regex to download multiple schemas at once
+        subjectPattern('avro.*', 'src/main/avro')
     }
 }
 ```

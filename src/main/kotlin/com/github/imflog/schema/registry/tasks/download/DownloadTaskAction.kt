@@ -9,6 +9,7 @@ import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import org.gradle.api.logging.Logging
 import java.io.File
+import java.util.regex.PatternSyntaxException
 
 class DownloadTaskAction(
     client: SchemaRegistryClient,
@@ -20,7 +21,7 @@ class DownloadTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { downloadSubject ->
+        expandSubjectPatterns().forEach { downloadSubject ->
             logger.info("Start loading schemas for ${downloadSubject.subject}")
             try {
                 val downloadedSchema = downloadSchema(downloadSubject)
@@ -31,6 +32,29 @@ class DownloadTaskAction(
             }
         }
         return errorCount
+    }
+
+    private fun expandSubjectPatterns() : List<DownloadSubject> {
+        val allSubjects = client.allSubjects
+        return subjects.flatMap { downloadSubject ->
+            if (downloadSubject.regex) {
+                val regex = parseSubjectRegex(downloadSubject.subject)
+                allSubjects.filter { subject -> regex?.matches(subject) ?: false }
+                    .map { subject -> DownloadSubject(subject, downloadSubject.file, downloadSubject.version) }
+                    .toList()
+            } else {
+                listOf(downloadSubject)
+            }
+        }
+    }
+
+    private fun parseSubjectRegex(regex: String): Regex? {
+        return try {
+            Regex(regex)
+        } catch (exception: PatternSyntaxException) {
+            logger.error("Unable to compile subject pattern of ${regex}", exception)
+            null
+        }
     }
 
     private fun downloadSchema(subject: DownloadSubject): ParsedSchema {

@@ -91,6 +91,48 @@ class DownloadTaskIT : Kafka5TestContainersUtils() {
         Assertions.assertThat(resultFile2.readText()).contains("description")
     }
 
+    @ParameterizedTest(name = "{0}")
+    @ArgumentsSource(SchemaArgumentProvider::class)
+    fun `Should download schemas by subject name pattern`(type: String, oldSchema: ParsedSchema, newSchema: ParsedSchema) {
+        // Given
+        val subjectName = "parameterized-$type"
+
+        client.register(subjectName, oldSchema)
+        client.register(subjectName, newSchema)
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    subjectPattern('parameterized-[a-zA-Z]+', '${folderRule.root.absolutePath}/src/main/$type/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaFile = "$subjectName.${oldSchema.extension()}"
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
     @Test
     fun `DownloadSchemaTask should fail download when schema does not exist`() {
         buildFile = folderRule.newFile("build.gradle")
