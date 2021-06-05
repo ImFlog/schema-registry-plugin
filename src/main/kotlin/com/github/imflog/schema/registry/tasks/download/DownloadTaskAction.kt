@@ -54,7 +54,7 @@ class DownloadTaskAction(
         return try {
             Regex(regex)
         } catch (exception: PatternSyntaxException) {
-            logger.error("Unable to compile subject pattern of ${regex}", exception)
+            logger.error("Unable to compile subject pattern of $regex, skipping", exception)
             null
         }
     }
