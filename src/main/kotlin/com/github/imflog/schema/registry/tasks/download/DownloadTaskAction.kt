@@ -40,10 +40,12 @@ class DownloadTaskAction(
         val subjectsSupplier = Suppliers.memoize { client.allSubjects }
         return subjects.flatMap { downloadSubject ->
             if (downloadSubject.regex) {
-                val regex = parseSubjectRegex(downloadSubject.subject)
-                subjectsSupplier.get().filter { subject -> regex?.matches(subject) ?: false }
-                    .map { subject -> DownloadSubject(subject, downloadSubject.file, downloadSubject.version) }
-                    .toList()
+                parseSubjectRegex(downloadSubject.subject)?.let { regex ->
+                    subjectsSupplier.get()
+                        .filter { subject -> regex.matches(subject) }
+                        .map { subject -> DownloadSubject(subject, downloadSubject.file, downloadSubject.version) }
+                        .toList()
+                } ?: emptyList()
             } else {
                 listOf(downloadSubject)
             }
