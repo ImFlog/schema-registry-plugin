@@ -2,6 +2,8 @@ package com.github.imflog.schema.registry.tasks.download
 
 import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import com.github.imflog.schema.registry.UnknownSchemaTypeException
+import com.google.common.base.Suppliers
+import com.google.common.cache.CacheBuilder
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
@@ -35,11 +37,11 @@ class DownloadTaskAction(
     }
 
     private fun expandSubjectPatterns() : List<DownloadSubject> {
-        val allSubjects = client.allSubjects
+        val subjectsSupplier = Suppliers.memoize { client.allSubjects }
         return subjects.flatMap { downloadSubject ->
             if (downloadSubject.regex) {
                 val regex = parseSubjectRegex(downloadSubject.subject)
-                allSubjects.filter { subject -> regex?.matches(subject) ?: false }
+                subjectsSupplier.get().filter { subject -> regex?.matches(subject) ?: false }
                     .map { subject -> DownloadSubject(subject, downloadSubject.file, downloadSubject.version) }
                     .toList()
             } else {
