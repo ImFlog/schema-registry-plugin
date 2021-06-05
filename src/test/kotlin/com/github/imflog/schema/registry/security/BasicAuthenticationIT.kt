@@ -391,18 +391,6 @@ class BasicAuthenticationIT {
                             .withBody(mapper.writeValueAsString(Schema(subject, 1, 1, "AVRO", emptyList(), schema)))
                     )
             )
-            wireMockAuthServerItem.stubFor(
-                WireMock.get(
-                    WireMock.urlMatching("/subjects")
-                )
-                    .withBasicAuth(USERNAME, PASSWORD)
-                    .willReturn(
-                        WireMock.aResponse()
-                            .withStatus(200)
-                            .withHeader("Accept", "application/json")
-                            .withBody(mapper.writeValueAsString(listOf("test-subject")))
-                    )
-            )
         }
 
         @Test
