@@ -1,0 +1,10 @@
+{
+  "namespace": "com.github.imflog",
+  "name": "LatLong",
+  "type": "record",
+  "fields": [
+    {"name": "id", "type": "string"},
+    {"name": "latitude", "type": "double"},
+    {"name": "longitude", "type": "double" }
+  ]
+}
