@@ -1,16 +1,16 @@
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://github.com/imflog/kafka-schema-registry/examples/json/latlong.json",
+// [START declaration]
+syntax = "proto3";
+package proto;
+import "company";
+// [END declaration]
 
-  "definitions": {
-    "Address": {
-      "type": "object",
-      "properties": {
-        "id": {"type": "string"},
-        "latitude": {"type": "number"},
-        "longitude": {"type": "number"}
-      },
-      "additionalProperties": false
-    }
-  }
+// [START java_declaration]
+option java_package = "com.example";
+option java_outer_classname = "LatLongProtos";
+// [END java_declaration]
+
+message LatLong {
+  string id = 1;
+  double latitude = 3;
+  double longitude = 4;
 }

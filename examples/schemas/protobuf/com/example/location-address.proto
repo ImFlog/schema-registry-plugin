@@ -1,20 +1,18 @@
+// [START declaration]
+syntax = "proto3";
+package proto;
+import "company";
+// [END declaration]
 
+// [START java_declaration]
+option java_package = "com.example";
+option java_outer_classname = "AddressProtos";
+// [END java_declaration]
 
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://github.com/imflog/kafka-schema-registry/examples/json/adress.json",
-
-  "definitions": {
-    "Address": {
-      "type": "object",
-      "properties": {
-        "id": {"type": "string"},
-        "address_line_1": {"type": "string"},
-        "address_line_2": {"type": "string"},
-        "post_code": {"type": "string"},
-        "country": {"type": "string"}
-      },
-      "additionalProperties": false
-    }
-  }
+message Address {
+  string id = 1;
+  string address_line_1 = 3;
+  string address_line_2 = 4;
+  string post_code = 5;
+  string country = 6;
 }
