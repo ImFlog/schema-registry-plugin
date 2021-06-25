@@ -1,0 +1,1 @@
+{"type":"record","name":"LatLong","namespace":"com.github.imflog","fields":[{"name":"id","type":"string"},{"name":"latitude","type":"double"},{"name":"longitude","type":"double"}]}

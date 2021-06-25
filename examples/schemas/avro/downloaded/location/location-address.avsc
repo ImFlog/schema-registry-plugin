@@ -1,0 +1,1 @@
+{"type":"record","name":"Address","namespace":"com.github.imflog","fields":[{"name":"id","type":"string"},{"name":"address_line_1","type":"string"},{"name":"address_line_2","type":"string"},{"name":"post_code","type":"string"},{"name":"country","type":"string"}]}

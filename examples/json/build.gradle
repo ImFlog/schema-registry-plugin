@@ -9,8 +9,8 @@ schemaRegistry {
         subject('company', 'schemas/json/company.json', 'JSON')
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
-        subject('location/address', 'schemas/json/location-address.json', 'JSON')
-        subject('location/latlong', 'schemas/json/location-latlong.json', 'JSON')
+        subject('location-address', 'schemas/json/location-address.json', 'JSON')
+        subject('location-latlong', 'schemas/json/location-latlong.json', 'JSON')
     }
 
     config {
@@ -23,14 +23,14 @@ schemaRegistry {
     download {
         subject('company', 'schemas/json/downloaded')
         subject('user', 'schemas/json/downloaded')
-        // subjectPattern('location.*', 'schemas/json/downloaded/location')
+        subjectPattern('location.*', 'schemas/json/downloaded/location')
     }
 
     compatibility {
         subject('company', 'schemas/json/company_v2.json', 'JSON')
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
-        subject('location/address', 'schemas/json/location-address.json', 'JSON')
-        subject('location/latlong', 'schemas/json/location-latlong.json', 'JSON')
+        subject('location-address', 'schemas/json/location-address.json', 'JSON')
+        subject('location-latlong', 'schemas/json/location-latlong.json', 'JSON')
     }
 }

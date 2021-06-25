@@ -9,8 +9,8 @@ schemaRegistry {
         subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
             .addReference('company', 'company', 1)
-        subject('location/address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
-        subject('location/latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
+        subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
+        subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
     }
 
     config {
@@ -23,14 +23,14 @@ schemaRegistry {
     download {
         subject('company', 'schemas/protobuf/downloaded')
         subject('user', 'schemas/protobuf/downloaded')
-        // subjectPattern('location.*', 'schemas/protobuf/downloaded/location')
+        subjectPattern('location.*', 'schemas/protobuf/downloaded/location')
     }
 
     compatibility {
         subject('company', 'schemas/protobuf/com/example/company_v2.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
             .addReference('company', 'company', 1)
-        subject('location/address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
-        subject('location/latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
+        subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
+        subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
     }
 }

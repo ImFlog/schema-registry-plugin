@@ -1,0 +1,1 @@
+{"$schema":"http://json-schema.org/draft-07/schema#","$id":"http://github.com/imflog/kafka-schema-registry/examples/json/latlong.json","definitions":{"Address":{"type":"object","properties":{"id":{"type":"string"},"latitude":{"type":"number"},"longitude":{"type":"number"}},"additionalProperties":false}}}

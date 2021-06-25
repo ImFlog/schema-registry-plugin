@@ -2,7 +2,7 @@ buildscript {
     repositories {
         jcenter()
         maven {
-            url = uri("http://packages.confluent.io/maven/")
+            url = uri("https://packages.confluent.io/maven/")
         }
         maven {
             url = uri("https://plugins.gradle.org/m2/")
@@ -15,8 +15,8 @@ buildscript {
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.2.0" apply false
-    id("com.avast.gradle.docker-compose") version "0.13.3" apply true
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.3.0" apply false
+    id("com.avast.gradle.docker-compose") version "0.14.3" apply true
 }
 
 subprojects {

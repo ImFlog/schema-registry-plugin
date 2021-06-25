@@ -9,8 +9,8 @@ schemaRegistry {
         subject('company', 'schemas/avro/company.avsc', 'AVRO')
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
                 .addReference('company', 'company', -1)
-        subject('location/address', 'schemas/avro/location-address.avsc', 'AVRO')
-        subject('location/latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
+        subject('location-address', 'schemas/avro/location-address.avsc', 'AVRO')
+        subject('location-latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
     }
 
     config {
@@ -23,14 +23,14 @@ schemaRegistry {
     download {
         subject('company', 'schemas/avro/downloaded')
         subject('user', 'schemas/avro/downloaded')
-        // subjectPattern('location.*', 'schemas/avro/downloaded/location')
+        subjectPattern('location.*', 'schemas/avro/downloaded/location')
     }
 
     compatibility {
         subject('company', 'schemas/avro/company_v2.avsc', 'AVRO')
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
                 .addReference('company', 'company', -1)
-        subject('location/address', 'schemas/avro/location-address.avsc', 'AVRO')
-        subject('location/latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
+        subject('location-address', 'schemas/avro/location-address.avsc', 'AVRO')
+        subject('location-latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
     }
 }
