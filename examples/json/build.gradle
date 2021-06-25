@@ -9,21 +9,28 @@ schemaRegistry {
         subject('company', 'schemas/json/company.json', 'JSON')
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
+        subject('location/address', 'schemas/json/location-address.json', 'JSON')
+        subject('location/latlong', 'schemas/json/location-latlong.json', 'JSON')
     }
 
     config {
         subject('company', 'BACKWARD')
         subject('user', 'FULL_TRANSITIVE')
+        subject('location-address', 'FULL_TRANSITIVE')
+        subject('location-latlong', 'FULL_TRANSITIVE')
     }
 
     download {
         subject('company', 'schemas/json/downloaded')
         subject('user', 'schemas/json/downloaded')
+        // subjectPattern('location.*', 'schemas/json/downloaded/location')
     }
 
     compatibility {
         subject('company', 'schemas/json/company_v2.json', 'JSON')
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
+        subject('location/address', 'schemas/json/location-address.json', 'JSON')
+        subject('location/latlong', 'schemas/json/location-latlong.json', 'JSON')
     }
 }

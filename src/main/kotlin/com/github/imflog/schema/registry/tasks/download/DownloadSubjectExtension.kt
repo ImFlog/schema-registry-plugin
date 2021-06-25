@@ -20,10 +20,15 @@ open class DownloadSubjectExtension(objects: ObjectFactory) {
     fun subject(inputSubject: String, file: String) {
         subjects.add(DownloadSubject(inputSubject, file))
     }
+
+    fun subjectPattern(inputPattern: String, file: String) {
+        subjects.add(DownloadSubject(inputPattern, file, null, true))
+    }
 }
 
 data class DownloadSubject(
     val subject: String,
     val file: String,
-    val version: Int? = null
+    val version: Int? = null,
+    val regex: Boolean = false
 )

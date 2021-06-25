@@ -1,0 +1,18 @@
+// [START declaration]
+syntax = "proto3";
+package proto;
+import "company";
+// [END declaration]
+
+// [START java_declaration]
+option java_package = "com.example";
+option java_outer_classname = "AddressProtos";
+// [END java_declaration]
+
+message Address {
+  string id = 1;
+  string address_line_1 = 3;
+  string address_line_2 = 4;
+  string post_code = 5;
+  string country = 6;
+}
