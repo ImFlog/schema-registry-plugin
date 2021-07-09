@@ -5,10 +5,12 @@ import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import java.io.File
+import org.gradle.api.logging.Logger
 
 abstract class BaseTaskAction(
     val client: SchemaRegistryClient,
-    val rootDir: File
+    val rootDir: File,
+    val quietLogging: Boolean
 ) {
 
     fun parseSchemaFromFile(schemaPath: String, schemaType: String, dependencies: List<SchemaReference>): ParsedSchema {
@@ -25,4 +27,13 @@ abstract class BaseTaskAction(
         client.parseSchema(schemaType, schemaContent, dependencies).orElseThrow {
             SchemaParsingException(subject, schemaType)
         }
+
+    /**
+     * Utility method that checks if the quiet logging is activated before logging.
+     * This is needed because we cannot setup a log level per task.
+     * See https://github.com/gradle/gradle/issues/1010
+     */
+    fun Logger.infoIfNotQuiet(message: String) {
+        if (!quietLogging) info(message)
+    }
 }

@@ -1,11 +1,8 @@
 buildscript {
     repositories {
-        jcenter()
+        gradlePluginPortal()
         maven {
             url = uri("https://packages.confluent.io/maven/")
-        }
-        maven {
-            url = uri("https://plugins.gradle.org/m2/")
         }
         maven {
             url = uri("https://jitpack.io")

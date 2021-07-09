@@ -68,7 +68,8 @@ class CompatibilityTaskActionTest {
         val errorCount = CompatibilityTaskAction(
             registryClient,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then
@@ -153,7 +154,8 @@ class CompatibilityTaskActionTest {
         val errorCount = CompatibilityTaskAction(
             registryClient,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then
@@ -197,7 +199,8 @@ class CompatibilityTaskActionTest {
         val errorCount = CompatibilityTaskAction(
             registryClient,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then
@@ -237,7 +240,8 @@ class CompatibilityTaskActionTest {
         val errorCount = CompatibilityTaskAction(
             spySchemaRegistry,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then

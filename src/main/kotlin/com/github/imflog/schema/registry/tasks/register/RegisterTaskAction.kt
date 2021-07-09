@@ -9,8 +9,9 @@ import java.io.File
 class RegisterTaskAction(
     client: SchemaRegistryClient,
     rootDir: File,
-    private val subjects: List<RegisterSubject>
-) : BaseTaskAction(client, rootDir) {
+    private val subjects: List<RegisterSubject>,
+    quietLogging: Boolean
+) : BaseTaskAction(client, rootDir, quietLogging) {
 
     private val logger = Logging.getLogger(RegisterTaskAction::class.java)
 
@@ -19,7 +20,7 @@ class RegisterTaskAction(
         subjects.forEach { (subject, path, type, dependencies) ->
             try {
                 val parsedSchema = parseSchemaFromFile(path, type, dependencies)
-                logger.debug("Calling register ($subject, $path)")
+                logger.infoIfNotQuiet("Registering $subject (from $path)")
                 client.register(subject, parsedSchema)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)

@@ -35,12 +35,16 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     @Input
     val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
+    @Input
+    val quietLogging: Property<Boolean> = objects.property(Boolean::class.java)
+
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
             project.rootDir,
-            subjects.get()
+            subjects.get(),
+            quietLogging.get()
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not downloaded, see logs for details", Throwable())
