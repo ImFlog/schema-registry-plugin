@@ -53,7 +53,8 @@ class RegisterTaskActionTest {
         val errorCount = RegisterTaskAction(
             registryClient,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then
@@ -100,7 +101,8 @@ class RegisterTaskActionTest {
         val errorCount = RegisterTaskAction(
             registryClient,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then
@@ -184,7 +186,8 @@ class RegisterTaskActionTest {
         val errorCount = RegisterTaskAction(
             registryClient,
             folderRule.root,
-            subjects
+            subjects,
+            false
         ).run()
 
         // then

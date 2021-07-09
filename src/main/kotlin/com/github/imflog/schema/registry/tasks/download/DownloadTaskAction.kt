@@ -1,30 +1,30 @@
 package com.github.imflog.schema.registry.tasks.download
 
-import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import com.github.imflog.schema.registry.UnknownSchemaTypeException
+import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import com.google.common.base.Suppliers
-import com.google.common.cache.CacheBuilder
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
-import org.gradle.api.logging.Logging
 import java.io.File
 import java.util.regex.PatternSyntaxException
+import org.gradle.api.logging.Logging
 
 class DownloadTaskAction(
     client: SchemaRegistryClient,
     rootDir: File,
-    private val subjects: List<DownloadSubject>
-) : BaseTaskAction(client, rootDir) {
+    private val subjects: List<DownloadSubject>,
+    quietLogging: Boolean
+) : BaseTaskAction(client, rootDir, quietLogging) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
 
     fun run(): Int {
         var errorCount = 0
         expandSubjectPatterns().forEach { downloadSubject ->
-            logger.info("Start loading schemas for ${downloadSubject.subject}")
+            logger.infoIfNotQuiet("Start loading schemas for ${downloadSubject.subject}")
             try {
                 val downloadedSchema = downloadSchema(downloadSubject)
                 writeSchemaFiles(downloadSubject, downloadedSchema)
@@ -36,7 +36,7 @@ class DownloadTaskAction(
         return errorCount
     }
 
-    private fun expandSubjectPatterns() : List<DownloadSubject> {
+    private fun expandSubjectPatterns(): List<DownloadSubject> {
         val subjectsSupplier = Suppliers.memoize { client.allSubjects }
         return subjects.flatMap { downloadSubject ->
             if (downloadSubject.regex) {
@@ -75,7 +75,7 @@ class DownloadTaskAction(
         outputDir.mkdirs()
         val outputFile = File(outputDir, "${downloadSubject.subject}.${schema.extension()}")
         outputFile.createNewFile()
-        logger.info("Writing file  $outputFile")
+        logger.infoIfNotQuiet("Writing file  $outputFile")
         outputFile.printWriter().use { out ->
             out.println(schema.toString())
         }

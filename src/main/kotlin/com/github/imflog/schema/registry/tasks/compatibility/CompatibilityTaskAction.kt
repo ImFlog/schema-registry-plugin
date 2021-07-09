@@ -4,15 +4,16 @@ import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
-import org.gradle.api.logging.Logging
 import java.io.File
 import java.io.IOException
+import org.gradle.api.logging.Logging
 
 class CompatibilityTaskAction(
     client: SchemaRegistryClient,
     rootDir: File,
-    private val subjects: List<CompatibilitySubject>
-) : BaseTaskAction(client, rootDir) {
+    private val subjects: List<CompatibilitySubject>,
+    quietLogging: Boolean
+) : BaseTaskAction(client, rootDir, quietLogging) {
 
     private val logger = Logging.getLogger(CompatibilityTaskAction::class.java)
 
@@ -46,7 +47,7 @@ class CompatibilityTaskAction(
                 }
             }
             if (isCompatible) {
-                logger.info("Schema $path is compatible with subject: $subject")
+                logger.infoIfNotQuiet("Schema $path is compatible with subject: $subject")
             } else {
                 logger.error("Schema $path is not compatible with subject: $subject")
                 errorCount++

@@ -13,4 +13,8 @@ open class SchemaRegistryExtension(objects: ObjectFactory) {
         // Default value
         convention("http://localhost:8081")
     }
+
+    val quiet: Property<Boolean> = objects.property(Boolean::class.java).apply {
+        convention(false)
+    }
 }

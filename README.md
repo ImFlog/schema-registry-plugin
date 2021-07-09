@@ -15,7 +15,7 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
         maven {
-            url "http://packages.confluent.io/maven/"
+            url "https://packages.confluent.io/maven/"
         }
         maven {
             url = uri("https://jitpack.io")
@@ -36,6 +36,18 @@ When you install the plugin, four tasks are added under `registry` group:
 
 What these tasks do and how to configure them is described in the following sections.
 
+### Global configuration
+```groovy
+schemaRegistry {
+    url = 'http://registry-url:8081/'
+    quiet = true 
+}
+```
+* `url` is where the script can reach the Schema Registry.
+* `quiet` is whether you want to disable "INFO" level logs.
+  This can be useful if you test the compatibility of a lot of schema.
+  Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
+
 ### Download schemas
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
 
@@ -54,8 +66,6 @@ schemaRegistry {
     }
 }
 ```
-You have to put the url where the script can reach the Schema Registry.
-
 You need to specify the pairs (subjectName, outputDir) for all the schemas you want to download. 
 
 ### Test schemas compatibility
@@ -72,8 +82,6 @@ schemaRegistry {
     }
 }
 ```
-You have to put the url where the script can reach the Schema Registry.
-
 You have to list all the (subject, avsc file path) pairs that you want to test. 
 
 If you have dependencies with other schemas required before the compatibility check,
@@ -95,8 +103,6 @@ schemaRegistry {
     }
 }
 ```
-You have to put the url where the script can reach the Schema Registry.
-
 You have to list all the (subject, avsc file path) pairs that you want to send.
 
 If you have dependencies with other schemas required before the compatibility check,
@@ -116,12 +122,9 @@ schemaRegistry {
     }
 }
 ```
-
 See the Confluent
 [Schema Registry documentation](https://docs.confluent.io/current/schema-registry/avro.html#compatibility-types)
 for more information on valid compatibility levels.
-
-You have to put the URL where the script can reach the Schema Registry.
 
 You have to list the (subject, compatibility-level) 
 
@@ -166,8 +169,8 @@ When using the plugin, a default version of the confluent Schema registry is use
 The 5.5.X version of the schema-registry introduced changes that made the older version of the plugin obsolete.
 
 It was easier to introduce all the changes in one shot instead of supporting both version. Here is what it implies for users:
-* plugin versions above 1.X.X support the confluent version 5.5.X (Avro / Json / Protobuf)
-* plugin versions should supports anything below 5.4.X
+* plugin versions above 1.X.X support the confluent version > 5.5.X (Avro / Json / Protobuf)
+* plugin versions should support anything below 5.4.X
 
 We are not strictly following confluent version so if you need to change the confluent version for some reason,
 take a look at [examples/override-confluent-version](examples/override-confluent-version).

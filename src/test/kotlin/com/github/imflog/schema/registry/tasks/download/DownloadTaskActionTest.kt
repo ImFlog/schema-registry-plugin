@@ -72,7 +72,8 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
-            )
+            ),
+            false
         ).run()
 
         // then
@@ -143,7 +144,8 @@ class DownloadTaskActionTest {
             folderRule.root,
             arrayListOf(
                 DownloadSubject("te.*", outputDir, null, true)
-            )
+            ),
+            false
         ).run()
 
         // then
@@ -189,7 +191,8 @@ class DownloadTaskActionTest {
         val errorCount = DownloadTaskAction(
             registryClient,
             folderRule.root,
-            arrayListOf(DownloadSubject(subject, outputDir))
+            arrayListOf(DownloadSubject(subject, outputDir)),
+            false
         ).run()
 
         // then
@@ -223,7 +226,8 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject(invalidSubjectPattern, outputDir, null, true),
                 DownloadSubject("test", outputDir)
-            )
+            ),
+            false
         ).run()
 
         // then
@@ -275,7 +279,8 @@ class DownloadTaskActionTest {
             folderRule.root,
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
-            )
+            ),
+            false
         ).run()
 
         // Then

@@ -51,6 +51,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(DownloadTask.TASK_NAME, DownloadTask::class.java)
                 .configure {
                     it.url.set(globalExtension.url)
+                    it.quietLogging.set(globalExtension.quiet)
                     it.basicAuth.set(basicAuthExtension.basicAuth)
                     it.ssl.set(sslExtension.configs)
                     it.subjects.set(downloadExtension.subjects)
@@ -59,6 +60,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
                 .configure {
                     it.url.set(globalExtension.url)
+                    it.quietLogging.set(globalExtension.quiet)
                     it.basicAuth.set(basicAuthExtension.basicAuth)
                     it.ssl.set(sslExtension.configs)
                     it.subjects.set(registerExtension.subjects)
@@ -67,6 +69,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
                 .configure {
                     it.url.set(globalExtension.url)
+                    it.quietLogging.set(globalExtension.quiet)
                     it.basicAuth.set(basicAuthExtension.basicAuth)
                     it.ssl.set(sslExtension.configs)
                     it.subjects.set(compatibilityExtension.subjects)
