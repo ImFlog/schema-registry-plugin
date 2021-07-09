@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "1.3.1-SNAPSHOT"
+version = "1.4.0-SNAPSHOT"
 
 plugins {
     kotlin("jvm") version "1.4.31"
@@ -28,7 +28,9 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
     implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
-    implementation("io.confluent", "kafka-schema-registry")
+    implementation("io.confluent", "kafka-schema-registry") {
+        exclude("org.slf4j", "slf4j-log4j12")
+    }
     implementation("io.confluent", "kafka-json-schema-provider")
     implementation("io.confluent", "kafka-protobuf-provider")
 }
