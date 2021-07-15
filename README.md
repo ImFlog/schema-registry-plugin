@@ -4,26 +4,48 @@
 The aim of this plugin is to adapt the [Confluent schema registry maven plugin](https://docs.confluent.io/current/schema-registry/docs/maven-plugin.html) for Gradle builds.
 
 ## Usage
-See [gradle plugins portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
-for instructions about how to add the plugin to your build configuration.
 
-Also, do not forget to add the confluent repository in your buildscript:
+The plugin requires external dependencies coming from Confluent and Jitpack repositories.
+
+### `plugins` block
 ```groovy
 buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url "https://packages.confluent.io/maven/"
-        }
-        maven {
-            url = uri("https://jitpack.io")
-        }
-  }
-    dependencies {
-        classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X"
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
     }
+    maven {
+      url "https://packages.confluent.io/maven/"
+    }
+    maven {
+      url = uri("https://jitpack.io")
+    }
+  }
+}
+
+plugins {
+  id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
+}
+```
+
+### `buildscript` block:
+```groovy
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+    maven {
+      url "https://packages.confluent.io/maven/"
+    }
+    maven {
+      url = uri("https://jitpack.io")
+    }
+  }
+
+  dependencies {
+    classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X"
+  }
 }
 ```
 

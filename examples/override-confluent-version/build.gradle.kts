@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("io.confluent:kafka-avro-serializer:5.4.0")
+        classpath("io.confluent:kafka-schema-registry-parent:5.4.0")
     }
 }
 
