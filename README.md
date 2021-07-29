@@ -28,7 +28,7 @@ plugins {
 }
 ```
 
-### `buildscript` block:
+### `buildscript` block
 ```groovy
 buildscript {
   repositories {
