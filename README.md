@@ -88,7 +88,17 @@ schemaRegistry {
     }
 }
 ```
-You need to specify the pairs (subjectName, outputDir) for all the schemas you want to download. 
+Here is the list of all the signatures for the `subject` extension:
+* subject(inputSubject: String, outputPath: String)
+* subject(inputSubject: String, outputPath: String, outputFileName: String)
+* subject(inputSubject: String, outputPath: String, version: Int)
+* subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String)
+* subjectPattern(inputPattern: String, outputPath: String)
+
+NB:
+* If not provided, the outputFileName is equal to the inputSubject.
+* It's not possible to specify the outputFileName for subject pattern as it would override the
+  file for each downloaded schema.
 
 ### Test schemas compatibility
 This task test compatibility between local schemas and schemas stored in the Schema Registry.

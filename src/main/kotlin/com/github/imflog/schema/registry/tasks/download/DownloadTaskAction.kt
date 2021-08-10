@@ -43,7 +43,7 @@ class DownloadTaskAction(
                 parseSubjectRegex(downloadSubject.subject)?.let { regex ->
                     subjectsSupplier.get()
                         .filter { subject -> regex.matches(subject) }
-                        .map { subject -> DownloadSubject(subject, downloadSubject.file, downloadSubject.version) }
+                        .map { subject -> DownloadSubject(subject, downloadSubject.outputPath, downloadSubject.version) }
                         .toList()
                 } ?: emptyList()
             } else {
@@ -71,9 +71,10 @@ class DownloadTaskAction(
     }
 
     private fun writeSchemaFiles(downloadSubject: DownloadSubject, schema: ParsedSchema) {
-        val outputDir = File(rootDir.toURI()).resolve(downloadSubject.file)
+        val outputDir = File(rootDir.toURI()).resolve(downloadSubject.outputPath)
         outputDir.mkdirs()
-        val outputFile = File(outputDir, "${downloadSubject.subject}.${schema.extension()}")
+        val fileName = downloadSubject.outputFileName ?: downloadSubject.subject
+        val outputFile = File(outputDir, "${fileName}.${schema.extension()}")
         outputFile.createNewFile()
         logger.infoIfNotQuiet("Writing file  $outputFile")
         outputFile.printWriter().use { out ->

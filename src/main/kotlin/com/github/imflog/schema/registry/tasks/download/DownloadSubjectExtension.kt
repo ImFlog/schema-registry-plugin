@@ -13,22 +13,31 @@ open class DownloadSubjectExtension(objects: ObjectFactory) {
         convention(listOf())
     }
 
-    fun subject(inputSubject: String, file: String, version: Int) {
-        subjects.add(DownloadSubject(inputSubject, file, version))
+    fun subject(inputSubject: String, outputPath: String) {
+        subjects.add(DownloadSubject(inputSubject, outputPath))
     }
 
-    fun subject(inputSubject: String, file: String) {
-        subjects.add(DownloadSubject(inputSubject, file))
+    fun subject(inputSubject: String, outputPath: String, outputFileName: String) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, outputFileName = outputFileName))
     }
 
-    fun subjectPattern(inputPattern: String, file: String) {
-        subjects.add(DownloadSubject(inputPattern, file, null, true))
+    fun subject(inputSubject: String, outputPath: String, version: Int) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, version))
+    }
+
+    fun subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, version, outputFileName = outputFileName))
+    }
+
+    fun subjectPattern(inputPattern: String, outputPath: String) {
+        subjects.add(DownloadSubject(inputPattern, outputPath, null, true))
     }
 }
 
 data class DownloadSubject(
     val subject: String,
-    val file: String,
+    val outputPath: String,
     val version: Int? = null,
-    val regex: Boolean = false
+    val regex: Boolean = false,
+    val outputFileName: String? = null
 )
