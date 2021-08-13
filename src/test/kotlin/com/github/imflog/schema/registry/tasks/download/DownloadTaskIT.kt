@@ -93,7 +93,11 @@ class DownloadTaskIT : Kafka5TestContainersUtils() {
 
     @ParameterizedTest(name = "{0}")
     @ArgumentsSource(SchemaArgumentProvider::class)
-    fun `Should download schemas by subject name pattern`(type: String, oldSchema: ParsedSchema, newSchema: ParsedSchema) {
+    fun `Should download schemas by subject name pattern`(
+        type: String,
+        oldSchema: ParsedSchema,
+        newSchema: ParsedSchema
+    ) {
         // Given
         val subjectName = "parameterized-$type"
 
@@ -134,7 +138,7 @@ class DownloadTaskIT : Kafka5TestContainersUtils() {
     }
 
     @Test
-    fun `DownloadSchemaTask should fail download when schema does not exist`() {
+    fun `Should fail download when schema does not exist`() {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
             """
@@ -160,6 +164,58 @@ class DownloadTaskIT : Kafka5TestContainersUtils() {
             .withDebug(true)
             .buildAndFail()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
+    }
+
+    @Test
+    fun `Should save files under a custom output name`() {
+        // Given
+        val subjectName = "test-user"
+        val outputName = "other_output_name"
+
+        client.register(
+            subjectName,
+            AvroSchema(
+                """{
+                    "type": "record",
+                    "name": "User",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }"""
+            )
+        )
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test', "$outputName")
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaFile = "$outputName.avsc"
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
     private class SchemaArgumentProvider : ArgumentsProvider {
