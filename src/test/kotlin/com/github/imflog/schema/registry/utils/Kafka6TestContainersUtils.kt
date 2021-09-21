@@ -4,12 +4,13 @@ import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
+import java.io.File
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.utility.DockerImageName
-import java.io.File
 
 abstract class Kafka6TestContainersUtils {
 
@@ -24,15 +25,15 @@ abstract class Kafka6TestContainersUtils {
                 .withNetwork(network)
                 .withNetworkAliases(KAFKA_NETWORK_ALIAS)
         }
-        val schemaRegistryContainer: KGenericContainer by lazy {
-            KGenericContainer("confluentinc/cp-schema-registry:$DEFAULT_CONFLUENT_VERSION")
+        val schemaRegistryContainer: GenericContainer<*> by lazy {
+            GenericContainer("confluentinc/cp-schema-registry:$DEFAULT_CONFLUENT_VERSION")
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9092")
                 .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
         }
-        val schemaRegistrySslContainer: KGenericContainer by lazy {
-            KGenericContainer("confluentinc/cp-schema-registry:$DEFAULT_CONFLUENT_VERSION")
+        val schemaRegistrySslContainer: GenericContainer<*> by lazy {
+            GenericContainer("confluentinc/cp-schema-registry:$DEFAULT_CONFLUENT_VERSION")
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
                 .withEnv("SCHEMA_REGISTRY_LISTENERS", "https://0.0.0.0:$SCHEMA_REGISTRY_INTERNAL_PORT")

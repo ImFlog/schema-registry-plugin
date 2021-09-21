@@ -56,6 +56,9 @@ dependencies {
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs = listOf(
+            "-Xself-upper-bound-inference"
+        )
     }
 }
 
