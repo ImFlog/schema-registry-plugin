@@ -19,9 +19,10 @@ class CompatibilityTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        for ((subject, path, type, dependencies) in subjects) {
+        for ((subject, path, type, dependencies, localDependencies) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
+                // TODO: Handle local dependencies here
                 val parsedSchema = parseSchemaFromFile(path, type, dependencies)
                 val isCompatible = client.testCompatibility(subject, parsedSchema)
                 if (!isCompatible) {

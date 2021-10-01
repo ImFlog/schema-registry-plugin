@@ -30,7 +30,7 @@ abstract class BaseTaskAction(
 
     /**
      * Utility method that checks if the quiet logging is activated before logging.
-     * This is needed because we cannot setup a log level per task.
+     * This is needed because we cannot set a log level per task.
      * See https://github.com/gradle/gradle/issues/1010
      */
     fun Logger.infoIfNotQuiet(message: String) {

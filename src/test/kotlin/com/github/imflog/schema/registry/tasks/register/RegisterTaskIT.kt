@@ -4,6 +4,8 @@ import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
+import java.io.File
+import java.util.stream.Stream
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -16,8 +18,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
-import java.io.File
-import java.util.stream.Stream
 
 class RegisterTaskIT : Kafka5TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
@@ -39,7 +39,64 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
         type: String,
         userSchema: String,
         playerSchema: String
+    ) {
+        folderRule.create()
+        folderRule.newFolder(type)
+        val subjectName = "parameterized-$type"
+        val extension = when (type) {
+            AvroSchema.TYPE -> "avsc"
+            ProtobufSchema.TYPE -> "proto"
+            JsonSchema.TYPE -> "json"
+            else -> throw Exception("Should not happen")
+        }
 
+        val userPath = "$type/user.$extension"
+        val userSubject = "$subjectName-user-local"
+        val userFile = folderRule.newFile(userPath)
+        userFile.writeText(userSchema)
+
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player-local"
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchema)
+
+        // Small trick, for protobuf the name to import is not User but user.proto
+        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                register {
+                    subject('$userSubject', '${userFile.absolutePath}', '$type')
+                    subject('$playerSubject', '$playerPath', '$type').addReference('$referenceName', '$userSubject', 1)
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(SchemaArgumentProvider::class)
+    fun `Should register local dependencies`(
+        type: String,
+        userSchema: String,
+        playerSchema: String
     ) {
         folderRule.create()
         folderRule.newFolder(type)
@@ -75,8 +132,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 register {
-                    subject('$userSubject', '${userFile.absolutePath}', '$type')
-                    subject('$playerSubject', '$playerPath', '$type').addReference('$referenceName', '$userSubject', 1)
+                    subject('$playerSubject', '$playerPath', '$type').addLocalReference('$referenceName', '$userPath')
                 }
             }
         """
@@ -90,8 +146,8 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
             .withDebug(true)
             .build()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-    }
 
+    }
 
     private class SchemaArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
@@ -155,7 +211,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                     }
                     """.trimIndent(),
                     """
-                    syntax = "proto3";
+                    # syntax = "proto3";
                     package com.github.imflog;
                     
                     import "user.proto";

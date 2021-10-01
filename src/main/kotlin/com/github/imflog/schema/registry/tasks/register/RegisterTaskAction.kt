@@ -2,8 +2,8 @@ package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import org.gradle.api.logging.Logging
 import java.io.File
+import org.gradle.api.logging.Logging
 
 
 class RegisterTaskAction(
@@ -17,9 +17,17 @@ class RegisterTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path, type, dependencies) ->
+        subjects.forEach { (subject, path, type, remoteDependencies, localDependencies) ->
             try {
-                val parsedSchema = parseSchemaFromFile(path, type, dependencies)
+                // TODO: Move this to baseTask ?
+                //      OK AVRO
+                //      This seem to work for JSON (to verify as it shouldn't)
+                //      OK for protobuf but need to remove the headers (only keep the messages)
+                val schema = localDependencies.values
+                    .reversed()
+                    .joinToString("\n") { File(rootDir.toURI()).resolve(it).readText() }
+                    .plus(File(rootDir.toURI()).resolve(path).readText())
+                val parsedSchema = parseSchema(subject, schema, type, remoteDependencies)
                 logger.infoIfNotQuiet("Registering $subject (from $path)")
                 client.register(subject, parsedSchema)
             } catch (e: Exception) {
