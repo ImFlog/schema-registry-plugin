@@ -22,7 +22,7 @@ java {
 }
 
 // Dependencies versions
-val confluentVersion = "6.2.0"
+val confluentVersion = "6.2.1"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib"))
