@@ -109,7 +109,6 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
         }
 
         val userPath = "$type/user.$extension"
-        val userSubject = "$subjectName-user"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema)
 
@@ -132,7 +131,8 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 register {
-                    subject('$playerSubject', '$playerPath', '$type').addLocalReference('$referenceName', '$userPath')
+                    subject('$playerSubject', '$playerPath', '$type')
+                        .addLocalReference('$referenceName', '$userPath')
                 }
             }
         """
@@ -209,9 +209,9 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                     message User {
                         string name = 1;
                     }
-                    """.trimIndent(),
+                    """,
                     """
-                    # syntax = "proto3";
+                    syntax = "proto3";
                     package com.github.imflog;
                     
                     import "user.proto";
@@ -220,7 +220,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                         string identifier = 1;
                         User user = 2;
                     }
-                    """.trimIndent()
+                    """,
                 )
             )
     }

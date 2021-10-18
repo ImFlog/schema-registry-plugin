@@ -17,17 +17,9 @@ class RegisterTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path, type, remoteDependencies, localDependencies) ->
+        subjects.forEach { (subject, path, type, remoteDependencies) ->
             try {
-                // TODO: Move this to baseTask ?
-                //      OK AVRO
-                //      This seem to work for JSON (to verify as it shouldn't)
-                //      OK for protobuf but need to remove the headers (only keep the messages)
-                val schema = localDependencies.values
-                    .reversed()
-                    .joinToString("\n") { File(rootDir.toURI()).resolve(it).readText() }
-                    .plus(File(rootDir.toURI()).resolve(path).readText())
-                val parsedSchema = parseSchema(subject, schema, type, remoteDependencies)
+                val parsedSchema = parseSchema(subject, path, type, remoteDependencies)
                 logger.infoIfNotQuiet("Registering $subject (from $path)")
                 client.register(subject, parsedSchema)
             } catch (e: Exception) {

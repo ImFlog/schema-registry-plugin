@@ -12,21 +12,26 @@ abstract class BaseTaskAction(
     val rootDir: File,
     private val quietLogging: Boolean
 ) {
-
-    fun parseSchemaFromFile(schemaPath: String, schemaType: String, dependencies: List<SchemaReference>): ParsedSchema {
-        val schemaString = File(rootDir.toURI()).resolve(schemaPath).readText()
-        return parseSchema(schemaPath, schemaString, schemaType, dependencies)
-    }
-
     fun parseSchema(
         subject: String,
-        schemaContent: String,
+        schemaPath: String,
         schemaType: String,
         dependencies: List<SchemaReference>
-    ): ParsedSchema =
-        client.parseSchema(schemaType, schemaContent, dependencies).orElseThrow {
+    ): ParsedSchema {
+        val schemaContent = File(rootDir.toURI()).resolve(schemaPath).readText()
+        // TODO : This is ugly
+        val modifiedForLocalDependencies = dependencies
+            .map {
+                if (it.version == -2) SchemaReference(
+                    File(rootDir.toURI()).resolve(it.name).absolutePath,
+                    it.subject,
+                    it.version
+                ) else it
+            }
+        return client.parseSchema(schemaType, schemaContent, modifiedForLocalDependencies).orElseThrow {
             SchemaParsingException(subject, schemaType)
         }
+    }
 
     /**
      * Utility method that checks if the quiet logging is activated before logging.

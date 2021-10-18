@@ -30,8 +30,7 @@ data class CompatibilitySubject(
     val inputSubject: String,
     val file: String,
     val type: String,
-    val references: MutableList<SchemaReference> = mutableListOf(),
-    val localReference: MutableMap<String, String> = mutableMapOf(),
+    val references: MutableList<SchemaReference> = mutableListOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): CompatibilitySubject {
         references.add(SchemaReference(name, subject, version))
@@ -39,7 +38,8 @@ data class CompatibilitySubject(
     }
 
     fun addLocalReference(name: String, path: String): CompatibilitySubject {
-        localReference[name] = path
+        // TODO: Clarify this (extend SchemaReference ?)
+        references.add(SchemaReference(path, name, -2))
         return this
     }
 }

@@ -157,6 +157,67 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.FAILED)
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(SchemaSuccessArgumentProvider::class)
+    fun `CompatibilityTask should succeed for compatible schemas with local dependencies`(
+        type: String,
+        userSchema: ParsedSchema,
+        playerSchema: ParsedSchema,
+        playerSchemaUpdated: String
+    ) {
+        folderRule.create()
+        folderRule.newFolder(type)
+
+        val extension = when (type) {
+            AvroSchema.TYPE -> "avsc"
+            ProtobufSchema.TYPE -> "proto"
+            JsonSchema.TYPE -> "json"
+            else -> throw Exception("Should not happen")
+        }
+        val subjectName = "parameterized-$type"
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player"
+
+        client.register(playerSubject, playerSchema)
+
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchemaUpdated)
+
+        val userPath = "$type/user.$extension"
+        val userFile = folderRule.newFile(userPath)
+        userFile.writeText(userSchema.canonicalString())
+
+        // Small trick, for protobuf the name to import is not User but user.proto
+        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                compatibility {
+                    subject('$playerSubject', '${playerFile.absolutePath}', "$type")
+                        .addLocalReference('$referenceName', '$userPath')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
     private class SchemaSuccessArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
