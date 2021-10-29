@@ -43,7 +43,13 @@ class DownloadTaskAction(
                 parseSubjectRegex(downloadSubject.subject)?.let { regex ->
                     subjectsSupplier.get()
                         .filter { subject -> regex.matches(subject) }
-                        .map { subject -> DownloadSubject(subject, downloadSubject.outputPath, downloadSubject.version) }
+                        .map { subject ->
+                            DownloadSubject(
+                                subject,
+                                downloadSubject.outputPath,
+                                downloadSubject.version
+                            )
+                        }
                         .toList()
                 } ?: emptyList()
             } else {
@@ -67,7 +73,13 @@ class DownloadTaskAction(
         } else {
             client.getSchemaMetadata(subject.subject, subject.version)
         }
-        return parseSchema(subject.subject, schemaMetadata.schema, schemaMetadata.schemaType, schemaMetadata.references)
+        return parseSchema(
+            subject.subject,
+            schemaMetadata.schema,
+            schemaMetadata.schemaType,
+            schemaMetadata.references,
+            mapOf(), // No need for local reference when downloading a schema
+        )
     }
 
     private fun writeSchemaFiles(downloadSubject: DownloadSubject, schema: ParsedSchema) {

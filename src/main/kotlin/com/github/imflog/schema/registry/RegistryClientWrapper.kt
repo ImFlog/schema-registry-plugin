@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry
 
 import com.github.imflog.schema.registry.providers.CustomAvroSchemaProvider
+import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClientConfig
@@ -25,7 +26,7 @@ object RegistryClientWrapper {
         CachedSchemaRegistryClient(
             listOf(url),
             100,
-            listOf(CustomAvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()),
+            listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()),
             getConfig(basicAuth) + getValidatedSslConfig(sslConfigs)
         )
 

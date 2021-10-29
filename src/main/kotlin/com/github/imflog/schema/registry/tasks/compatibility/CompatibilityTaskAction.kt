@@ -19,10 +19,16 @@ class CompatibilityTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        for ((subject, path, type, dependencies) in subjects) {
+        for ((subject, path, type, remoteReferences, localReferences) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
-                val parsedSchema = parseSchema(subject, path, type, dependencies)
+                val parsedSchema = parseSchema(
+                    subject,
+                    path,
+                    type,
+                    remoteReferences,
+                    localReferences
+                )
                 val isCompatible = client.testCompatibility(subject, parsedSchema)
                 if (!isCompatible) {
                     try {

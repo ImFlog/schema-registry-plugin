@@ -29,7 +29,8 @@ data class RegisterSubject(
     val inputSubject: String,
     val file: String,
     val type: String,
-    val references: MutableList<SchemaReference> = mutableListOf()
+    val references: MutableList<SchemaReference> = mutableListOf(),
+    val localReferences: MutableMap<String, String> = mutableMapOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): RegisterSubject {
         references.add(SchemaReference(name, subject, version))
@@ -37,8 +38,7 @@ data class RegisterSubject(
     }
 
     fun addLocalReference(name: String, path: String): RegisterSubject {
-        // TODO: Clarify this (extend SchemaReference ?)
-        references.add(SchemaReference(path, name, -2))
+        localReferences[name] = path
         return this
     }
 }

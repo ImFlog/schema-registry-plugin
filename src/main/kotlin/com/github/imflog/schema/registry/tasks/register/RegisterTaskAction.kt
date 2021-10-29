@@ -17,9 +17,9 @@ class RegisterTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path, type, remoteDependencies) ->
+        subjects.forEach { (subject, path, type, dependencies, localDependencies) ->
             try {
-                val parsedSchema = parseSchema(subject, path, type, remoteDependencies)
+                val parsedSchema = parseSchema(subject, path, type, dependencies, localDependencies)
                 logger.infoIfNotQuiet("Registering $subject (from $path)")
                 client.register(subject, parsedSchema)
             } catch (e: Exception) {
