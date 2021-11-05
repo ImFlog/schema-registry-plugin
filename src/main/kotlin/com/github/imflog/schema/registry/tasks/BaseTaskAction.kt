@@ -1,12 +1,11 @@
 package com.github.imflog.schema.registry.tasks
 
 import com.github.imflog.schema.registry.SchemaParsingException
+import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
-import io.confluent.kafka.schemaregistry.json.JsonSchema
-import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import java.io.File
 import org.apache.avro.Schema
 import org.slf4j.Logger
@@ -17,34 +16,45 @@ abstract class BaseTaskAction(
     private val quietLogging: Boolean
 ) {
 
-    fun parseSchema(
+    fun parseSchemaFromFile(
         subject: String,
         schemaPath: String,
-        schemaType: String,
+        schemaType: SchemaType,
         references: List<SchemaReference>,
         localReferences: Map<String, String>
-    ): ParsedSchema =
-        if (localReferences.isEmpty()) {
-            parseSchemaWithoutLocalDependencies(schemaPath, schemaType, references, subject)
-        } else {
-            when (schemaType) {
-                AvroSchema.TYPE -> parseAvroSchemaWithLocalReferencies(subject, schemaPath, references, localReferences)
-                ProtobufSchema.TYPE,
-                JsonSchema.TYPE -> throw NotImplementedError("LocalDependencies resolver is not yet available for $schemaType")
-                else -> throw NotImplementedError("LocalDependencies resolver is not yet available for $schemaType")
-            }
-        }
-
-    private fun parseSchemaWithoutLocalDependencies(
-        schemaPath: String,
-        schemaType: String,
-        dependencies: List<SchemaReference>,
-        subject: String
     ): ParsedSchema {
         val schemaContent = File(rootDir.toURI()).resolve(schemaPath).readText()
-        return client.parseSchema(schemaType, schemaContent, dependencies)
-            .orElseThrow { SchemaParsingException(subject, schemaType) }
+        return if (localReferences.isEmpty()) {
+            parseSchemaWithoutLocalReferences(
+                subject,
+                schemaType,
+                schemaContent,
+                references,
+            )
+        } else {
+            when (schemaType) {
+                SchemaType.AVRO -> parseAvroSchemaWithLocalReferences(
+                    subject,
+                    schemaContent,
+                    references,
+                    localReferences
+                )
+                SchemaType.PROTOBUF,
+                SchemaType.JSON -> throw NotImplementedError(
+                    "LocalReferences resolver is not yet available for $schemaType"
+                )
+            }
+        }
     }
+
+    fun parseSchemaWithoutLocalReferences(
+        subject: String,
+        schemaType: SchemaType,
+        schemaContent: String,
+        references: List<SchemaReference>,
+    ): ParsedSchema = client
+        .parseSchema(schemaType.registryType, schemaContent, references)
+        .orElseThrow { SchemaParsingException(subject, schemaType) }
 
     /**
      * Utility method that checks if the quiet logging is activated before logging.
@@ -55,17 +65,17 @@ abstract class BaseTaskAction(
         if (!quietLogging) this.info(message)
     }
 
-    private fun parseAvroSchemaWithLocalReferencies(
+    private fun parseAvroSchemaWithLocalReferences(
         subject: String,
-        schemaPath: String,
+        schemaString: String,
         dependencies: List<SchemaReference>,
         localDependencies: Map<String, String>
     ): ParsedSchema {
         val parser = Schema.Parser()
         localDependencies.mapValues { File(rootDir.toURI()).resolve(it.value) }.entries.reversed()
             .forEach { parser.parse(it.value.readText()) }
-        val parsedLocalSchema = parser.parse(File(rootDir.toURI()).resolve(schemaPath).readText())
+        val parsedLocalSchema = parser.parse(schemaString)
         return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), dependencies)
-            .orElseThrow { SchemaParsingException(subject, AvroSchema.TYPE) }
+            .orElseThrow { SchemaParsingException(subject, SchemaType.AVRO) }
     }
 }

@@ -22,7 +22,7 @@ class CompatibilityTaskAction(
         for ((subject, path, type, remoteReferences, localReferences) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
-                val parsedSchema = parseSchema(
+                val parsedSchema = parseSchemaFromFile(
                     subject,
                     path,
                     type,

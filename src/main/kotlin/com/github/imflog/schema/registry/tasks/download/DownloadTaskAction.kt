@@ -1,13 +1,10 @@
 package com.github.imflog.schema.registry.tasks.download
 
-import com.github.imflog.schema.registry.UnknownSchemaTypeException
 import com.github.imflog.schema.registry.tasks.BaseTaskAction
+import com.github.imflog.schema.registry.toSchemaType
 import com.google.common.base.Suppliers
 import io.confluent.kafka.schemaregistry.ParsedSchema
-import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import io.confluent.kafka.schemaregistry.json.JsonSchema
-import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import java.io.File
 import java.util.regex.PatternSyntaxException
 import org.gradle.api.logging.Logging
@@ -73,12 +70,11 @@ class DownloadTaskAction(
         } else {
             client.getSchemaMetadata(subject.subject, subject.version)
         }
-        return parseSchema(
+        return parseSchemaWithoutLocalReferences(
             subject.subject,
+            schemaMetadata.schemaType.toSchemaType(),
             schemaMetadata.schema,
-            schemaMetadata.schemaType,
-            schemaMetadata.references,
-            mapOf(), // No need for local reference when downloading a schema
+            schemaMetadata.references
         )
     }
 
@@ -86,18 +82,11 @@ class DownloadTaskAction(
         val outputDir = File(rootDir.toURI()).resolve(downloadSubject.outputPath)
         outputDir.mkdirs()
         val fileName = downloadSubject.outputFileName ?: downloadSubject.subject
-        val outputFile = File(outputDir, "${fileName}.${schema.extension()}")
+        val outputFile = File(outputDir, "${fileName}.${schema.schemaType().toSchemaType().extension}")
         outputFile.createNewFile()
         logger.infoIfNotQuiet("Writing file  $outputFile")
         outputFile.printWriter().use { out ->
             out.println(schema.toString())
         }
     }
-}
-
-fun ParsedSchema.extension(): String = when (val type = this.schemaType()) {
-    AvroSchema.TYPE -> "avsc"
-    ProtobufSchema.TYPE -> "proto"
-    JsonSchema.TYPE -> "json"
-    else -> throw UnknownSchemaTypeException(type)
 }

@@ -92,7 +92,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(SchemaArgumentProvider::class)
+    @ArgumentsSource(LocalSchemaArgumentProvider::class)
     fun `Should register local dependencies`(
         type: String,
         userSchema: String,
@@ -222,6 +222,83 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                     }
                     """,
                 )
+            )
+    }
+
+    private class LocalSchemaArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    AvroSchema.TYPE,
+                    """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }, 
+                            { "name": "user", "type": "User" }
+                        ]
+                    }"""
+                ),
+                // TODO: Uncomment this when the other types support local references
+//                Arguments.of(
+//                    JsonSchema.TYPE,
+//                    """{
+//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+//
+//                        "definitions": {
+//                            "User": {
+//                                "type": "object",
+//                                "properties": {
+//                                    "name": {"type": "string"}
+//                                },
+//                                "additionalProperties": false
+//                            }
+//                        }
+//                    }""",
+//                    """{
+//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+//
+//                        "definitions": {
+//                            "Player": {
+//                                "type": "object",
+//                                "properties": {
+//                                    "identifier": {"type": "string"},
+//                                    "user": {"type": "User"}
+//                                },
+//                                "additionalProperties": false
+//                            }
+//                        }
+//                    }"""
+//                ),
+//                Arguments.of(
+//                    ProtobufSchema.TYPE,
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message User {
+//                        string name = 1;
+//                    }
+//                    """,
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    import "user.proto";
+//
+//                    message Player {
+//                        string identifier = 1;
+//                        User user = 2;
+//                    }
+//                    """,
+//                )
             )
     }
 }

@@ -158,7 +158,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
     }
 
     @ParameterizedTest
-    @ArgumentsSource(SchemaSuccessArgumentProvider::class)
+    @ArgumentsSource(SchemaLocalReferenceSuccessArgumentProvider::class)
     fun `CompatibilityTask should succeed for compatible schemas with local dependencies`(
         type: String,
         userSchema: ParsedSchema,
@@ -344,6 +344,136 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
                     }
                     """
                 )
+            )
+    }
+
+    private class SchemaLocalReferenceSuccessArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    AvroSchema.TYPE,
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }"""
+                    ),
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }
+                        ]
+                    }"""
+                    ),
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" },
+                            { "name": "user", "type": ["null", "User"], "default": null}
+                        ]
+                    }"""
+                ),
+                // TODO: Uncomment this when the other types support local references
+//                Arguments.of(
+//                    JsonSchema.TYPE,
+//                    JsonSchema(
+//                        """{
+//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+//                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/user.json",
+//
+//                        "definitions": {
+//                            "User": {
+//                                "type": "object",
+//                                "properties": {
+//                                    "name": { "type": "string" }
+//                                },
+//                                "additionalProperties": false
+//                            }
+//                        },
+//                        "properties": {
+//                            "user": { "${"$"}ref": "#/definitions/User" }
+//                        }
+//                    }"""
+//                    ),
+//                    JsonSchema(
+//                        """{
+//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+//                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+//
+//                        "definitions": {
+//                            "Player": {
+//                                "type": "object",
+//                                "properties": {
+//                                    "identifier": { "type": "string" }
+//                                },
+//                                "additionalProperties": false
+//                            }
+//                        },
+//
+//                        "properties": {
+//                            "player": { "${"$"}ref": "#/definitions/Player" }
+//                        }
+//                    }"""
+//                    ),
+//                    """{
+//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+//                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+//
+//                        "definitions": {
+//                            "Player": {
+//                                "type": "object",
+//                                "properties": {
+//                                    "identifier": { "type": "string" },
+//                                    "user": { "${"$"}ref": "#user" }
+//                                },
+//                                "additionalProperties": false
+//                            }
+//                        },
+//                        "properties": {
+//                            "player": { "${"$"}ref": "#/definitions/Player" }
+//                        }
+//                    }"""
+//                ),
+//                Arguments.of(
+//                    ProtobufSchema.TYPE,
+//                    ProtobufSchema(
+//                        """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message User {
+//                        string name = 1;
+//                    }
+//                    """
+//                    ),
+//                    ProtobufSchema(
+//                        """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message Player {
+//                        string identifier = 1;
+//                    }
+//                    """
+//                    ),
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    import "user.proto";
+//
+//                    message Player {
+//                        string identifier = 1;
+//                        User user = 2;
+//                    }
+//                    """
+//                )
             )
     }
 

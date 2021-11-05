@@ -1,6 +1,5 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.providers.CustomAvroSchemaProvider
 import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
