@@ -159,7 +159,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
 
     @ParameterizedTest
     @ArgumentsSource(SchemaLocalReferenceSuccessArgumentProvider::class)
-    fun `CompatibilityTask should succeed for compatible schemas with local dependencies`(
+    fun `CompatibilityTask should succeed for compatible schemas with local references`(
         type: String,
         userSchema: ParsedSchema,
         playerSchema: ParsedSchema,

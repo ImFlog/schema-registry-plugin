@@ -93,7 +93,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
 
     @ParameterizedTest
     @ArgumentsSource(LocalSchemaArgumentProvider::class)
-    fun `Should register local dependencies`(
+    fun `Should register local references`(
         type: String,
         userSchema: String,
         playerSchema: String

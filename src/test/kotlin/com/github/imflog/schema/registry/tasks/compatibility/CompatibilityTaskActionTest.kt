@@ -32,7 +32,7 @@ class CompatibilityTaskActionTest {
     }
 
     @Test
-    fun `Should verify compatibility with no dependencies`() {
+    fun `Should verify compatibility with no references`() {
         // given
         val registryClient = MockSchemaRegistryClient()
         registryClient.register(
@@ -78,7 +78,7 @@ class CompatibilityTaskActionTest {
     }
 
     @Test
-    fun `Should verify compatibility with dependencies`() {
+    fun `Should verify compatibility with references`() {
         // given
         val registryClient = MockSchemaRegistryClient()
         registryClient.register(

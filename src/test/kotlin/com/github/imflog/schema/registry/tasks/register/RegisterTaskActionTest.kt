@@ -113,7 +113,7 @@ class RegisterTaskActionTest {
     }
 
     @Test
-    internal fun `Should register schema with dependencies`() {
+    internal fun `Should register schema with references`() {
         // given
         val registryClient =
             MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))

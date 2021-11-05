@@ -68,14 +68,14 @@ abstract class BaseTaskAction(
     private fun parseAvroSchemaWithLocalReferences(
         subject: String,
         schemaString: String,
-        dependencies: List<SchemaReference>,
-        localDependencies: Map<String, String>
+        references: List<SchemaReference>,
+        localReferences: Map<String, String>
     ): ParsedSchema {
         val parser = Schema.Parser()
-        localDependencies.mapValues { File(rootDir.toURI()).resolve(it.value) }.entries.reversed()
+        localReferences.mapValues { File(rootDir.toURI()).resolve(it.value) }.entries.reversed()
             .forEach { parser.parse(it.value.readText()) }
         val parsedLocalSchema = parser.parse(schemaString)
-        return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), dependencies)
+        return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), references)
             .orElseThrow { SchemaParsingException(subject, SchemaType.AVRO) }
     }
 }
