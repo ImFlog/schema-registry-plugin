@@ -1,9 +1,9 @@
 buildscript {
 
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
-            url = uri("http://packages.confluent.io/maven/")
+            url = uri("https://packages.confluent.io/maven/")
         }
         maven {
             url = uri("https://plugins.gradle.org/m2/")
@@ -24,6 +24,7 @@ schemaRegistry {
 
     register {
         subject("company", "schemas/avro/company.avsc")
+            .addLocalReference("address", "schemas/avro/location-address.avsc")
     }
 
     config {
@@ -36,5 +37,6 @@ schemaRegistry {
 
     compatibility {
         subject("company", "schemas/avro/company_v2.avsc")
+            .addLocalReference("address", "schemas/avro/location-address.avsc")
     }
 }

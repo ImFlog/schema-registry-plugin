@@ -5,6 +5,7 @@
   "fields": [
     {"name": "id", "type": "string"},
     {"name": "name", "type": "string"},
+    {"name": "address", "type": "Address"},
     {"name": "thumbnail_url", "type": "string" },
     {"name": "company_type", "type": {
         "type": "enum", "name": "companyTypes", "symbols": [
