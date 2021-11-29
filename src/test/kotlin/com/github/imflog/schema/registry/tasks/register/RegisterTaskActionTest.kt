@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.register
 
+import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
@@ -46,7 +47,7 @@ class RegisterTaskActionTest {
         )
 
         val subjects = listOf(
-            RegisterSubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE)
+            RegisterSubject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO)
         )
 
         // when
@@ -93,7 +94,7 @@ class RegisterTaskActionTest {
             RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE
+                SchemaType.AVRO
             )
         )
 
@@ -112,7 +113,7 @@ class RegisterTaskActionTest {
     }
 
     @Test
-    internal fun `Should register schema with dependencies`() {
+    internal fun `Should register schema with references`() {
         // given
         val registryClient =
             MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
@@ -176,7 +177,7 @@ class RegisterTaskActionTest {
             RegisterSubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE
+                SchemaType.AVRO
             )
                 .addReference("Address", "Address", 1)
                 .addReference("Street", "Street", 1)

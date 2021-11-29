@@ -108,17 +108,28 @@ A DSL is available to specify what to test:
 schemaRegistry {
     url = 'http://registry-url:8081'
     compatibility {
-        subject('avroWithDependencies', '/absolutPath/dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
-        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
-        subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
+        subject('avroWithLocalReferences', '/absolutPath/dependent/path.avsc', "AVRO")
+                .addLocalReference("localAvroSubject", "/a/local/path.avsc")
+        subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
+                .addReference('avroSubject', 'avroSubjectType', 1)
+        subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
+        subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
 }
 ```
 You have to list all the (subject, avsc file path) pairs that you want to test. 
 
-If you have dependencies with other schemas required before the compatibility check,
+If you have references with other schemas stored in the registry that are required before the compatibility check,
 you can call the `addReference("name", "subject", version)`, this will add a reference to fetch dynamically from the registry.
 The addReference calls can be chained.
+
+If you have local references to add before calling the compatibility in the registry,
+you can call the `addLocalReference("name", "/a/path")`,
+this will add a reference from a local file and inline it in the schema registry call.
+The addLocalReference calls can be chained.
+
+:warning: For now you cannot mix local and remote reference (parse order issues).
+:warning: The local reference is not yet supported for JSON and PROTOBUF.
 
 ### Register schemas
 Once again the name speaks for itself.
@@ -129,17 +140,28 @@ A DSL is available to specify what to register:
 schemaRegistry {
     url = 'http://registry-url:8081'
     register {
-        subject('avroWithDependencies', '/absolutPath/dependent/path.avsc', "AVRO").addReference('avroSubject', 'avroSubjectType', 1)
-        subject('protoWithDependencies', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
-        subject('jsonWithDependencies', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
+        subject('avroWithLocalReferences', '/absolutPath/dependent/path.avsc', "AVRO")
+                .addLocalReference("localAvroSubject", "/a/local/path.avsc")
+        subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
+                .addReference('avroSubject', 'avroSubjectType', 1)
+        subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
+        subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
 }
 ```
 You have to list all the (subject, avsc file path) pairs that you want to send.
 
-If you have dependencies with other schemas required before the compatibility check,
-you can call the `addReference("name", "subject", version)`, this will add a reference to fetch dynamically from the registry.
+If you have references to other schemas required before the register,
+you can call the `addReference("name", "subject", version)`, this will add a reference to use from the registry.
 The addReference calls can be chained.
+
+If you have local references to add before calling the register,
+you can call the `addLocalReference("name", "/a/path")`,
+this will add a reference from a local file and inline it in the schema registry call.
+The addLocalReference calls can be chained.
+
+:warning: For now you cannot mix local and remote reference (parse order issues).
+:warning: The local reference is not yet supported for JSON and PROTOBUF.
 
 ### Configure subjects
 This task sets the schema compatibility level for registered subjects.

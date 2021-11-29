@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.download
 
+import com.github.imflog.schema.registry.toSchemaType
 import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
@@ -75,7 +76,7 @@ class DownloadTaskIT : Kafka5TestContainersUtils() {
             .build()
 
         // Then
-        val schemaFile = "$subjectName.${oldSchema.extension()}"
+        val schemaFile = "$subjectName.${oldSchema.schemaType().toSchemaType().extension}"
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -131,7 +132,7 @@ class DownloadTaskIT : Kafka5TestContainersUtils() {
             .build()
 
         // Then
-        val schemaFile = "$subjectName.${oldSchema.extension()}"
+        val schemaFile = "$subjectName.${oldSchema.schemaType().toSchemaType().extension}"
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)

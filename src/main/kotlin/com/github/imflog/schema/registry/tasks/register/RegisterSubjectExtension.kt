@@ -1,5 +1,8 @@
 package com.github.imflog.schema.registry.tasks.register
 
+import com.github.imflog.schema.registry.MixedReferenceException
+import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.model.ObjectFactory
@@ -19,7 +22,7 @@ open class RegisterSubjectExtension(objects: ObjectFactory) {
         file: String,
         type: String
     ): RegisterSubject {
-        val subject = RegisterSubject(inputSubject, file, type)
+        val subject = RegisterSubject(inputSubject, file, type.toSchemaType())
         subjects.add(subject)
         return subject
     }
@@ -28,11 +31,19 @@ open class RegisterSubjectExtension(objects: ObjectFactory) {
 data class RegisterSubject(
     val inputSubject: String,
     val file: String,
-    val type: String,
-    val references: MutableList<SchemaReference> = mutableListOf()
+    val type: SchemaType,
+    val references: MutableList<SchemaReference> = mutableListOf(),
+    val localReferences: MutableMap<String, String> = mutableMapOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): RegisterSubject {
+        if (localReferences.isNotEmpty()) throw MixedReferenceException()
         references.add(SchemaReference(name, subject, version))
+        return this
+    }
+
+    fun addLocalReference(name: String, path: String): RegisterSubject {
+        if (references.isNotEmpty()) throw MixedReferenceException()
+        localReferences[name] = path
         return this
     }
 }

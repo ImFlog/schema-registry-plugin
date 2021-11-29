@@ -2,8 +2,8 @@ package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import org.gradle.api.logging.Logging
 import java.io.File
+import org.gradle.api.logging.Logging
 
 
 class RegisterTaskAction(
@@ -17,9 +17,9 @@ class RegisterTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        subjects.forEach { (subject, path, type, dependencies) ->
+        subjects.forEach { (subject, path, type, references, localReferences) ->
             try {
-                val parsedSchema = parseSchemaFromFile(path, type, dependencies)
+                val parsedSchema = parseSchemaFromFile(subject, path, type, references, localReferences)
                 logger.infoIfNotQuiet("Registering $subject (from $path)")
                 client.register(subject, parsedSchema)
             } catch (e: Exception) {

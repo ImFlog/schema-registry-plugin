@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
+import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
@@ -31,7 +32,7 @@ class CompatibilityTaskActionTest {
     }
 
     @Test
-    fun `Should verify compatibility with no dependencies`() {
+    fun `Should verify compatibility with no references`() {
         // given
         val registryClient = MockSchemaRegistryClient()
         registryClient.register(
@@ -51,7 +52,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE))
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -77,7 +78,7 @@ class CompatibilityTaskActionTest {
     }
 
     @Test
-    fun `Should verify compatibility with dependencies`() {
+    fun `Should verify compatibility with references`() {
         // given
         val registryClient = MockSchemaRegistryClient()
         registryClient.register(
@@ -144,7 +145,7 @@ class CompatibilityTaskActionTest {
             CompatibilitySubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE
+                SchemaType.AVRO
             )
                 .addReference("Address", "Address", 1)
                 .addReference("Street", "Street", 1)
@@ -183,7 +184,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", AvroSchema.TYPE))
+            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -208,7 +209,7 @@ class CompatibilityTaskActionTest {
     }
 
     @Test
-    internal fun `Should succeed if schema does not exist`() {
+    fun `Should succeed if schema does not exist`() {
         // Given
 
         val spySchemaRegistry = spyk<MockSchemaRegistryClient>()
@@ -222,7 +223,7 @@ class CompatibilityTaskActionTest {
             CompatibilitySubject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                AvroSchema.TYPE
+                SchemaType.AVRO
             )
         )
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(

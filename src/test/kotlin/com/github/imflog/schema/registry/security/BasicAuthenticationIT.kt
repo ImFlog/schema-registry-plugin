@@ -321,7 +321,7 @@ class BasicAuthenticationIT {
         }
 
         @Test
-        fun `CompatibilityTask should validate input schema with no dependencies`() {
+        fun `CompatibilityTask should validate input schema with no references`() {
             folderRule.newFolder("avro")
             val testAvsc = folderRule.newFile("avro/test.avsc")
             val schemaTest = """
@@ -473,7 +473,7 @@ class BasicAuthenticationIT {
                             .withBody("{\"id\": 1}")
                     )
             )
-            // Stub for get subject dependencies
+            // Stub for get subject reference
             val schema = Schema(
                 "testSubject1", 1, 1, AvroSchema.TYPE, listOf(), """{
                 "type":"record",
