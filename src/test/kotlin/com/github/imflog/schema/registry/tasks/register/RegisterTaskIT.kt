@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.register
 
+import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
@@ -36,32 +37,27 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
     @ParameterizedTest
     @ArgumentsSource(SchemaArgumentProvider::class)
     fun `RegisterSchemasTask should register schemas`(
-        type: String,
+        type: SchemaType,
         userSchema: String,
         playerSchema: String
     ) {
         folderRule.create()
-        folderRule.newFolder(type)
-        val subjectName = "parameterized-$type"
-        val extension = when (type) {
-            AvroSchema.TYPE -> "avsc"
-            ProtobufSchema.TYPE -> "proto"
-            JsonSchema.TYPE -> "json"
-            else -> throw Exception("Should not happen")
-        }
+        folderRule.newFolder(type.name)
+        val subjectName = "parameterized-${type.name}"
+        val extension = type.extension
 
-        val userPath = "$type/user.$extension"
+        val userPath = "${type.name}/user.$extension"
         val userSubject = "$subjectName-user-local"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema)
 
-        val playerPath = "$type/player.$extension"
+        val playerPath = "${type.name}/player.$extension"
         val playerSubject = "$subjectName-player-local"
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchema)
 
         // Small trick, for protobuf the name to import is not User but user.proto
-        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -74,8 +70,9 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 register {
-                    subject('$userSubject', '${userFile.absolutePath}', '$type')
-                    subject('$playerSubject', '$playerPath', '$type').addReference('$referenceName', '$userSubject', 1)
+                    subject('$userSubject', '${userFile.absolutePath}', '${type.name}')
+                    subject('$playerSubject', '$playerPath', '${type.name}')
+                        .addReference('$referenceName', '$userSubject', 1)
                 }
             }
         """
@@ -94,19 +91,14 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
     @ParameterizedTest
     @ArgumentsSource(LocalSchemaArgumentProvider::class)
     fun `Should register local references`(
-        type: String,
+        type: SchemaType,
         userSchema: String,
         playerSchema: String
     ) {
         folderRule.create()
-        folderRule.newFolder(type)
-        val subjectName = "parameterized-$type"
-        val extension = when (type) {
-            AvroSchema.TYPE -> "avsc"
-            ProtobufSchema.TYPE -> "proto"
-            JsonSchema.TYPE -> "json"
-            else -> throw Exception("Should not happen")
-        }
+        folderRule.newFolder(type.name)
+        val subjectName = "parameterized-${type.name}"
+        val extension = type.extension
 
         val userPath = "$type/user.$extension"
         val userFile = folderRule.newFile(userPath)
@@ -118,7 +110,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
         playerFile.writeText(playerSchema)
 
         // Small trick, for protobuf the name to import is not User but user.proto
-        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -131,7 +123,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 register {
-                    subject('$playerSubject', '$playerPath', '$type')
+                    subject('$playerSubject', '$playerPath', '${type.name}')
                         .addLocalReference('$referenceName', '$userPath')
                 }
             }
@@ -153,7 +145,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
-                    AvroSchema.TYPE,
+                    SchemaType.AVRO,
                     """{
                         "type": "record",
                         "name": "User",
@@ -171,7 +163,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                     }"""
                 ),
                 Arguments.of(
-                    JsonSchema.TYPE,
+                    SchemaType.JSON,
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
     
@@ -201,7 +193,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                     }"""
                 ),
                 Arguments.of(
-                    ProtobufSchema.TYPE,
+                    SchemaType.PROTOBUF,
                     """
                     syntax = "proto3";
                     package com.github.imflog;
@@ -229,7 +221,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
-                    AvroSchema.TYPE,
+                    SchemaType.AVRO,
                     """{
                         "type": "record",
                         "name": "User",
@@ -248,7 +240,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
                 ),
                 // TODO: Uncomment this when the other types support local references
 //                Arguments.of(
-//                    JsonSchema.TYPE,
+//                    SchemaType.JSON,
 //                    """{
 //                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
 //
@@ -278,7 +270,7 @@ class RegisterTaskIT : Kafka5TestContainersUtils() {
 //                    }"""
 //                ),
 //                Arguments.of(
-//                    ProtobufSchema.TYPE,
+//                    SchemaType.PROTOBUF,
 //                    """
 //                    syntax = "proto3";
 //                    package com.github.imflog;

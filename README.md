@@ -108,8 +108,9 @@ A DSL is available to specify what to test:
 schemaRegistry {
     url = 'http://registry-url:8081'
     compatibility {
-        subject('avroWithReferences', '/absolutPath/dependent/path.avsc', "AVRO")
+        subject('avroWithLocalReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addLocalReference("localAvroSubject", "/a/local/path.avsc")
+        subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addReference('avroSubject', 'avroSubjectType', 1)
         subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
@@ -127,6 +128,7 @@ you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
 
+:warning: For now you cannot mix local and remote reference (parse order issues).
 :warning: The local reference is not yet supported for JSON and PROTOBUF.
 
 ### Register schemas
@@ -138,8 +140,9 @@ A DSL is available to specify what to register:
 schemaRegistry {
     url = 'http://registry-url:8081'
     register {
-        subject('avroWithReferencies', '/absolutPath/dependent/path.avsc', "AVRO")
+        subject('avroWithLocalReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addLocalReference("localAvroSubject", "/a/local/path.avsc")
+        subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addReference('avroSubject', 'avroSubjectType', 1)
         subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
@@ -157,6 +160,7 @@ you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
 
+:warning: For now you cannot mix local and remote reference (parse order issues).
 :warning: The local reference is not yet supported for JSON and PROTOBUF.
 
 ### Configure subjects

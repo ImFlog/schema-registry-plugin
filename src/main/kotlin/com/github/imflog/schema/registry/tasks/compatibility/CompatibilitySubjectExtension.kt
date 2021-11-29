@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
+import com.github.imflog.schema.registry.MixedReferenceException
 import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
@@ -36,11 +37,13 @@ data class CompatibilitySubject(
     val localReferences: MutableMap<String, String> = mutableMapOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): CompatibilitySubject {
+        if (localReferences.isNotEmpty()) throw MixedReferenceException()
         references.add(SchemaReference(name, subject, version))
         return this
     }
 
     fun addLocalReference(name: String, path: String): CompatibilitySubject {
+        if (references.isNotEmpty()) throw MixedReferenceException()
         localReferences[name] = path
         return this
     }

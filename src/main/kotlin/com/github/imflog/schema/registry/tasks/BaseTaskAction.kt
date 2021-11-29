@@ -25,29 +25,13 @@ abstract class BaseTaskAction(
     ): ParsedSchema {
         val schemaContent = File(rootDir.toURI()).resolve(schemaPath).readText()
         return if (localReferences.isEmpty()) {
-            parseSchemaWithoutLocalReferences(
-                subject,
-                schemaType,
-                schemaContent,
-                references,
-            )
+            parseSchemaWithRemoteReferences(subject, schemaType, schemaContent, references)
         } else {
-            when (schemaType) {
-                SchemaType.AVRO -> parseAvroSchemaWithLocalReferences(
-                    subject,
-                    schemaContent,
-                    references,
-                    localReferences
-                )
-                SchemaType.PROTOBUF,
-                SchemaType.JSON -> throw NotImplementedError(
-                    "LocalReferences resolver is not yet available for $schemaType"
-                )
-            }
+            parseSchemaWithLocalReferences(subject, schemaType, schemaContent, localReferences)
         }
     }
 
-    fun parseSchemaWithoutLocalReferences(
+    fun parseSchemaWithRemoteReferences(
         subject: String,
         schemaType: SchemaType,
         schemaContent: String,
@@ -65,17 +49,33 @@ abstract class BaseTaskAction(
         if (!quietLogging) this.info(message)
     }
 
+    private fun parseSchemaWithLocalReferences(
+        subject: String,
+        schemaType: SchemaType,
+        schemaContent: String,
+        localReferences: Map<String, String>
+    ): ParsedSchema = when (schemaType) {
+        SchemaType.AVRO -> parseAvroSchemaWithLocalReferences(
+            subject,
+            schemaContent,
+            localReferences
+        )
+        SchemaType.PROTOBUF,
+        SchemaType.JSON -> throw NotImplementedError(
+            "LocalReferences resolver is not yet available for $schemaType"
+        )
+    }
+
     private fun parseAvroSchemaWithLocalReferences(
         subject: String,
         schemaString: String,
-        references: List<SchemaReference>,
         localReferences: Map<String, String>
     ): ParsedSchema {
         val parser = Schema.Parser()
         localReferences.mapValues { File(rootDir.toURI()).resolve(it.value) }.entries.reversed()
             .forEach { parser.parse(it.value.readText()) }
         val parsedLocalSchema = parser.parse(schemaString)
-        return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), references)
+        return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), emptyList())
             .orElseThrow { SchemaParsingException(subject, SchemaType.AVRO) }
     }
 }

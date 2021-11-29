@@ -70,7 +70,7 @@ class DownloadTaskAction(
         } else {
             client.getSchemaMetadata(subject.subject, subject.version)
         }
-        return parseSchemaWithoutLocalReferences(
+        return parseSchemaWithRemoteReferences(
             subject.subject,
             schemaMetadata.schemaType.toSchemaType(),
             schemaMetadata.schema,

@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.register
 
+import com.github.imflog.schema.registry.MixedReferenceException
 import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
@@ -35,11 +36,13 @@ data class RegisterSubject(
     val localReferences: MutableMap<String, String> = mutableMapOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): RegisterSubject {
+        if (localReferences.isNotEmpty()) throw MixedReferenceException()
         references.add(SchemaReference(name, subject, version))
         return this
     }
 
     fun addLocalReference(name: String, path: String): RegisterSubject {
+        if (references.isNotEmpty()) throw MixedReferenceException()
         localReferences[name] = path
         return this
     }

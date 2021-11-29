@@ -209,7 +209,7 @@ class CompatibilityTaskActionTest {
     }
 
     @Test
-    internal fun `Should succeed if schema does not exist`() {
+    fun `Should succeed if schema does not exist`() {
         // Given
 
         val spySchemaRegistry = spyk<MockSchemaRegistryClient>()

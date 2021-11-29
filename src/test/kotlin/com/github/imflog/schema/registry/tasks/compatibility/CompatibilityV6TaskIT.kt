@@ -1,10 +1,13 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
+import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.utils.Kafka6TestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
+import java.io.File
+import java.util.stream.Stream
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -17,8 +20,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
-import java.io.File
-import java.util.stream.Stream
 
 class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
@@ -40,25 +41,20 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
     @ParameterizedTest
     @ArgumentsSource(SchemaSuccessArgumentProvider::class)
     fun `CompatibilityTask should succeed for compatible schemas`(
-        type: String,
+        type: SchemaType,
         userSchema: ParsedSchema,
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
     ) {
         folderRule.create()
-        folderRule.newFolder(type)
+        folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-$type"
+        val subjectName = "parameterized-${type.name}"
 
         val userSubject = "$subjectName-user"
         client.register(userSubject, userSchema)
 
-        val extension = when (type) {
-            AvroSchema.TYPE -> "avsc"
-            ProtobufSchema.TYPE -> "proto"
-            JsonSchema.TYPE -> "json"
-            else -> throw Exception("Should not happen")
-        }
+        val extension = type.extension
         val playerPath = "$type/player.$extension"
         val playerSubject = "$subjectName-player"
 
@@ -68,7 +64,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
         playerFile.writeText(playerSchemaUpdated)
 
         // Small trick, for protobuf the name to import is not User but user.proto
-        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -81,7 +77,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$playerSubject', '${playerFile.absolutePath}', "$type").addReference('$referenceName', '$userSubject', 1)
+                    subject('$playerSubject', '${playerFile.absolutePath}', "${type.name}").addReference('$referenceName', '$userSubject', 1)
                 }
             }
         """
@@ -100,26 +96,20 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
     @ParameterizedTest
     @ArgumentsSource(SchemaFailureArgumentProvider::class)
     fun `CompatibilityTask should fail for incompatible schemas`(
-        type: String,
+        type: SchemaType,
         userSchema: ParsedSchema,
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
     ) {
         folderRule.create()
-        folderRule.newFolder(type)
+        folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-$type"
+        val subjectName = "parameterized-${type.name}"
 
         val userSubject = "$subjectName-user"
         client.register(userSubject, userSchema)
 
-        val extension = when (type) {
-            AvroSchema.TYPE -> "avsc"
-            ProtobufSchema.TYPE -> "proto"
-            JsonSchema.TYPE -> "json"
-            else -> throw Exception("Should not happen")
-        }
-        val playerPath = "$type/player.$extension"
+        val playerPath = "$type/player.${type.extension}"
         val playerSubject = "$subjectName-player"
 
         client.register(playerSubject, playerSchema)
@@ -128,7 +118,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
         playerFile.writeText(playerSchemaUpdated)
 
         // Small trick, for protobuf the name to import is not User but user.proto
-        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -141,7 +131,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$playerSubject', '$playerPath', "$type").addReference('$referenceName', '$userSubject', 1)
+                    subject('$playerSubject', '$playerPath', "${type.name}").addReference('$referenceName', '$userSubject', 1)
                 }
             }
         """
@@ -160,22 +150,16 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
     @ParameterizedTest
     @ArgumentsSource(SchemaLocalReferenceSuccessArgumentProvider::class)
     fun `CompatibilityTask should succeed for compatible schemas with local references`(
-        type: String,
+        type: SchemaType,
         userSchema: ParsedSchema,
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
     ) {
         folderRule.create()
-        folderRule.newFolder(type)
+        folderRule.newFolder(type.name)
 
-        val extension = when (type) {
-            AvroSchema.TYPE -> "avsc"
-            ProtobufSchema.TYPE -> "proto"
-            JsonSchema.TYPE -> "json"
-            else -> throw Exception("Should not happen")
-        }
         val subjectName = "parameterized-$type"
-        val playerPath = "$type/player.$extension"
+        val playerPath = "$type/player.${type.extension}"
         val playerSubject = "$subjectName-player"
 
         client.register(playerSubject, playerSchema)
@@ -183,12 +167,12 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchemaUpdated)
 
-        val userPath = "$type/user.$extension"
+        val userPath = "$type/user.${type.extension}"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema.canonicalString())
 
         // Small trick, for protobuf the name to import is not User but user.proto
-        val referenceName = if (type == ProtobufSchema.TYPE) "user.proto" else "User"
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -222,7 +206,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
-                    AvroSchema.TYPE,
+                    SchemaType.AVRO,
                     AvroSchema(
                         """{
                         "type": "record",
@@ -251,7 +235,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
                     }"""
                 ),
                 Arguments.of(
-                    JsonSchema.TYPE,
+                    SchemaType.JSON,
                     JsonSchema(
                         """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
@@ -311,7 +295,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
                     }"""
                 ),
                 Arguments.of(
-                    ProtobufSchema.TYPE,
+                    SchemaType.PROTOBUF,
                     ProtobufSchema(
                         """
                     syntax = "proto3";
@@ -351,7 +335,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
-                    AvroSchema.TYPE,
+                    SchemaType.AVRO,
                     AvroSchema(
                         """{
                         "type": "record",
@@ -381,7 +365,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
                 ),
                 // TODO: Uncomment this when the other types support local references
 //                Arguments.of(
-//                    JsonSchema.TYPE,
+//                    SchemaType.JSON,
 //                    JsonSchema(
 //                        """{
 //                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
@@ -441,7 +425,7 @@ class CompatibilityV6TaskIT : Kafka6TestContainersUtils() {
 //                    }"""
 //                ),
 //                Arguments.of(
-//                    ProtobufSchema.TYPE,
+//                    SchemaType.PROTOBUF,
 //                    ProtobufSchema(
 //                        """
 //                    syntax = "proto3";
