@@ -8,7 +8,6 @@ plugins {
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.19.0"
     id("maven-publish")
-    id("com.github.ben-manes.versions") version "0.39.0"
 }
 
 repositories {
