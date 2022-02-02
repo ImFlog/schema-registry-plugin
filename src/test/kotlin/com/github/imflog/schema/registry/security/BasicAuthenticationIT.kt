@@ -465,7 +465,7 @@ class BasicAuthenticationIT {
         @BeforeEach
         fun setup() {
             wireMockAuthServerItem.stubFor(
-                WireMock.post(WireMock.urlMatching("/subjects/.*/versions"))
+                WireMock.post(WireMock.urlMatching("/subjects/.*/versions\\?normalize=false"))
                     .withBasicAuth(USERNAME, PASSWORD)
                     .willReturn(
                         WireMock.aResponse()
