@@ -3,9 +3,9 @@ package com.github.imflog.schema.registry.utils
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 
-abstract class Kafka6TestContainersUtils {
+abstract class Kafka7TestContainersUtils {
 
-    companion object : KafkaHelper("6.1.0") {
+    companion object : KafkaHelper("7.2.0") {
         @JvmStatic
         @BeforeAll
         fun startContainers() {
