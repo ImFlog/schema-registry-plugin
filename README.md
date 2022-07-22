@@ -70,6 +70,23 @@ schemaRegistry {
   This can be useful if you test the compatibility of a lot of schema.
   Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
 
+#### Working with Protobuf v3
+When declaring the ```*.proto``` file, we have to configure the ```option``` values on a specific order, otherwise the
+inconsistencies arise like this.
+> http://localhost:8081/subjects/example-value/versions/1
+
+Schema registered by the Confluent's SerDes.
+
+```
+{"subject":"example-value","version":1,"id":1,"schemaType":"PROTOBUF","schema":"syntax = \"proto3\";\npackage com.example;\n\noption java_package = \"com.example.kafka.model\";\noption java_multiple_files = true;\n\nmessage Message {\n  string msg = 1;\n}\n"}
+```
+
+Schema registered by the plugin.
+
+```
+{"subject":"example-value","version":1,"id":1,"schemaType":"PROTOBUF","schema":"syntax = \"proto3\";\npackage com.example;\n\noption java_multiple_files = true;\noption java_package = \"com.example.kafka.model\";\n\nmessage Message {\n  string msg = 1;\n}\n"}
+```
+
 ### Download schemas
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
 
