@@ -230,6 +230,22 @@ We are not strictly following confluent version so if you need to change the con
 take a look at [examples/override-confluent-version](examples/override-confluent-version).
 
 ## Developing
+
+### Running tests
+In order to customize the Kafka version to run in integration tests,
+you can specify the ENV VAR KAFKA_VERSION with the version that you want to test upon.
+The library is tested with the following versions:
+* 5.5.1
+* 6.2.6
+* 7.2.1 (by default if no env_var is passed)
+
+PS: If you are running an ARM computer (like apple M1),
+you can add the `.arm64` suffix to the version to run ARM container and speed up tests.
+```bash
+KAFKA_VERSION=7.2.0.arm64 ./gradlew integrationTest
+````
+
+### Publishing locally
 In order to build the plugin locally, you can run the following commands:
 ```bash
 ./gradlew build # To compile and test the code

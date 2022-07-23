@@ -1,12 +1,7 @@
 package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.SchemaType
-import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
-import io.confluent.kafka.schemaregistry.avro.AvroSchema
-import io.confluent.kafka.schemaregistry.json.JsonSchema
-import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
-import java.io.File
-import java.util.stream.Stream
+import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -19,8 +14,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import java.io.File
+import java.util.stream.Stream
 
-class RegisterTaskIT : Kafka5TestContainersUtils() {
+class RegisterTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
 

@@ -1,11 +1,8 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.security.BasicAuthExtension
-import com.github.imflog.schema.registry.security.BasicAuthenticationIT
 import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import org.assertj.core.api.Assertions
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner

@@ -9,6 +9,9 @@ jobs:
   build:
     name: "Build"
     runs-on: "ubuntu-latest"
+    strategy:
+      matrix:
+        kafka_version: [ "5.5.1", "6.2.6", "7.2.1" ]
     steps:
       - uses: "actions/checkout@v2"
       - uses: "gradle/wrapper-validation-action@v1"
@@ -18,4 +21,6 @@ jobs:
           java-version: "8"
           cache: "gradle"
       - name: "Build with Gradle"
-        run: "./gradlew build --no-daemon"
+        env:
+          KAFKA_VERSION: ${{ matrix.kafka_version }}
+        run: "./gradlew integrationTest --stacktrace"

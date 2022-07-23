@@ -4,29 +4,30 @@ import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
-import java.io.File
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.testcontainers.containers.GenericContainer
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.utility.DockerImageName
+import java.io.File
 
-abstract class Kafka5TestContainersUtils {
+abstract class KafkaTestContainersUtils {
 
     companion object {
-        private const val DEFAULT_CONFLUENT_VERSION = "5.5.1"
-        private const val KAFKA_NETWORK_ALIAS = "kafka"
         private const val SCHEMA_REGISTRY_INTERNAL_PORT = 8081
+
+        private val CONFLUENT_VERSION = System.getenv().getOrDefault("KAFKA_VERSION", "7.2.1")
+        private val KAFKA_NETWORK_ALIAS = "kafka-${CONFLUENT_VERSION}"
 
         private val network: Network = Network.newNetwork()
         private val kafkaContainer: KafkaContainer by lazy {
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$DEFAULT_CONFLUENT_VERSION"))
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$CONFLUENT_VERSION"))
                 .withNetwork(network)
                 .withNetworkAliases(KAFKA_NETWORK_ALIAS)
         }
         val schemaRegistryContainer: GenericContainer<*> by lazy {
-            GenericContainer("confluentinc/cp-schema-registry:$DEFAULT_CONFLUENT_VERSION")
+            GenericContainer("confluentinc/cp-schema-registry:$CONFLUENT_VERSION")
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9092")
@@ -35,7 +36,7 @@ abstract class Kafka5TestContainersUtils {
 
 
         val schemaRegistrySslContainer: GenericContainer<*> by lazy {
-            GenericContainer("confluentinc/cp-schema-registry:$DEFAULT_CONFLUENT_VERSION")
+            GenericContainer("confluentinc/cp-schema-registry:$CONFLUENT_VERSION")
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
                 .withEnv("SCHEMA_REGISTRY_LISTENERS", "https://0.0.0.0:$SCHEMA_REGISTRY_INTERNAL_PORT")
@@ -54,7 +55,7 @@ abstract class Kafka5TestContainersUtils {
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_TOPIC", "_ssl_schemas")
                 .withEnv("SCHEMA_REGISTRY_SSL_CLIENT_AUTHENTICATION", "REQUIRED")
                 .withFileSystemBind(
-                    File(Kafka5TestContainersUtils::class.java.getResource("/secrets").toURI()).absolutePath,
+                    File(KafkaTestContainersUtils::class.java.getResource("/secrets").toURI()).absolutePath,
                     "/etc/schema-registry/secrets"
                 )
         }
