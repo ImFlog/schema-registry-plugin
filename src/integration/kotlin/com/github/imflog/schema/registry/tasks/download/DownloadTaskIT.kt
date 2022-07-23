@@ -1,7 +1,7 @@
 package com.github.imflog.schema.registry.tasks.download
 
 import com.github.imflog.schema.registry.toSchemaType
-import com.github.imflog.schema.registry.utils.Kafka5TestContainersUtils
+import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
@@ -22,7 +22,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
 import java.util.stream.Stream
 
-class DownloadTaskIT : Kafka5TestContainersUtils() {
+class DownloadTaskIT : KafkaTestContainersUtils() {
 
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File

@@ -16,13 +16,9 @@ repositories {
     maven("https://jitpack.io")
 }
 
-java {
-    withSourcesJar()
-}
-
 // Dependencies versions
 val kotlinVersion = "1.6.0"
-val confluentVersion = "7.0.1"
+val confluentVersion = "7.2.0"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib", kotlinVersion))
@@ -35,24 +31,6 @@ dependencies {
     implementation("io.confluent", "kafka-protobuf-provider")
 }
 
-// Test versions
-val junitVersion = "5.7.2"
-val mockkVersion = "1.11.0"
-val wiremockVersion = "2.28.1"
-val assertJVersion = "3.20.2"
-val testContainersVersion = "1.15.3"
-val awaitabilityVersion = "4.0.3"
-dependencies {
-    testImplementation(gradleTestKit())
-    testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
-    testImplementation("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
-    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
-    testImplementation("org.assertj", "assertj-core", assertJVersion)
-    testImplementation("io.mockk", "mockk", mockkVersion)
-    testImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
-    testImplementation("org.testcontainers", "kafka", testContainersVersion)
-}
-
 tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -62,12 +40,67 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
+// Unit tests
+val junitVersion = "5.7.2"
+val mockkVersion = "1.11.0"
+val assertJVersion = "3.20.2"
+val awaitabilityVersion = "4.0.3"
+dependencies {
+    testImplementation(gradleTestKit())
+    testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-engine", junitVersion)
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", junitVersion)
+    testImplementation("org.assertj", "assertj-core", assertJVersion)
+    testImplementation("io.mockk", "mockk", mockkVersion)
+}
+
 tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+// Integration tests
+val integrationSource = sourceSets.create("integration") {
+    compileClasspath += sourceSets.main.get().output
+    runtimeClasspath += sourceSets.main.get().output
+}
+
+val integrationImplementation: Configuration by configurations.getting {
+    extendsFrom(
+        configurations.implementation.get(),
+        configurations.testImplementation.get()
+    )
+}
+
+configurations["integrationImplementation"].extendsFrom(configurations.runtimeOnly.get())
+
+val wiremockVersion = "2.28.1"
+val testContainersVersion = "1.15.3"
+dependencies {
+    integrationImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
+    integrationImplementation("org.testcontainers", "kafka", testContainersVersion)
+}
+
+task<Test>("integrationTest") {
+    description = "Runs integration tests."
+    group = "verification"
+
+    testClassesDirs = sourceSets["integration"].output.classesDirs
+    classpath = sourceSets["integration"].runtimeClasspath
+
+    dependsOn("build")
+}
+
+// Publish plugin
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
 gradlePlugin {
+    testSourceSets(
+        sourceSets["test"],
+        integrationSource
+    )
     plugins {
         create("schema-registry") {
             id = registryPluginName
