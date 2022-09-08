@@ -243,37 +243,37 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                         ]
                     }"""
                 ),
+                Arguments.of(
+                    SchemaType.JSON,
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+
+                        "definitions": {
+                            "User": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {"type": "string"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }""",
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+
+                        "definitions": {
+                            "Player": {
+                                "type": "object",
+                                "properties": {
+                                    "identifier": {"type": "string"},
+                                    "user": {"type": "User"}
+                                },
+                                "additionalProperties": false
+                            }
+                        }
+                    }"""
+                ),
                 // TODO: Uncomment this when the other types support local references
-//                Arguments.of(
-//                    SchemaType.JSON,
-//                    """{
-//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-//
-//                        "definitions": {
-//                            "User": {
-//                                "type": "object",
-//                                "properties": {
-//                                    "name": {"type": "string"}
-//                                },
-//                                "additionalProperties": false
-//                            }
-//                        }
-//                    }""",
-//                    """{
-//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-//
-//                        "definitions": {
-//                            "Player": {
-//                                "type": "object",
-//                                "properties": {
-//                                    "identifier": {"type": "string"},
-//                                    "user": {"type": "User"}
-//                                },
-//                                "additionalProperties": false
-//                            }
-//                        }
-//                    }"""
-//                ),
 //                Arguments.of(
 //                    SchemaType.PROTOBUF,
 //                    """

@@ -6,9 +6,10 @@ import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+import io.confluent.kafka.schemaregistry.json.JsonSchema
+import java.io.File
 import org.apache.avro.Schema
 import org.slf4j.Logger
-import java.io.File
 
 abstract class BaseTaskAction(
     val client: SchemaRegistryClient,
@@ -60,8 +61,14 @@ abstract class BaseTaskAction(
             schemaContent,
             localReferences
         )
-        SchemaType.PROTOBUF,
-        SchemaType.JSON -> throw NotImplementedError(
+
+        SchemaType.JSON -> parseJsonSchemaWithLocalReferences(
+            subject,
+            schemaContent,
+            localReferences
+        )
+
+        SchemaType.PROTOBUF -> throw NotImplementedError(
             "LocalReferences resolver is not yet available for $schemaType"
         )
     }
@@ -77,5 +84,15 @@ abstract class BaseTaskAction(
         val parsedLocalSchema = parser.parse(schemaString)
         return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), emptyList())
             .orElseThrow { SchemaParsingException(subject, SchemaType.AVRO) }
+    }
+
+    private fun parseJsonSchemaWithLocalReferences(
+        subject: String,
+        schemaContent: String,
+        localReferences: Map<String, String>
+    ): ParsedSchema {
+        val schema = JsonSchema(schemaContent, emptyList(), localReferences, null)
+        return client.parseSchema(JsonSchema.TYPE, schema.toString(), emptyList())
+            .orElseThrow { SchemaParsingException(subject, SchemaType.JSON) }
     }
 }
