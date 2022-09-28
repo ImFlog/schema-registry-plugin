@@ -244,33 +244,29 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                     }"""
                 ),
                 Arguments.of(
+                    // TODO: definitions is for draft 4. Also we are not defining objects but definitions ...
+                    //  See https://json-schema.org/understanding-json-schema/structuring.html
                     SchemaType.JSON,
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
 
-                        "definitions": {
-                            "User": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"}
-                                },
-                                "additionalProperties": false
-                            }
-                        }
+                        "${"$"}id": "User",
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"}
+                        },
+                        "additionalProperties": false
                     }""",
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
 
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": {"type": "string"},
-                                    "user": {"type": "User"}
-                                },
-                                "additionalProperties": false
-                            }
-                        }
+                        "${"$"}id": "Player",
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "user": {"${"$"}ref": "classpath://json/user.json"}
+                        },
+                        "additionalProperties": false
                     }"""
                 ),
                 // TODO: Uncomment this when the other types support local references

@@ -8,6 +8,7 @@
       "properties": {
         "id": {"type": "string"},
         "name": {"type": "string"},
+        "address": {"$ref": "#address"},
         "thumbnail_url": {"type": "string"},
         "company_type": {"type":  "string"},
         "sectors": {

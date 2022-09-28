@@ -1,0 +1,70 @@
+NAME                COMMAND                  SERVICE             STATUS              PORTS
+broker              "/etc/confluent/dock…"   broker              running             0.0.0.0:9092->9092/tcp, 0.0.0.0:29092->29092/tcp
+schema-registry     "/etc/confluent/dock…"   schema-registry     running             0.0.0.0:8081->8081/tcp
+zookeeper           "/etc/confluent/dock…"   zookeeper           running             2888/tcp, 0.0.0.0:2181->2181/tcp, 3888/tcpname: json
+services:
+  broker:
+    container_name: broker
+    depends_on:
+      zookeeper:
+        condition: service_started
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_BROKER_ID: "1"
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: "0"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LOG4J_LOGGERS: kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    hostname: broker
+    image: confluentinc/cp-kafka:7.2.0
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 29092
+      published: "29092"
+      protocol: tcp
+    - mode: ingress
+      target: 9092
+      published: "9092"
+      protocol: tcp
+  schema-registry:
+    container_name: schema-registry
+    depends_on:
+      broker:
+        condition: service_started
+      zookeeper:
+        condition: service_started
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://broker:29092
+      SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL: zookeeper:2181
+    hostname: schema-registry
+    image: confluentinc/cp-schema-registry:7.2.0
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 8081
+      published: "8081"
+      protocol: tcp
+  zookeeper:
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    hostname: zookeeper
+    image: confluentinc/cp-zookeeper:7.2.0
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 2181
+      published: "2181"
+      protocol: tcp
+networks:
+  default:
+    name: json_default

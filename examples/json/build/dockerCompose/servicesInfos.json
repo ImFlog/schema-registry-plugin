@@ -1,0 +1,2020 @@
+{
+    "zookeeper": {
+        "firstContainer": {
+            "instanceName": "zookeeper",
+            "serviceHost": {
+                "type": "LocalHost",
+                "host": "localhost"
+            },
+            "udpPort": null,
+            "containerId": "a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe",
+            "containerHostname": "zookeeper",
+            "tcpPort": 2181,
+            "port": 2181,
+            "tcpPorts": {
+                "2181": 2181
+            },
+            "ports": {
+                "2181": 2181
+            },
+            "host": "localhost",
+            "inspection": {
+                "Id": "a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe",
+                "Created": "2022-09-08T21:56:54.713947548Z",
+                "Path": "/etc/confluent/docker/run",
+                "Args": [
+                    
+                ],
+                "State": {
+                    "Status": "running",
+                    "Running": true,
+                    "Paused": false,
+                    "Restarting": false,
+                    "OOMKilled": false,
+                    "Dead": false,
+                    "Pid": 20135,
+                    "ExitCode": 0,
+                    "Error": "",
+                    "StartedAt": "2022-09-08T21:56:55.157918923Z",
+                    "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "Image": "sha256:818e045084fd0f5db3ff455543f29fcee6db43d621e177fee1f8e967723eddd2",
+                "ResolvConfPath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/resolv.conf",
+                "HostnamePath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/hostname",
+                "HostsPath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/hosts",
+                "LogPath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe-json.log",
+                "Name": "/zookeeper",
+                "RestartCount": 0,
+                "Driver": "overlay2",
+                "Platform": "linux",
+                "MountLabel": "",
+                "ProcessLabel": "",
+                "AppArmorProfile": "",
+                "ExecIDs": null,
+                "HostConfig": {
+                    "Binds": [
+                        
+                    ],
+                    "ContainerIDFile": "",
+                    "LogConfig": {
+                        "Type": "json-file",
+                        "Config": {
+                            
+                        }
+                    },
+                    "NetworkMode": "json_default",
+                    "PortBindings": {
+                        "2181/tcp": [
+                            {
+                                "HostIp": "",
+                                "HostPort": "2181"
+                            }
+                        ]
+                    },
+                    "RestartPolicy": {
+                        "Name": "",
+                        "MaximumRetryCount": 0
+                    },
+                    "AutoRemove": false,
+                    "VolumeDriver": "",
+                    "VolumesFrom": null,
+                    "CapAdd": null,
+                    "CapDrop": null,
+                    "CgroupnsMode": "private",
+                    "Dns": null,
+                    "DnsOptions": null,
+                    "DnsSearch": null,
+                    "ExtraHosts": [
+                        
+                    ],
+                    "GroupAdd": null,
+                    "IpcMode": "private",
+                    "Cgroup": "",
+                    "Links": null,
+                    "OomScoreAdj": 0,
+                    "PidMode": "",
+                    "Privileged": false,
+                    "PublishAllPorts": false,
+                    "ReadonlyRootfs": false,
+                    "SecurityOpt": null,
+                    "UTSMode": "",
+                    "UsernsMode": "",
+                    "ShmSize": 67108864,
+                    "Runtime": "runc",
+                    "ConsoleSize": [
+                        0,
+                        0
+                    ],
+                    "Isolation": "",
+                    "CpuShares": 0,
+                    "Memory": 0,
+                    "NanoCpus": 0,
+                    "CgroupParent": "",
+                    "BlkioWeight": 0,
+                    "BlkioWeightDevice": null,
+                    "BlkioDeviceReadBps": null,
+                    "BlkioDeviceWriteBps": null,
+                    "BlkioDeviceReadIOps": null,
+                    "BlkioDeviceWriteIOps": null,
+                    "CpuPeriod": 0,
+                    "CpuQuota": 0,
+                    "CpuRealtimePeriod": 0,
+                    "CpuRealtimeRuntime": 0,
+                    "CpusetCpus": "",
+                    "CpusetMems": "",
+                    "Devices": null,
+                    "DeviceCgroupRules": null,
+                    "DeviceRequests": null,
+                    "KernelMemory": 0,
+                    "KernelMemoryTCP": 0,
+                    "MemoryReservation": 0,
+                    "MemorySwap": 0,
+                    "MemorySwappiness": null,
+                    "OomKillDisable": null,
+                    "PidsLimit": null,
+                    "Ulimits": null,
+                    "CpuCount": 0,
+                    "CpuPercent": 0,
+                    "IOMaximumIOps": 0,
+                    "IOMaximumBandwidth": 0,
+                    "MaskedPaths": [
+                        "/proc/asound",
+                        "/proc/acpi",
+                        "/proc/kcore",
+                        "/proc/keys",
+                        "/proc/latency_stats",
+                        "/proc/timer_list",
+                        "/proc/timer_stats",
+                        "/proc/sched_debug",
+                        "/proc/scsi",
+                        "/sys/firmware"
+                    ],
+                    "ReadonlyPaths": [
+                        "/proc/bus",
+                        "/proc/fs",
+                        "/proc/irq",
+                        "/proc/sys",
+                        "/proc/sysrq-trigger"
+                    ]
+                },
+                "GraphDriver": {
+                    "Data": {
+                        "LowerDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0-init/diff:/var/lib/docker/overlay2/e813c916c0f52fa3a16956f5c8aea36573d4b4f2d5b4d8ffa2682ac02918929a/diff:/var/lib/docker/overlay2/30471e10489271bc1a0b11afe7b7001d9a29782df73c051a96bb7dd572037580/diff:/var/lib/docker/overlay2/d576ca2e54486c0221d62a2f1034c3a09ab2d174524331d56cbc6276a6bd5d68/diff:/var/lib/docker/overlay2/1b9852e971319bede332ddb5b65eaabf29d775f1d8d61297747419cc735bd5b9/diff:/var/lib/docker/overlay2/c1b85cd3bd8b45eab16bd3f00ae8069c846da15e1a043e04d47fa5b2f4596d17/diff:/var/lib/docker/overlay2/2060b70d4de0cf1fdd4ca0f9f15dcafed5f8e0408e866d36a621d00502c57bc2/diff:/var/lib/docker/overlay2/8d6d042840478ff466aa0dbab78a9776f270aa072d634363cdc4ca661ec14214/diff:/var/lib/docker/overlay2/c3de15d03189bf774942d33c6b5931bcefc9d2221813cd74b64e67e6816daa77/diff:/var/lib/docker/overlay2/a87cefc808a5318727c75f0ae1430da629e704fb796f8507130cea06e3699dd0/diff:/var/lib/docker/overlay2/f1b15e4d4d89b3af92d11fc1baa9f129c0c0fc7b65daf74081b6650b015bc768/diff:/var/lib/docker/overlay2/f0f89399c687ea474306c8cc7d8feb8a439a096a9dd308c843ae6a3588626ed4/diff",
+                        "MergedDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0/merged",
+                        "UpperDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0/diff",
+                        "WorkDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0/work"
+                    },
+                    "Name": "overlay2"
+                },
+                "Mounts": [
+                    {
+                        "Type": "volume",
+                        "Name": "a56973d11aa408ebddd47e1ea0aaee5fa0f71c9760b2503602ed22d7d0469700",
+                        "Source": "/var/lib/docker/volumes/a56973d11aa408ebddd47e1ea0aaee5fa0f71c9760b2503602ed22d7d0469700/_data",
+                        "Destination": "/etc/zookeeper/secrets",
+                        "Driver": "local",
+                        "Mode": "",
+                        "RW": true,
+                        "Propagation": ""
+                    },
+                    {
+                        "Type": "volume",
+                        "Name": "875fa785d6fa36e6468f009b449c80b48252fb0133642708eb8cb39ff53f7797",
+                        "Source": "/var/lib/docker/volumes/875fa785d6fa36e6468f009b449c80b48252fb0133642708eb8cb39ff53f7797/_data",
+                        "Destination": "/var/lib/zookeeper/data",
+                        "Driver": "local",
+                        "Mode": "",
+                        "RW": true,
+                        "Propagation": ""
+                    },
+                    {
+                        "Type": "volume",
+                        "Name": "93762cf24323e2abe7c734eb18584fe15a9446865e6e8e9334e83e51ccf1ac24",
+                        "Source": "/var/lib/docker/volumes/93762cf24323e2abe7c734eb18584fe15a9446865e6e8e9334e83e51ccf1ac24/_data",
+                        "Destination": "/var/lib/zookeeper/log",
+                        "Driver": "local",
+                        "Mode": "",
+                        "RW": true,
+                        "Propagation": ""
+                    }
+                ],
+                "Config": {
+                    "Hostname": "zookeeper",
+                    "Domainname": "",
+                    "User": "appuser",
+                    "AttachStdin": false,
+                    "AttachStdout": true,
+                    "AttachStderr": true,
+                    "ExposedPorts": {
+                        "2181/tcp": {
+                            
+                        },
+                        "2888/tcp": {
+                            
+                        },
+                        "3888/tcp": {
+                            
+                        }
+                    },
+                    "Tty": false,
+                    "OpenStdin": false,
+                    "StdinOnce": false,
+                    "Env": [
+                        "ZOOKEEPER_CLIENT_PORT=2181",
+                        "ZOOKEEPER_TICK_TIME=2000",
+                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                        "container=oci",
+                        "LANG=C.UTF-8",
+                        "CUB_CLASSPATH=\"/usr/share/java/cp-base-new/*\"",
+                        "COMPONENT=zookeeper"
+                    ],
+                    "Cmd": [
+                        "/etc/confluent/docker/run"
+                    ],
+                    "Image": "confluentinc/cp-zookeeper:7.2.0",
+                    "Volumes": {
+                        "/etc/zookeeper/secrets": {
+                            
+                        },
+                        "/var/lib/zookeeper/data": {
+                            
+                        },
+                        "/var/lib/zookeeper/log": {
+                            
+                        }
+                    },
+                    "WorkingDir": "/home/appuser",
+                    "Entrypoint": null,
+                    "OnBuild": null,
+                    "Labels": {
+                        "architecture": "arm64",
+                        "build-date": "2022-06-17T04:19:24.046256",
+                        "com.docker.compose.config-hash": "e52b929a0f0dbb74762d0dbd710450fbd0bfc314d055678405138f6e60de30f5",
+                        "com.docker.compose.container-number": "1",
+                        "com.docker.compose.depends_on": "",
+                        "com.docker.compose.image": "sha256:818e045084fd0f5db3ff455543f29fcee6db43d621e177fee1f8e967723eddd2",
+                        "com.docker.compose.oneoff": "False",
+                        "com.docker.compose.project": "json",
+                        "com.docker.compose.project.config_files": "/Users/f.garcia/code/perso/schema-registry-plugin/examples/docker-compose.yml",
+                        "com.docker.compose.project.working_dir": "/Users/f.garcia/code/perso/schema-registry-plugin/examples",
+                        "com.docker.compose.service": "zookeeper",
+                        "com.docker.compose.version": "2.10.2",
+                        "com.redhat.build-host": "arm-003.osbs.prod.upshift.rdu2.redhat.com",
+                        "com.redhat.component": "ubi8-minimal-container",
+                        "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+                        "description": "ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.",
+                        "distribution-scope": "public",
+                        "io.confluent.docker": "true",
+                        "io.confluent.docker.build.number": "2",
+                        "io.confluent.docker.git.id": "83305f9e",
+                        "io.confluent.docker.git.repo": "confluentinc/kafka-images",
+                        "io.k8s.description": "The Universal Base Image Minimal is a stripped down image that uses microdnf as a package manager. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+                        "io.k8s.display-name": "Red Hat Universal Base Image 8 Minimal",
+                        "io.openshift.expose-services": "",
+                        "io.openshift.tags": "minimal rhel8",
+                        "maintainer": "partner-support@confluent.io",
+                        "name": "cp-zookeeper",
+                        "release": "7.2.0",
+                        "summary": "ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.",
+                        "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8-minimal/images/8.6-854",
+                        "vcs-ref": "50293e4ba66ca2194d8ee5a149a665cb9a375c71",
+                        "vcs-type": "git",
+                        "vendor": "Confluent",
+                        "version": "83305f9e"
+                    }
+                },
+                "NetworkSettings": {
+                    "Bridge": "",
+                    "SandboxID": "2c8fb6bd8abb22760163c7fd0004d965d24b1426f0cc1fa1bd553d7deab05f98",
+                    "HairpinMode": false,
+                    "LinkLocalIPv6Address": "",
+                    "LinkLocalIPv6PrefixLen": 0,
+                    "Ports": {
+                        "2181/tcp": [
+                            {
+                                "HostIp": "0.0.0.0",
+                                "HostPort": "2181"
+                            }
+                        ],
+                        "2888/tcp": null,
+                        "3888/tcp": null
+                    },
+                    "SandboxKey": "/var/run/docker/netns/2c8fb6bd8abb",
+                    "SecondaryIPAddresses": null,
+                    "SecondaryIPv6Addresses": null,
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "MacAddress": "",
+                    "Networks": {
+                        "json_default": {
+                            "IPAMConfig": null,
+                            "Links": null,
+                            "Aliases": [
+                                "zookeeper",
+                                "zookeeper",
+                                "a578f38715d1"
+                            ],
+                            "NetworkID": "30a033bbafb3a45d533698ab46b2771488fb52d20afa98fcdd62a5a214fb56d7",
+                            "EndpointID": "a1a6a7847675dbfb00b7684a57babf8721c3599e0500de3f89f52a8e7f26b774",
+                            "Gateway": "172.28.0.1",
+                            "IPAddress": "172.28.0.2",
+                            "IPPrefixLen": 16,
+                            "IPv6Gateway": "",
+                            "GlobalIPv6Address": "",
+                            "GlobalIPv6PrefixLen": 0,
+                            "MacAddress": "02:42:ac:1c:00:02",
+                            "DriverOpts": null
+                        }
+                    }
+                }
+            },
+            "udpPorts": {
+                
+            }
+        },
+        "udpPort": null,
+        "tcpPorts": {
+            "2181": 2181
+        },
+        "tcpPort": 2181,
+        "port": 2181,
+        "ports": {
+            "2181": 2181
+        },
+        "host": "localhost",
+        "containerInfos": {
+            "zookeeper": {
+                "instanceName": "zookeeper",
+                "serviceHost": {
+                    "type": "LocalHost",
+                    "host": "localhost"
+                },
+                "udpPort": null,
+                "containerId": "a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe",
+                "containerHostname": "zookeeper",
+                "tcpPort": 2181,
+                "port": 2181,
+                "tcpPorts": {
+                    "2181": 2181
+                },
+                "ports": {
+                    "2181": 2181
+                },
+                "host": "localhost",
+                "inspection": {
+                    "Id": "a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe",
+                    "Created": "2022-09-08T21:56:54.713947548Z",
+                    "Path": "/etc/confluent/docker/run",
+                    "Args": [
+                        
+                    ],
+                    "State": {
+                        "Status": "running",
+                        "Running": true,
+                        "Paused": false,
+                        "Restarting": false,
+                        "OOMKilled": false,
+                        "Dead": false,
+                        "Pid": 20135,
+                        "ExitCode": 0,
+                        "Error": "",
+                        "StartedAt": "2022-09-08T21:56:55.157918923Z",
+                        "FinishedAt": "0001-01-01T00:00:00Z"
+                    },
+                    "Image": "sha256:818e045084fd0f5db3ff455543f29fcee6db43d621e177fee1f8e967723eddd2",
+                    "ResolvConfPath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/resolv.conf",
+                    "HostnamePath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/hostname",
+                    "HostsPath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/hosts",
+                    "LogPath": "/var/lib/docker/containers/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe/a578f38715d15e089c294880406a51f5eeff630b3486ac4d4ca8271279de82fe-json.log",
+                    "Name": "/zookeeper",
+                    "RestartCount": 0,
+                    "Driver": "overlay2",
+                    "Platform": "linux",
+                    "MountLabel": "",
+                    "ProcessLabel": "",
+                    "AppArmorProfile": "",
+                    "ExecIDs": null,
+                    "HostConfig": {
+                        "Binds": [
+                            
+                        ],
+                        "ContainerIDFile": "",
+                        "LogConfig": {
+                            "Type": "json-file",
+                            "Config": {
+                                
+                            }
+                        },
+                        "NetworkMode": "json_default",
+                        "PortBindings": {
+                            "2181/tcp": [
+                                {
+                                    "HostIp": "",
+                                    "HostPort": "2181"
+                                }
+                            ]
+                        },
+                        "RestartPolicy": {
+                            "Name": "",
+                            "MaximumRetryCount": 0
+                        },
+                        "AutoRemove": false,
+                        "VolumeDriver": "",
+                        "VolumesFrom": null,
+                        "CapAdd": null,
+                        "CapDrop": null,
+                        "CgroupnsMode": "private",
+                        "Dns": null,
+                        "DnsOptions": null,
+                        "DnsSearch": null,
+                        "ExtraHosts": [
+                            
+                        ],
+                        "GroupAdd": null,
+                        "IpcMode": "private",
+                        "Cgroup": "",
+                        "Links": null,
+                        "OomScoreAdj": 0,
+                        "PidMode": "",
+                        "Privileged": false,
+                        "PublishAllPorts": false,
+                        "ReadonlyRootfs": false,
+                        "SecurityOpt": null,
+                        "UTSMode": "",
+                        "UsernsMode": "",
+                        "ShmSize": 67108864,
+                        "Runtime": "runc",
+                        "ConsoleSize": [
+                            0,
+                            0
+                        ],
+                        "Isolation": "",
+                        "CpuShares": 0,
+                        "Memory": 0,
+                        "NanoCpus": 0,
+                        "CgroupParent": "",
+                        "BlkioWeight": 0,
+                        "BlkioWeightDevice": null,
+                        "BlkioDeviceReadBps": null,
+                        "BlkioDeviceWriteBps": null,
+                        "BlkioDeviceReadIOps": null,
+                        "BlkioDeviceWriteIOps": null,
+                        "CpuPeriod": 0,
+                        "CpuQuota": 0,
+                        "CpuRealtimePeriod": 0,
+                        "CpuRealtimeRuntime": 0,
+                        "CpusetCpus": "",
+                        "CpusetMems": "",
+                        "Devices": null,
+                        "DeviceCgroupRules": null,
+                        "DeviceRequests": null,
+                        "KernelMemory": 0,
+                        "KernelMemoryTCP": 0,
+                        "MemoryReservation": 0,
+                        "MemorySwap": 0,
+                        "MemorySwappiness": null,
+                        "OomKillDisable": null,
+                        "PidsLimit": null,
+                        "Ulimits": null,
+                        "CpuCount": 0,
+                        "CpuPercent": 0,
+                        "IOMaximumIOps": 0,
+                        "IOMaximumBandwidth": 0,
+                        "MaskedPaths": [
+                            "/proc/asound",
+                            "/proc/acpi",
+                            "/proc/kcore",
+                            "/proc/keys",
+                            "/proc/latency_stats",
+                            "/proc/timer_list",
+                            "/proc/timer_stats",
+                            "/proc/sched_debug",
+                            "/proc/scsi",
+                            "/sys/firmware"
+                        ],
+                        "ReadonlyPaths": [
+                            "/proc/bus",
+                            "/proc/fs",
+                            "/proc/irq",
+                            "/proc/sys",
+                            "/proc/sysrq-trigger"
+                        ]
+                    },
+                    "GraphDriver": {
+                        "Data": {
+                            "LowerDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0-init/diff:/var/lib/docker/overlay2/e813c916c0f52fa3a16956f5c8aea36573d4b4f2d5b4d8ffa2682ac02918929a/diff:/var/lib/docker/overlay2/30471e10489271bc1a0b11afe7b7001d9a29782df73c051a96bb7dd572037580/diff:/var/lib/docker/overlay2/d576ca2e54486c0221d62a2f1034c3a09ab2d174524331d56cbc6276a6bd5d68/diff:/var/lib/docker/overlay2/1b9852e971319bede332ddb5b65eaabf29d775f1d8d61297747419cc735bd5b9/diff:/var/lib/docker/overlay2/c1b85cd3bd8b45eab16bd3f00ae8069c846da15e1a043e04d47fa5b2f4596d17/diff:/var/lib/docker/overlay2/2060b70d4de0cf1fdd4ca0f9f15dcafed5f8e0408e866d36a621d00502c57bc2/diff:/var/lib/docker/overlay2/8d6d042840478ff466aa0dbab78a9776f270aa072d634363cdc4ca661ec14214/diff:/var/lib/docker/overlay2/c3de15d03189bf774942d33c6b5931bcefc9d2221813cd74b64e67e6816daa77/diff:/var/lib/docker/overlay2/a87cefc808a5318727c75f0ae1430da629e704fb796f8507130cea06e3699dd0/diff:/var/lib/docker/overlay2/f1b15e4d4d89b3af92d11fc1baa9f129c0c0fc7b65daf74081b6650b015bc768/diff:/var/lib/docker/overlay2/f0f89399c687ea474306c8cc7d8feb8a439a096a9dd308c843ae6a3588626ed4/diff",
+                            "MergedDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0/merged",
+                            "UpperDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0/diff",
+                            "WorkDir": "/var/lib/docker/overlay2/0218651a6fa20e4a993536c54c2d3486df62d8279b52818e0aafb99329632fc0/work"
+                        },
+                        "Name": "overlay2"
+                    },
+                    "Mounts": [
+                        {
+                            "Type": "volume",
+                            "Name": "a56973d11aa408ebddd47e1ea0aaee5fa0f71c9760b2503602ed22d7d0469700",
+                            "Source": "/var/lib/docker/volumes/a56973d11aa408ebddd47e1ea0aaee5fa0f71c9760b2503602ed22d7d0469700/_data",
+                            "Destination": "/etc/zookeeper/secrets",
+                            "Driver": "local",
+                            "Mode": "",
+                            "RW": true,
+                            "Propagation": ""
+                        },
+                        {
+                            "Type": "volume",
+                            "Name": "875fa785d6fa36e6468f009b449c80b48252fb0133642708eb8cb39ff53f7797",
+                            "Source": "/var/lib/docker/volumes/875fa785d6fa36e6468f009b449c80b48252fb0133642708eb8cb39ff53f7797/_data",
+                            "Destination": "/var/lib/zookeeper/data",
+                            "Driver": "local",
+                            "Mode": "",
+                            "RW": true,
+                            "Propagation": ""
+                        },
+                        {
+                            "Type": "volume",
+                            "Name": "93762cf24323e2abe7c734eb18584fe15a9446865e6e8e9334e83e51ccf1ac24",
+                            "Source": "/var/lib/docker/volumes/93762cf24323e2abe7c734eb18584fe15a9446865e6e8e9334e83e51ccf1ac24/_data",
+                            "Destination": "/var/lib/zookeeper/log",
+                            "Driver": "local",
+                            "Mode": "",
+                            "RW": true,
+                            "Propagation": ""
+                        }
+                    ],
+                    "Config": {
+                        "Hostname": "zookeeper",
+                        "Domainname": "",
+                        "User": "appuser",
+                        "AttachStdin": false,
+                        "AttachStdout": true,
+                        "AttachStderr": true,
+                        "ExposedPorts": {
+                            "2181/tcp": {
+                                
+                            },
+                            "2888/tcp": {
+                                
+                            },
+                            "3888/tcp": {
+                                
+                            }
+                        },
+                        "Tty": false,
+                        "OpenStdin": false,
+                        "StdinOnce": false,
+                        "Env": [
+                            "ZOOKEEPER_CLIENT_PORT=2181",
+                            "ZOOKEEPER_TICK_TIME=2000",
+                            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                            "container=oci",
+                            "LANG=C.UTF-8",
+                            "CUB_CLASSPATH=\"/usr/share/java/cp-base-new/*\"",
+                            "COMPONENT=zookeeper"
+                        ],
+                        "Cmd": [
+                            "/etc/confluent/docker/run"
+                        ],
+                        "Image": "confluentinc/cp-zookeeper:7.2.0",
+                        "Volumes": {
+                            "/etc/zookeeper/secrets": {
+                                
+                            },
+                            "/var/lib/zookeeper/data": {
+                                
+                            },
+                            "/var/lib/zookeeper/log": {
+                                
+                            }
+                        },
+                        "WorkingDir": "/home/appuser",
+                        "Entrypoint": null,
+                        "OnBuild": null,
+                        "Labels": {
+                            "architecture": "arm64",
+                            "build-date": "2022-06-17T04:19:24.046256",
+                            "com.docker.compose.config-hash": "e52b929a0f0dbb74762d0dbd710450fbd0bfc314d055678405138f6e60de30f5",
+                            "com.docker.compose.container-number": "1",
+                            "com.docker.compose.depends_on": "",
+                            "com.docker.compose.image": "sha256:818e045084fd0f5db3ff455543f29fcee6db43d621e177fee1f8e967723eddd2",
+                            "com.docker.compose.oneoff": "False",
+                            "com.docker.compose.project": "json",
+                            "com.docker.compose.project.config_files": "/Users/f.garcia/code/perso/schema-registry-plugin/examples/docker-compose.yml",
+                            "com.docker.compose.project.working_dir": "/Users/f.garcia/code/perso/schema-registry-plugin/examples",
+                            "com.docker.compose.service": "zookeeper",
+                            "com.docker.compose.version": "2.10.2",
+                            "com.redhat.build-host": "arm-003.osbs.prod.upshift.rdu2.redhat.com",
+                            "com.redhat.component": "ubi8-minimal-container",
+                            "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+                            "description": "ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.",
+                            "distribution-scope": "public",
+                            "io.confluent.docker": "true",
+                            "io.confluent.docker.build.number": "2",
+                            "io.confluent.docker.git.id": "83305f9e",
+                            "io.confluent.docker.git.repo": "confluentinc/kafka-images",
+                            "io.k8s.description": "The Universal Base Image Minimal is a stripped down image that uses microdnf as a package manager. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+                            "io.k8s.display-name": "Red Hat Universal Base Image 8 Minimal",
+                            "io.openshift.expose-services": "",
+                            "io.openshift.tags": "minimal rhel8",
+                            "maintainer": "partner-support@confluent.io",
+                            "name": "cp-zookeeper",
+                            "release": "7.2.0",
+                            "summary": "ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services.",
+                            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8-minimal/images/8.6-854",
+                            "vcs-ref": "50293e4ba66ca2194d8ee5a149a665cb9a375c71",
+                            "vcs-type": "git",
+                            "vendor": "Confluent",
+                            "version": "83305f9e"
+                        }
+                    },
+                    "NetworkSettings": {
+                        "Bridge": "",
+                        "SandboxID": "2c8fb6bd8abb22760163c7fd0004d965d24b1426f0cc1fa1bd553d7deab05f98",
+                        "HairpinMode": false,
+                        "LinkLocalIPv6Address": "",
+                        "LinkLocalIPv6PrefixLen": 0,
+                        "Ports": {
+                            "2181/tcp": [
+                                {
+                                    "HostIp": "0.0.0.0",
+                                    "HostPort": "2181"
+                                }
+                            ],
+                            "2888/tcp": null,
+                            "3888/tcp": null
+                        },
+                        "SandboxKey": "/var/run/docker/netns/2c8fb6bd8abb",
+                        "SecondaryIPAddresses": null,
+                        "SecondaryIPv6Addresses": null,
+                        "EndpointID": "",
+                        "Gateway": "",
+                        "GlobalIPv6Address": "",
+                        "GlobalIPv6PrefixLen": 0,
+                        "IPAddress": "",
+                        "IPPrefixLen": 0,
+                        "IPv6Gateway": "",
+                        "MacAddress": "",
+                        "Networks": {
+                            "json_default": {
+                                "IPAMConfig": null,
+                                "Links": null,
+                                "Aliases": [
+                                    "zookeeper",
+                                    "zookeeper",
+                                    "a578f38715d1"
+                                ],
+                                "NetworkID": "30a033bbafb3a45d533698ab46b2771488fb52d20afa98fcdd62a5a214fb56d7",
+                                "EndpointID": "a1a6a7847675dbfb00b7684a57babf8721c3599e0500de3f89f52a8e7f26b774",
+                                "Gateway": "172.28.0.1",
+                                "IPAddress": "172.28.0.2",
+                                "IPPrefixLen": 16,
+                                "IPv6Gateway": "",
+                                "GlobalIPv6Address": "",
+                                "GlobalIPv6PrefixLen": 0,
+                                "MacAddress": "02:42:ac:1c:00:02",
+                                "DriverOpts": null
+                            }
+                        }
+                    }
+                },
+                "udpPorts": {
+                    
+                }
+            }
+        },
+        "udpPorts": {
+            
+        },
+        "name": "zookeeper"
+    },
+    "broker": {
+        "firstContainer": {
+            "instanceName": "broker",
+            "serviceHost": {
+                "type": "LocalHost",
+                "host": "localhost"
+            },
+            "udpPort": null,
+            "containerId": "0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572",
+            "containerHostname": "broker",
+            "tcpPort": 29092,
+            "port": 29092,
+            "tcpPorts": {
+                "29092": 29092,
+                "9092": 9092
+            },
+            "ports": {
+                "29092": 29092,
+                "9092": 9092
+            },
+            "host": "localhost",
+            "inspection": {
+                "Id": "0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572",
+                "Created": "2022-09-08T21:56:54.763299256Z",
+                "Path": "/etc/confluent/docker/run",
+                "Args": [
+                    
+                ],
+                "State": {
+                    "Status": "running",
+                    "Running": true,
+                    "Paused": false,
+                    "Restarting": false,
+                    "OOMKilled": false,
+                    "Dead": false,
+                    "Pid": 20241,
+                    "ExitCode": 0,
+                    "Error": "",
+                    "StartedAt": "2022-09-08T21:56:55.392445756Z",
+                    "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "Image": "sha256:d1bca2d9ce2a7e05018b87ba8edf571d585ad0fdf4b16491cfe05f8ee2d2711a",
+                "ResolvConfPath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/resolv.conf",
+                "HostnamePath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/hostname",
+                "HostsPath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/hosts",
+                "LogPath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572-json.log",
+                "Name": "/broker",
+                "RestartCount": 0,
+                "Driver": "overlay2",
+                "Platform": "linux",
+                "MountLabel": "",
+                "ProcessLabel": "",
+                "AppArmorProfile": "",
+                "ExecIDs": null,
+                "HostConfig": {
+                    "Binds": [
+                        
+                    ],
+                    "ContainerIDFile": "",
+                    "LogConfig": {
+                        "Type": "json-file",
+                        "Config": {
+                            
+                        }
+                    },
+                    "NetworkMode": "json_default",
+                    "PortBindings": {
+                        "29092/tcp": [
+                            {
+                                "HostIp": "",
+                                "HostPort": "29092"
+                            }
+                        ],
+                        "9092/tcp": [
+                            {
+                                "HostIp": "",
+                                "HostPort": "9092"
+                            }
+                        ]
+                    },
+                    "RestartPolicy": {
+                        "Name": "",
+                        "MaximumRetryCount": 0
+                    },
+                    "AutoRemove": false,
+                    "VolumeDriver": "",
+                    "VolumesFrom": null,
+                    "CapAdd": null,
+                    "CapDrop": null,
+                    "CgroupnsMode": "private",
+                    "Dns": null,
+                    "DnsOptions": null,
+                    "DnsSearch": null,
+                    "ExtraHosts": [
+                        
+                    ],
+                    "GroupAdd": null,
+                    "IpcMode": "private",
+                    "Cgroup": "",
+                    "Links": null,
+                    "OomScoreAdj": 0,
+                    "PidMode": "",
+                    "Privileged": false,
+                    "PublishAllPorts": false,
+                    "ReadonlyRootfs": false,
+                    "SecurityOpt": null,
+                    "UTSMode": "",
+                    "UsernsMode": "",
+                    "ShmSize": 67108864,
+                    "Runtime": "runc",
+                    "ConsoleSize": [
+                        0,
+                        0
+                    ],
+                    "Isolation": "",
+                    "CpuShares": 0,
+                    "Memory": 0,
+                    "NanoCpus": 0,
+                    "CgroupParent": "",
+                    "BlkioWeight": 0,
+                    "BlkioWeightDevice": null,
+                    "BlkioDeviceReadBps": null,
+                    "BlkioDeviceWriteBps": null,
+                    "BlkioDeviceReadIOps": null,
+                    "BlkioDeviceWriteIOps": null,
+                    "CpuPeriod": 0,
+                    "CpuQuota": 0,
+                    "CpuRealtimePeriod": 0,
+                    "CpuRealtimeRuntime": 0,
+                    "CpusetCpus": "",
+                    "CpusetMems": "",
+                    "Devices": null,
+                    "DeviceCgroupRules": null,
+                    "DeviceRequests": null,
+                    "KernelMemory": 0,
+                    "KernelMemoryTCP": 0,
+                    "MemoryReservation": 0,
+                    "MemorySwap": 0,
+                    "MemorySwappiness": null,
+                    "OomKillDisable": null,
+                    "PidsLimit": null,
+                    "Ulimits": null,
+                    "CpuCount": 0,
+                    "CpuPercent": 0,
+                    "IOMaximumIOps": 0,
+                    "IOMaximumBandwidth": 0,
+                    "MaskedPaths": [
+                        "/proc/asound",
+                        "/proc/acpi",
+                        "/proc/kcore",
+                        "/proc/keys",
+                        "/proc/latency_stats",
+                        "/proc/timer_list",
+                        "/proc/timer_stats",
+                        "/proc/sched_debug",
+                        "/proc/scsi",
+                        "/sys/firmware"
+                    ],
+                    "ReadonlyPaths": [
+                        "/proc/bus",
+                        "/proc/fs",
+                        "/proc/irq",
+                        "/proc/sys",
+                        "/proc/sysrq-trigger"
+                    ]
+                },
+                "GraphDriver": {
+                    "Data": {
+                        "LowerDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228-init/diff:/var/lib/docker/overlay2/ae6aa03c94d6deb8c5ed05c592cce7dcc3f083106996a8759d76073071da6f15/diff:/var/lib/docker/overlay2/7130fbb9d0d858862dc84839ddc6149199b4315d9233f007bc9004cd88a5cb00/diff:/var/lib/docker/overlay2/d576ca2e54486c0221d62a2f1034c3a09ab2d174524331d56cbc6276a6bd5d68/diff:/var/lib/docker/overlay2/1b9852e971319bede332ddb5b65eaabf29d775f1d8d61297747419cc735bd5b9/diff:/var/lib/docker/overlay2/c1b85cd3bd8b45eab16bd3f00ae8069c846da15e1a043e04d47fa5b2f4596d17/diff:/var/lib/docker/overlay2/2060b70d4de0cf1fdd4ca0f9f15dcafed5f8e0408e866d36a621d00502c57bc2/diff:/var/lib/docker/overlay2/8d6d042840478ff466aa0dbab78a9776f270aa072d634363cdc4ca661ec14214/diff:/var/lib/docker/overlay2/c3de15d03189bf774942d33c6b5931bcefc9d2221813cd74b64e67e6816daa77/diff:/var/lib/docker/overlay2/a87cefc808a5318727c75f0ae1430da629e704fb796f8507130cea06e3699dd0/diff:/var/lib/docker/overlay2/f1b15e4d4d89b3af92d11fc1baa9f129c0c0fc7b65daf74081b6650b015bc768/diff:/var/lib/docker/overlay2/f0f89399c687ea474306c8cc7d8feb8a439a096a9dd308c843ae6a3588626ed4/diff",
+                        "MergedDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228/merged",
+                        "UpperDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228/diff",
+                        "WorkDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228/work"
+                    },
+                    "Name": "overlay2"
+                },
+                "Mounts": [
+                    {
+                        "Type": "volume",
+                        "Name": "05d2c0148573c2e785bca296e0e21ecfe76278e12ed04d6c4d99b9e0a1a1fd44",
+                        "Source": "/var/lib/docker/volumes/05d2c0148573c2e785bca296e0e21ecfe76278e12ed04d6c4d99b9e0a1a1fd44/_data",
+                        "Destination": "/etc/kafka/secrets",
+                        "Driver": "local",
+                        "Mode": "",
+                        "RW": true,
+                        "Propagation": ""
+                    },
+                    {
+                        "Type": "volume",
+                        "Name": "a6858948a46566204feb1a206be94424bdd776eea1001443a62631d17a05286b",
+                        "Source": "/var/lib/docker/volumes/a6858948a46566204feb1a206be94424bdd776eea1001443a62631d17a05286b/_data",
+                        "Destination": "/var/lib/kafka/data",
+                        "Driver": "local",
+                        "Mode": "",
+                        "RW": true,
+                        "Propagation": ""
+                    }
+                ],
+                "Config": {
+                    "Hostname": "broker",
+                    "Domainname": "",
+                    "User": "appuser",
+                    "AttachStdin": false,
+                    "AttachStdout": true,
+                    "AttachStderr": true,
+                    "ExposedPorts": {
+                        "29092/tcp": {
+                            
+                        },
+                        "9092/tcp": {
+                            
+                        }
+                    },
+                    "Tty": false,
+                    "OpenStdin": false,
+                    "StdinOnce": false,
+                    "Env": [
+                        "KAFKA_BROKER_ID=1",
+                        "KAFKA_LOG4J_LOGGERS=kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO",
+                        "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092",
+                        "KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
+                        "KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
+                        "KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
+                        "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
+                        "KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
+                        "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
+                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                        "container=oci",
+                        "LANG=C.UTF-8",
+                        "CUB_CLASSPATH=\"/usr/share/java/cp-base-new/*\"",
+                        "COMPONENT=kafka"
+                    ],
+                    "Cmd": [
+                        "/etc/confluent/docker/run"
+                    ],
+                    "Image": "confluentinc/cp-kafka:7.2.0",
+                    "Volumes": {
+                        "/etc/kafka/secrets": {
+                            
+                        },
+                        "/var/lib/kafka/data": {
+                            
+                        }
+                    },
+                    "WorkingDir": "/home/appuser",
+                    "Entrypoint": null,
+                    "OnBuild": null,
+                    "Labels": {
+                        "architecture": "arm64",
+                        "build-date": "2022-06-17T04:19:24.046256",
+                        "com.docker.compose.config-hash": "20dcc96957eaa7503ec361d7ba6d34aa4fde63cbd213a7403760e583df56a664",
+                        "com.docker.compose.container-number": "1",
+                        "com.docker.compose.depends_on": "zookeeper:service_started",
+                        "com.docker.compose.image": "sha256:d1bca2d9ce2a7e05018b87ba8edf571d585ad0fdf4b16491cfe05f8ee2d2711a",
+                        "com.docker.compose.oneoff": "False",
+                        "com.docker.compose.project": "json",
+                        "com.docker.compose.project.config_files": "/Users/f.garcia/code/perso/schema-registry-plugin/examples/docker-compose.yml",
+                        "com.docker.compose.project.working_dir": "/Users/f.garcia/code/perso/schema-registry-plugin/examples",
+                        "com.docker.compose.service": "broker",
+                        "com.docker.compose.version": "2.10.2",
+                        "com.redhat.build-host": "arm-003.osbs.prod.upshift.rdu2.redhat.com",
+                        "com.redhat.component": "ubi8-minimal-container",
+                        "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+                        "description": "Common base image for Confluent's Docker images.",
+                        "distribution-scope": "public",
+                        "io.confluent.docker": "true",
+                        "io.confluent.docker.build.number": "2",
+                        "io.confluent.docker.git.id": "83305f9e",
+                        "io.confluent.docker.git.repo": "confluentinc/kafka-images",
+                        "io.k8s.description": "The Universal Base Image Minimal is a stripped down image that uses microdnf as a package manager. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+                        "io.k8s.display-name": "Red Hat Universal Base Image 8 Minimal",
+                        "io.openshift.expose-services": "",
+                        "io.openshift.tags": "minimal rhel8",
+                        "maintainer": "partner-support@confluent.io",
+                        "name": "cp-kafka",
+                        "release": "7.2.0",
+                        "summary": "Confluent platform Kafka.",
+                        "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8-minimal/images/8.6-854",
+                        "vcs-ref": "50293e4ba66ca2194d8ee5a149a665cb9a375c71",
+                        "vcs-type": "git",
+                        "vendor": "Confluent",
+                        "version": "83305f9e"
+                    }
+                },
+                "NetworkSettings": {
+                    "Bridge": "",
+                    "SandboxID": "7c9980fde975c9c466387c3f501a74f133ba8d1ec4bd6e3cd642f320c04a94e2",
+                    "HairpinMode": false,
+                    "LinkLocalIPv6Address": "",
+                    "LinkLocalIPv6PrefixLen": 0,
+                    "Ports": {
+                        "29092/tcp": [
+                            {
+                                "HostIp": "0.0.0.0",
+                                "HostPort": "29092"
+                            }
+                        ],
+                        "9092/tcp": [
+                            {
+                                "HostIp": "0.0.0.0",
+                                "HostPort": "9092"
+                            }
+                        ]
+                    },
+                    "SandboxKey": "/var/run/docker/netns/7c9980fde975",
+                    "SecondaryIPAddresses": null,
+                    "SecondaryIPv6Addresses": null,
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "MacAddress": "",
+                    "Networks": {
+                        "json_default": {
+                            "IPAMConfig": null,
+                            "Links": null,
+                            "Aliases": [
+                                "broker",
+                                "broker",
+                                "0555f006dc52"
+                            ],
+                            "NetworkID": "30a033bbafb3a45d533698ab46b2771488fb52d20afa98fcdd62a5a214fb56d7",
+                            "EndpointID": "9e48a256df48624c8bf2a9007531459252e32bc54526b15d164bd80e1660b720",
+                            "Gateway": "172.28.0.1",
+                            "IPAddress": "172.28.0.3",
+                            "IPPrefixLen": 16,
+                            "IPv6Gateway": "",
+                            "GlobalIPv6Address": "",
+                            "GlobalIPv6PrefixLen": 0,
+                            "MacAddress": "02:42:ac:1c:00:03",
+                            "DriverOpts": null
+                        }
+                    }
+                }
+            },
+            "udpPorts": {
+                
+            }
+        },
+        "udpPort": null,
+        "tcpPorts": {
+            "29092": 29092,
+            "9092": 9092
+        },
+        "tcpPort": 29092,
+        "port": 29092,
+        "ports": {
+            "29092": 29092,
+            "9092": 9092
+        },
+        "host": "localhost",
+        "containerInfos": {
+            "broker": {
+                "instanceName": "broker",
+                "serviceHost": {
+                    "type": "LocalHost",
+                    "host": "localhost"
+                },
+                "udpPort": null,
+                "containerId": "0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572",
+                "containerHostname": "broker",
+                "tcpPort": 29092,
+                "port": 29092,
+                "tcpPorts": {
+                    "29092": 29092,
+                    "9092": 9092
+                },
+                "ports": {
+                    "29092": 29092,
+                    "9092": 9092
+                },
+                "host": "localhost",
+                "inspection": {
+                    "Id": "0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572",
+                    "Created": "2022-09-08T21:56:54.763299256Z",
+                    "Path": "/etc/confluent/docker/run",
+                    "Args": [
+                        
+                    ],
+                    "State": {
+                        "Status": "running",
+                        "Running": true,
+                        "Paused": false,
+                        "Restarting": false,
+                        "OOMKilled": false,
+                        "Dead": false,
+                        "Pid": 20241,
+                        "ExitCode": 0,
+                        "Error": "",
+                        "StartedAt": "2022-09-08T21:56:55.392445756Z",
+                        "FinishedAt": "0001-01-01T00:00:00Z"
+                    },
+                    "Image": "sha256:d1bca2d9ce2a7e05018b87ba8edf571d585ad0fdf4b16491cfe05f8ee2d2711a",
+                    "ResolvConfPath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/resolv.conf",
+                    "HostnamePath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/hostname",
+                    "HostsPath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/hosts",
+                    "LogPath": "/var/lib/docker/containers/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572/0555f006dc529f2dc1cc1e592ad3750228cb110fcc7197d71fd1f672d323d572-json.log",
+                    "Name": "/broker",
+                    "RestartCount": 0,
+                    "Driver": "overlay2",
+                    "Platform": "linux",
+                    "MountLabel": "",
+                    "ProcessLabel": "",
+                    "AppArmorProfile": "",
+                    "ExecIDs": null,
+                    "HostConfig": {
+                        "Binds": [
+                            
+                        ],
+                        "ContainerIDFile": "",
+                        "LogConfig": {
+                            "Type": "json-file",
+                            "Config": {
+                                
+                            }
+                        },
+                        "NetworkMode": "json_default",
+                        "PortBindings": {
+                            "29092/tcp": [
+                                {
+                                    "HostIp": "",
+                                    "HostPort": "29092"
+                                }
+                            ],
+                            "9092/tcp": [
+                                {
+                                    "HostIp": "",
+                                    "HostPort": "9092"
+                                }
+                            ]
+                        },
+                        "RestartPolicy": {
+                            "Name": "",
+                            "MaximumRetryCount": 0
+                        },
+                        "AutoRemove": false,
+                        "VolumeDriver": "",
+                        "VolumesFrom": null,
+                        "CapAdd": null,
+                        "CapDrop": null,
+                        "CgroupnsMode": "private",
+                        "Dns": null,
+                        "DnsOptions": null,
+                        "DnsSearch": null,
+                        "ExtraHosts": [
+                            
+                        ],
+                        "GroupAdd": null,
+                        "IpcMode": "private",
+                        "Cgroup": "",
+                        "Links": null,
+                        "OomScoreAdj": 0,
+                        "PidMode": "",
+                        "Privileged": false,
+                        "PublishAllPorts": false,
+                        "ReadonlyRootfs": false,
+                        "SecurityOpt": null,
+                        "UTSMode": "",
+                        "UsernsMode": "",
+                        "ShmSize": 67108864,
+                        "Runtime": "runc",
+                        "ConsoleSize": [
+                            0,
+                            0
+                        ],
+                        "Isolation": "",
+                        "CpuShares": 0,
+                        "Memory": 0,
+                        "NanoCpus": 0,
+                        "CgroupParent": "",
+                        "BlkioWeight": 0,
+                        "BlkioWeightDevice": null,
+                        "BlkioDeviceReadBps": null,
+                        "BlkioDeviceWriteBps": null,
+                        "BlkioDeviceReadIOps": null,
+                        "BlkioDeviceWriteIOps": null,
+                        "CpuPeriod": 0,
+                        "CpuQuota": 0,
+                        "CpuRealtimePeriod": 0,
+                        "CpuRealtimeRuntime": 0,
+                        "CpusetCpus": "",
+                        "CpusetMems": "",
+                        "Devices": null,
+                        "DeviceCgroupRules": null,
+                        "DeviceRequests": null,
+                        "KernelMemory": 0,
+                        "KernelMemoryTCP": 0,
+                        "MemoryReservation": 0,
+                        "MemorySwap": 0,
+                        "MemorySwappiness": null,
+                        "OomKillDisable": null,
+                        "PidsLimit": null,
+                        "Ulimits": null,
+                        "CpuCount": 0,
+                        "CpuPercent": 0,
+                        "IOMaximumIOps": 0,
+                        "IOMaximumBandwidth": 0,
+                        "MaskedPaths": [
+                            "/proc/asound",
+                            "/proc/acpi",
+                            "/proc/kcore",
+                            "/proc/keys",
+                            "/proc/latency_stats",
+                            "/proc/timer_list",
+                            "/proc/timer_stats",
+                            "/proc/sched_debug",
+                            "/proc/scsi",
+                            "/sys/firmware"
+                        ],
+                        "ReadonlyPaths": [
+                            "/proc/bus",
+                            "/proc/fs",
+                            "/proc/irq",
+                            "/proc/sys",
+                            "/proc/sysrq-trigger"
+                        ]
+                    },
+                    "GraphDriver": {
+                        "Data": {
+                            "LowerDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228-init/diff:/var/lib/docker/overlay2/ae6aa03c94d6deb8c5ed05c592cce7dcc3f083106996a8759d76073071da6f15/diff:/var/lib/docker/overlay2/7130fbb9d0d858862dc84839ddc6149199b4315d9233f007bc9004cd88a5cb00/diff:/var/lib/docker/overlay2/d576ca2e54486c0221d62a2f1034c3a09ab2d174524331d56cbc6276a6bd5d68/diff:/var/lib/docker/overlay2/1b9852e971319bede332ddb5b65eaabf29d775f1d8d61297747419cc735bd5b9/diff:/var/lib/docker/overlay2/c1b85cd3bd8b45eab16bd3f00ae8069c846da15e1a043e04d47fa5b2f4596d17/diff:/var/lib/docker/overlay2/2060b70d4de0cf1fdd4ca0f9f15dcafed5f8e0408e866d36a621d00502c57bc2/diff:/var/lib/docker/overlay2/8d6d042840478ff466aa0dbab78a9776f270aa072d634363cdc4ca661ec14214/diff:/var/lib/docker/overlay2/c3de15d03189bf774942d33c6b5931bcefc9d2221813cd74b64e67e6816daa77/diff:/var/lib/docker/overlay2/a87cefc808a5318727c75f0ae1430da629e704fb796f8507130cea06e3699dd0/diff:/var/lib/docker/overlay2/f1b15e4d4d89b3af92d11fc1baa9f129c0c0fc7b65daf74081b6650b015bc768/diff:/var/lib/docker/overlay2/f0f89399c687ea474306c8cc7d8feb8a439a096a9dd308c843ae6a3588626ed4/diff",
+                            "MergedDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228/merged",
+                            "UpperDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228/diff",
+                            "WorkDir": "/var/lib/docker/overlay2/baf7c7dd78142049ac1b55194d233b9c6d23b05d39c6c5b8a80ecf4b987ab228/work"
+                        },
+                        "Name": "overlay2"
+                    },
+                    "Mounts": [
+                        {
+                            "Type": "volume",
+                            "Name": "05d2c0148573c2e785bca296e0e21ecfe76278e12ed04d6c4d99b9e0a1a1fd44",
+                            "Source": "/var/lib/docker/volumes/05d2c0148573c2e785bca296e0e21ecfe76278e12ed04d6c4d99b9e0a1a1fd44/_data",
+                            "Destination": "/etc/kafka/secrets",
+                            "Driver": "local",
+                            "Mode": "",
+                            "RW": true,
+                            "Propagation": ""
+                        },
+                        {
+                            "Type": "volume",
+                            "Name": "a6858948a46566204feb1a206be94424bdd776eea1001443a62631d17a05286b",
+                            "Source": "/var/lib/docker/volumes/a6858948a46566204feb1a206be94424bdd776eea1001443a62631d17a05286b/_data",
+                            "Destination": "/var/lib/kafka/data",
+                            "Driver": "local",
+                            "Mode": "",
+                            "RW": true,
+                            "Propagation": ""
+                        }
+                    ],
+                    "Config": {
+                        "Hostname": "broker",
+                        "Domainname": "",
+                        "User": "appuser",
+                        "AttachStdin": false,
+                        "AttachStdout": true,
+                        "AttachStderr": true,
+                        "ExposedPorts": {
+                            "29092/tcp": {
+                                
+                            },
+                            "9092/tcp": {
+                                
+                            }
+                        },
+                        "Tty": false,
+                        "OpenStdin": false,
+                        "StdinOnce": false,
+                        "Env": [
+                            "KAFKA_BROKER_ID=1",
+                            "KAFKA_LOG4J_LOGGERS=kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO",
+                            "KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092",
+                            "KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1",
+                            "KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0",
+                            "KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1",
+                            "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1",
+                            "KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181",
+                            "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT",
+                            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                            "container=oci",
+                            "LANG=C.UTF-8",
+                            "CUB_CLASSPATH=\"/usr/share/java/cp-base-new/*\"",
+                            "COMPONENT=kafka"
+                        ],
+                        "Cmd": [
+                            "/etc/confluent/docker/run"
+                        ],
+                        "Image": "confluentinc/cp-kafka:7.2.0",
+                        "Volumes": {
+                            "/etc/kafka/secrets": {
+                                
+                            },
+                            "/var/lib/kafka/data": {
+                                
+                            }
+                        },
+                        "WorkingDir": "/home/appuser",
+                        "Entrypoint": null,
+                        "OnBuild": null,
+                        "Labels": {
+                            "architecture": "arm64",
+                            "build-date": "2022-06-17T04:19:24.046256",
+                            "com.docker.compose.config-hash": "20dcc96957eaa7503ec361d7ba6d34aa4fde63cbd213a7403760e583df56a664",
+                            "com.docker.compose.container-number": "1",
+                            "com.docker.compose.depends_on": "zookeeper:service_started",
+                            "com.docker.compose.image": "sha256:d1bca2d9ce2a7e05018b87ba8edf571d585ad0fdf4b16491cfe05f8ee2d2711a",
+                            "com.docker.compose.oneoff": "False",
+                            "com.docker.compose.project": "json",
+                            "com.docker.compose.project.config_files": "/Users/f.garcia/code/perso/schema-registry-plugin/examples/docker-compose.yml",
+                            "com.docker.compose.project.working_dir": "/Users/f.garcia/code/perso/schema-registry-plugin/examples",
+                            "com.docker.compose.service": "broker",
+                            "com.docker.compose.version": "2.10.2",
+                            "com.redhat.build-host": "arm-003.osbs.prod.upshift.rdu2.redhat.com",
+                            "com.redhat.component": "ubi8-minimal-container",
+                            "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+                            "description": "Common base image for Confluent's Docker images.",
+                            "distribution-scope": "public",
+                            "io.confluent.docker": "true",
+                            "io.confluent.docker.build.number": "2",
+                            "io.confluent.docker.git.id": "83305f9e",
+                            "io.confluent.docker.git.repo": "confluentinc/kafka-images",
+                            "io.k8s.description": "The Universal Base Image Minimal is a stripped down image that uses microdnf as a package manager. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+                            "io.k8s.display-name": "Red Hat Universal Base Image 8 Minimal",
+                            "io.openshift.expose-services": "",
+                            "io.openshift.tags": "minimal rhel8",
+                            "maintainer": "partner-support@confluent.io",
+                            "name": "cp-kafka",
+                            "release": "7.2.0",
+                            "summary": "Confluent platform Kafka.",
+                            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8-minimal/images/8.6-854",
+                            "vcs-ref": "50293e4ba66ca2194d8ee5a149a665cb9a375c71",
+                            "vcs-type": "git",
+                            "vendor": "Confluent",
+                            "version": "83305f9e"
+                        }
+                    },
+                    "NetworkSettings": {
+                        "Bridge": "",
+                        "SandboxID": "7c9980fde975c9c466387c3f501a74f133ba8d1ec4bd6e3cd642f320c04a94e2",
+                        "HairpinMode": false,
+                        "LinkLocalIPv6Address": "",
+                        "LinkLocalIPv6PrefixLen": 0,
+                        "Ports": {
+                            "29092/tcp": [
+                                {
+                                    "HostIp": "0.0.0.0",
+                                    "HostPort": "29092"
+                                }
+                            ],
+                            "9092/tcp": [
+                                {
+                                    "HostIp": "0.0.0.0",
+                                    "HostPort": "9092"
+                                }
+                            ]
+                        },
+                        "SandboxKey": "/var/run/docker/netns/7c9980fde975",
+                        "SecondaryIPAddresses": null,
+                        "SecondaryIPv6Addresses": null,
+                        "EndpointID": "",
+                        "Gateway": "",
+                        "GlobalIPv6Address": "",
+                        "GlobalIPv6PrefixLen": 0,
+                        "IPAddress": "",
+                        "IPPrefixLen": 0,
+                        "IPv6Gateway": "",
+                        "MacAddress": "",
+                        "Networks": {
+                            "json_default": {
+                                "IPAMConfig": null,
+                                "Links": null,
+                                "Aliases": [
+                                    "broker",
+                                    "broker",
+                                    "0555f006dc52"
+                                ],
+                                "NetworkID": "30a033bbafb3a45d533698ab46b2771488fb52d20afa98fcdd62a5a214fb56d7",
+                                "EndpointID": "9e48a256df48624c8bf2a9007531459252e32bc54526b15d164bd80e1660b720",
+                                "Gateway": "172.28.0.1",
+                                "IPAddress": "172.28.0.3",
+                                "IPPrefixLen": 16,
+                                "IPv6Gateway": "",
+                                "GlobalIPv6Address": "",
+                                "GlobalIPv6PrefixLen": 0,
+                                "MacAddress": "02:42:ac:1c:00:03",
+                                "DriverOpts": null
+                            }
+                        }
+                    }
+                },
+                "udpPorts": {
+                    
+                }
+            }
+        },
+        "udpPorts": {
+            
+        },
+        "name": "broker"
+    },
+    "schema-registry": {
+        "firstContainer": {
+            "instanceName": "schema-registry",
+            "serviceHost": {
+                "type": "LocalHost",
+                "host": "localhost"
+            },
+            "udpPort": null,
+            "containerId": "38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb",
+            "containerHostname": "schema-registry",
+            "tcpPort": 8081,
+            "port": 8081,
+            "tcpPorts": {
+                "8081": 8081
+            },
+            "ports": {
+                "8081": 8081
+            },
+            "host": "localhost",
+            "inspection": {
+                "Id": "38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb",
+                "Created": "2022-09-08T21:56:54.807726631Z",
+                "Path": "/etc/confluent/docker/run",
+                "Args": [
+                    
+                ],
+                "State": {
+                    "Status": "running",
+                    "Running": true,
+                    "Paused": false,
+                    "Restarting": false,
+                    "OOMKilled": false,
+                    "Dead": false,
+                    "Pid": 20337,
+                    "ExitCode": 0,
+                    "Error": "",
+                    "StartedAt": "2022-09-08T21:56:55.588820673Z",
+                    "FinishedAt": "0001-01-01T00:00:00Z"
+                },
+                "Image": "sha256:85eafff0b7c038343fcec682cdd1494b482878d47c28f9337410880b43fad349",
+                "ResolvConfPath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/resolv.conf",
+                "HostnamePath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/hostname",
+                "HostsPath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/hosts",
+                "LogPath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb-json.log",
+                "Name": "/schema-registry",
+                "RestartCount": 0,
+                "Driver": "overlay2",
+                "Platform": "linux",
+                "MountLabel": "",
+                "ProcessLabel": "",
+                "AppArmorProfile": "",
+                "ExecIDs": null,
+                "HostConfig": {
+                    "Binds": [
+                        
+                    ],
+                    "ContainerIDFile": "",
+                    "LogConfig": {
+                        "Type": "json-file",
+                        "Config": {
+                            
+                        }
+                    },
+                    "NetworkMode": "json_default",
+                    "PortBindings": {
+                        "8081/tcp": [
+                            {
+                                "HostIp": "",
+                                "HostPort": "8081"
+                            }
+                        ]
+                    },
+                    "RestartPolicy": {
+                        "Name": "",
+                        "MaximumRetryCount": 0
+                    },
+                    "AutoRemove": false,
+                    "VolumeDriver": "",
+                    "VolumesFrom": null,
+                    "CapAdd": null,
+                    "CapDrop": null,
+                    "CgroupnsMode": "private",
+                    "Dns": null,
+                    "DnsOptions": null,
+                    "DnsSearch": null,
+                    "ExtraHosts": [
+                        
+                    ],
+                    "GroupAdd": null,
+                    "IpcMode": "private",
+                    "Cgroup": "",
+                    "Links": null,
+                    "OomScoreAdj": 0,
+                    "PidMode": "",
+                    "Privileged": false,
+                    "PublishAllPorts": false,
+                    "ReadonlyRootfs": false,
+                    "SecurityOpt": null,
+                    "UTSMode": "",
+                    "UsernsMode": "",
+                    "ShmSize": 67108864,
+                    "Runtime": "runc",
+                    "ConsoleSize": [
+                        0,
+                        0
+                    ],
+                    "Isolation": "",
+                    "CpuShares": 0,
+                    "Memory": 0,
+                    "NanoCpus": 0,
+                    "CgroupParent": "",
+                    "BlkioWeight": 0,
+                    "BlkioWeightDevice": null,
+                    "BlkioDeviceReadBps": null,
+                    "BlkioDeviceWriteBps": null,
+                    "BlkioDeviceReadIOps": null,
+                    "BlkioDeviceWriteIOps": null,
+                    "CpuPeriod": 0,
+                    "CpuQuota": 0,
+                    "CpuRealtimePeriod": 0,
+                    "CpuRealtimeRuntime": 0,
+                    "CpusetCpus": "",
+                    "CpusetMems": "",
+                    "Devices": null,
+                    "DeviceCgroupRules": null,
+                    "DeviceRequests": null,
+                    "KernelMemory": 0,
+                    "KernelMemoryTCP": 0,
+                    "MemoryReservation": 0,
+                    "MemorySwap": 0,
+                    "MemorySwappiness": null,
+                    "OomKillDisable": null,
+                    "PidsLimit": null,
+                    "Ulimits": null,
+                    "CpuCount": 0,
+                    "CpuPercent": 0,
+                    "IOMaximumIOps": 0,
+                    "IOMaximumBandwidth": 0,
+                    "MaskedPaths": [
+                        "/proc/asound",
+                        "/proc/acpi",
+                        "/proc/kcore",
+                        "/proc/keys",
+                        "/proc/latency_stats",
+                        "/proc/timer_list",
+                        "/proc/timer_stats",
+                        "/proc/sched_debug",
+                        "/proc/scsi",
+                        "/sys/firmware"
+                    ],
+                    "ReadonlyPaths": [
+                        "/proc/bus",
+                        "/proc/fs",
+                        "/proc/irq",
+                        "/proc/sys",
+                        "/proc/sysrq-trigger"
+                    ]
+                },
+                "GraphDriver": {
+                    "Data": {
+                        "LowerDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5-init/diff:/var/lib/docker/overlay2/4da1482b33a93870c2ca5057efb3cb7d03864af5f9d83629b9ffd4b109e9dc21/diff:/var/lib/docker/overlay2/2fd43be2185bbe46d551c24aa697d4d92af1eda27ea27ec2aaefc81422650aa3/diff:/var/lib/docker/overlay2/d576ca2e54486c0221d62a2f1034c3a09ab2d174524331d56cbc6276a6bd5d68/diff:/var/lib/docker/overlay2/1b9852e971319bede332ddb5b65eaabf29d775f1d8d61297747419cc735bd5b9/diff:/var/lib/docker/overlay2/c1b85cd3bd8b45eab16bd3f00ae8069c846da15e1a043e04d47fa5b2f4596d17/diff:/var/lib/docker/overlay2/2060b70d4de0cf1fdd4ca0f9f15dcafed5f8e0408e866d36a621d00502c57bc2/diff:/var/lib/docker/overlay2/8d6d042840478ff466aa0dbab78a9776f270aa072d634363cdc4ca661ec14214/diff:/var/lib/docker/overlay2/c3de15d03189bf774942d33c6b5931bcefc9d2221813cd74b64e67e6816daa77/diff:/var/lib/docker/overlay2/a87cefc808a5318727c75f0ae1430da629e704fb796f8507130cea06e3699dd0/diff:/var/lib/docker/overlay2/f1b15e4d4d89b3af92d11fc1baa9f129c0c0fc7b65daf74081b6650b015bc768/diff:/var/lib/docker/overlay2/f0f89399c687ea474306c8cc7d8feb8a439a096a9dd308c843ae6a3588626ed4/diff",
+                        "MergedDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5/merged",
+                        "UpperDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5/diff",
+                        "WorkDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5/work"
+                    },
+                    "Name": "overlay2"
+                },
+                "Mounts": [
+                    {
+                        "Type": "volume",
+                        "Name": "e011a4612bff041025c441a367ff2703eda78fe753c768277cf5a9ab97016042",
+                        "Source": "/var/lib/docker/volumes/e011a4612bff041025c441a367ff2703eda78fe753c768277cf5a9ab97016042/_data",
+                        "Destination": "/etc/schema-registry/secrets",
+                        "Driver": "local",
+                        "Mode": "",
+                        "RW": true,
+                        "Propagation": ""
+                    }
+                ],
+                "Config": {
+                    "Hostname": "schema-registry",
+                    "Domainname": "",
+                    "User": "appuser",
+                    "AttachStdin": false,
+                    "AttachStdout": true,
+                    "AttachStderr": true,
+                    "ExposedPorts": {
+                        "8081/tcp": {
+                            
+                        }
+                    },
+                    "Tty": false,
+                    "OpenStdin": false,
+                    "StdinOnce": false,
+                    "Env": [
+                        "SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181",
+                        "SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://broker:29092",
+                        "SCHEMA_REGISTRY_HOST_NAME=schema-registry",
+                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                        "container=oci",
+                        "LANG=C.UTF-8",
+                        "CUB_CLASSPATH=\"/usr/share/java/cp-base-new/*\"",
+                        "COMPONENT=schema-registry"
+                    ],
+                    "Cmd": [
+                        "/etc/confluent/docker/run"
+                    ],
+                    "Image": "confluentinc/cp-schema-registry:7.2.0",
+                    "Volumes": {
+                        "/etc/schema-registry/secrets": {
+                            
+                        }
+                    },
+                    "WorkingDir": "/home/appuser",
+                    "Entrypoint": null,
+                    "OnBuild": null,
+                    "Labels": {
+                        "architecture": "arm64",
+                        "build-date": "2022-06-17T04:19:24.046256",
+                        "com.docker.compose.config-hash": "f5e137609d9d14f7731c08c066898734074df5b5b425b8f0fa72e6e5cbc48ebc",
+                        "com.docker.compose.container-number": "1",
+                        "com.docker.compose.depends_on": "broker:service_started,zookeeper:service_started",
+                        "com.docker.compose.image": "sha256:85eafff0b7c038343fcec682cdd1494b482878d47c28f9337410880b43fad349",
+                        "com.docker.compose.oneoff": "False",
+                        "com.docker.compose.project": "json",
+                        "com.docker.compose.project.config_files": "/Users/f.garcia/code/perso/schema-registry-plugin/examples/docker-compose.yml",
+                        "com.docker.compose.project.working_dir": "/Users/f.garcia/code/perso/schema-registry-plugin/examples",
+                        "com.docker.compose.service": "schema-registry",
+                        "com.docker.compose.version": "2.10.2",
+                        "com.redhat.build-host": "arm-003.osbs.prod.upshift.rdu2.redhat.com",
+                        "com.redhat.component": "ubi8-minimal-container",
+                        "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+                        "description": "Confluent Schema Registry provides a RESTful interface for developers to define standard schemas for their events, share them across the organization and safely evolve them in a way that is backward compatible and future proof.",
+                        "distribution-scope": "public",
+                        "io.confluent.docker": "true",
+                        "io.confluent.docker.build.number": "2",
+                        "io.confluent.docker.git.id": "888644d",
+                        "io.confluent.docker.git.repo": "confluentinc/schema-registry-images",
+                        "io.k8s.description": "The Universal Base Image Minimal is a stripped down image that uses microdnf as a package manager. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+                        "io.k8s.display-name": "Red Hat Universal Base Image 8 Minimal",
+                        "io.openshift.expose-services": "",
+                        "io.openshift.tags": "minimal rhel8",
+                        "maintainer": "partner-support@confluent.io",
+                        "name": "cp-schema-registry",
+                        "release": "7.2.0",
+                        "summary": "Confluent Schema Registry provides a RESTful interface for developers to define standard schemas for their events, share them across the organization and safely evolve them in a way that is backward compatible and future proof.",
+                        "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8-minimal/images/8.6-854",
+                        "vcs-ref": "50293e4ba66ca2194d8ee5a149a665cb9a375c71",
+                        "vcs-type": "git",
+                        "vendor": "Confluent",
+                        "version": "888644d"
+                    }
+                },
+                "NetworkSettings": {
+                    "Bridge": "",
+                    "SandboxID": "58d1964eb521166c71406d71cd1a52100eb6fd6f25969fa92e8a5e96c4459b90",
+                    "HairpinMode": false,
+                    "LinkLocalIPv6Address": "",
+                    "LinkLocalIPv6PrefixLen": 0,
+                    "Ports": {
+                        "8081/tcp": [
+                            {
+                                "HostIp": "0.0.0.0",
+                                "HostPort": "8081"
+                            }
+                        ]
+                    },
+                    "SandboxKey": "/var/run/docker/netns/58d1964eb521",
+                    "SecondaryIPAddresses": null,
+                    "SecondaryIPv6Addresses": null,
+                    "EndpointID": "",
+                    "Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "IPAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "MacAddress": "",
+                    "Networks": {
+                        "json_default": {
+                            "IPAMConfig": null,
+                            "Links": null,
+                            "Aliases": [
+                                "schema-registry",
+                                "schema-registry",
+                                "38d243920ed0"
+                            ],
+                            "NetworkID": "30a033bbafb3a45d533698ab46b2771488fb52d20afa98fcdd62a5a214fb56d7",
+                            "EndpointID": "c598614655c7c249163a0b1337723d37835df05b7d3cac437782235e16a3d71e",
+                            "Gateway": "172.28.0.1",
+                            "IPAddress": "172.28.0.4",
+                            "IPPrefixLen": 16,
+                            "IPv6Gateway": "",
+                            "GlobalIPv6Address": "",
+                            "GlobalIPv6PrefixLen": 0,
+                            "MacAddress": "02:42:ac:1c:00:04",
+                            "DriverOpts": null
+                        }
+                    }
+                }
+            },
+            "udpPorts": {
+                
+            }
+        },
+        "udpPort": null,
+        "tcpPorts": {
+            "8081": 8081
+        },
+        "tcpPort": 8081,
+        "port": 8081,
+        "ports": {
+            "8081": 8081
+        },
+        "host": "localhost",
+        "containerInfos": {
+            "schema-registry": {
+                "instanceName": "schema-registry",
+                "serviceHost": {
+                    "type": "LocalHost",
+                    "host": "localhost"
+                },
+                "udpPort": null,
+                "containerId": "38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb",
+                "containerHostname": "schema-registry",
+                "tcpPort": 8081,
+                "port": 8081,
+                "tcpPorts": {
+                    "8081": 8081
+                },
+                "ports": {
+                    "8081": 8081
+                },
+                "host": "localhost",
+                "inspection": {
+                    "Id": "38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb",
+                    "Created": "2022-09-08T21:56:54.807726631Z",
+                    "Path": "/etc/confluent/docker/run",
+                    "Args": [
+                        
+                    ],
+                    "State": {
+                        "Status": "running",
+                        "Running": true,
+                        "Paused": false,
+                        "Restarting": false,
+                        "OOMKilled": false,
+                        "Dead": false,
+                        "Pid": 20337,
+                        "ExitCode": 0,
+                        "Error": "",
+                        "StartedAt": "2022-09-08T21:56:55.588820673Z",
+                        "FinishedAt": "0001-01-01T00:00:00Z"
+                    },
+                    "Image": "sha256:85eafff0b7c038343fcec682cdd1494b482878d47c28f9337410880b43fad349",
+                    "ResolvConfPath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/resolv.conf",
+                    "HostnamePath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/hostname",
+                    "HostsPath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/hosts",
+                    "LogPath": "/var/lib/docker/containers/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb/38d243920ed0e377ed32e296114c90ebce7df25042de7561077d935ee2709fcb-json.log",
+                    "Name": "/schema-registry",
+                    "RestartCount": 0,
+                    "Driver": "overlay2",
+                    "Platform": "linux",
+                    "MountLabel": "",
+                    "ProcessLabel": "",
+                    "AppArmorProfile": "",
+                    "ExecIDs": null,
+                    "HostConfig": {
+                        "Binds": [
+                            
+                        ],
+                        "ContainerIDFile": "",
+                        "LogConfig": {
+                            "Type": "json-file",
+                            "Config": {
+                                
+                            }
+                        },
+                        "NetworkMode": "json_default",
+                        "PortBindings": {
+                            "8081/tcp": [
+                                {
+                                    "HostIp": "",
+                                    "HostPort": "8081"
+                                }
+                            ]
+                        },
+                        "RestartPolicy": {
+                            "Name": "",
+                            "MaximumRetryCount": 0
+                        },
+                        "AutoRemove": false,
+                        "VolumeDriver": "",
+                        "VolumesFrom": null,
+                        "CapAdd": null,
+                        "CapDrop": null,
+                        "CgroupnsMode": "private",
+                        "Dns": null,
+                        "DnsOptions": null,
+                        "DnsSearch": null,
+                        "ExtraHosts": [
+                            
+                        ],
+                        "GroupAdd": null,
+                        "IpcMode": "private",
+                        "Cgroup": "",
+                        "Links": null,
+                        "OomScoreAdj": 0,
+                        "PidMode": "",
+                        "Privileged": false,
+                        "PublishAllPorts": false,
+                        "ReadonlyRootfs": false,
+                        "SecurityOpt": null,
+                        "UTSMode": "",
+                        "UsernsMode": "",
+                        "ShmSize": 67108864,
+                        "Runtime": "runc",
+                        "ConsoleSize": [
+                            0,
+                            0
+                        ],
+                        "Isolation": "",
+                        "CpuShares": 0,
+                        "Memory": 0,
+                        "NanoCpus": 0,
+                        "CgroupParent": "",
+                        "BlkioWeight": 0,
+                        "BlkioWeightDevice": null,
+                        "BlkioDeviceReadBps": null,
+                        "BlkioDeviceWriteBps": null,
+                        "BlkioDeviceReadIOps": null,
+                        "BlkioDeviceWriteIOps": null,
+                        "CpuPeriod": 0,
+                        "CpuQuota": 0,
+                        "CpuRealtimePeriod": 0,
+                        "CpuRealtimeRuntime": 0,
+                        "CpusetCpus": "",
+                        "CpusetMems": "",
+                        "Devices": null,
+                        "DeviceCgroupRules": null,
+                        "DeviceRequests": null,
+                        "KernelMemory": 0,
+                        "KernelMemoryTCP": 0,
+                        "MemoryReservation": 0,
+                        "MemorySwap": 0,
+                        "MemorySwappiness": null,
+                        "OomKillDisable": null,
+                        "PidsLimit": null,
+                        "Ulimits": null,
+                        "CpuCount": 0,
+                        "CpuPercent": 0,
+                        "IOMaximumIOps": 0,
+                        "IOMaximumBandwidth": 0,
+                        "MaskedPaths": [
+                            "/proc/asound",
+                            "/proc/acpi",
+                            "/proc/kcore",
+                            "/proc/keys",
+                            "/proc/latency_stats",
+                            "/proc/timer_list",
+                            "/proc/timer_stats",
+                            "/proc/sched_debug",
+                            "/proc/scsi",
+                            "/sys/firmware"
+                        ],
+                        "ReadonlyPaths": [
+                            "/proc/bus",
+                            "/proc/fs",
+                            "/proc/irq",
+                            "/proc/sys",
+                            "/proc/sysrq-trigger"
+                        ]
+                    },
+                    "GraphDriver": {
+                        "Data": {
+                            "LowerDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5-init/diff:/var/lib/docker/overlay2/4da1482b33a93870c2ca5057efb3cb7d03864af5f9d83629b9ffd4b109e9dc21/diff:/var/lib/docker/overlay2/2fd43be2185bbe46d551c24aa697d4d92af1eda27ea27ec2aaefc81422650aa3/diff:/var/lib/docker/overlay2/d576ca2e54486c0221d62a2f1034c3a09ab2d174524331d56cbc6276a6bd5d68/diff:/var/lib/docker/overlay2/1b9852e971319bede332ddb5b65eaabf29d775f1d8d61297747419cc735bd5b9/diff:/var/lib/docker/overlay2/c1b85cd3bd8b45eab16bd3f00ae8069c846da15e1a043e04d47fa5b2f4596d17/diff:/var/lib/docker/overlay2/2060b70d4de0cf1fdd4ca0f9f15dcafed5f8e0408e866d36a621d00502c57bc2/diff:/var/lib/docker/overlay2/8d6d042840478ff466aa0dbab78a9776f270aa072d634363cdc4ca661ec14214/diff:/var/lib/docker/overlay2/c3de15d03189bf774942d33c6b5931bcefc9d2221813cd74b64e67e6816daa77/diff:/var/lib/docker/overlay2/a87cefc808a5318727c75f0ae1430da629e704fb796f8507130cea06e3699dd0/diff:/var/lib/docker/overlay2/f1b15e4d4d89b3af92d11fc1baa9f129c0c0fc7b65daf74081b6650b015bc768/diff:/var/lib/docker/overlay2/f0f89399c687ea474306c8cc7d8feb8a439a096a9dd308c843ae6a3588626ed4/diff",
+                            "MergedDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5/merged",
+                            "UpperDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5/diff",
+                            "WorkDir": "/var/lib/docker/overlay2/3bd8490077da303d46a9260811206ee3aba743bd3b2a89a016cf223231b2dfa5/work"
+                        },
+                        "Name": "overlay2"
+                    },
+                    "Mounts": [
+                        {
+                            "Type": "volume",
+                            "Name": "e011a4612bff041025c441a367ff2703eda78fe753c768277cf5a9ab97016042",
+                            "Source": "/var/lib/docker/volumes/e011a4612bff041025c441a367ff2703eda78fe753c768277cf5a9ab97016042/_data",
+                            "Destination": "/etc/schema-registry/secrets",
+                            "Driver": "local",
+                            "Mode": "",
+                            "RW": true,
+                            "Propagation": ""
+                        }
+                    ],
+                    "Config": {
+                        "Hostname": "schema-registry",
+                        "Domainname": "",
+                        "User": "appuser",
+                        "AttachStdin": false,
+                        "AttachStdout": true,
+                        "AttachStderr": true,
+                        "ExposedPorts": {
+                            "8081/tcp": {
+                                
+                            }
+                        },
+                        "Tty": false,
+                        "OpenStdin": false,
+                        "StdinOnce": false,
+                        "Env": [
+                            "SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181",
+                            "SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://broker:29092",
+                            "SCHEMA_REGISTRY_HOST_NAME=schema-registry",
+                            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                            "container=oci",
+                            "LANG=C.UTF-8",
+                            "CUB_CLASSPATH=\"/usr/share/java/cp-base-new/*\"",
+                            "COMPONENT=schema-registry"
+                        ],
+                        "Cmd": [
+                            "/etc/confluent/docker/run"
+                        ],
+                        "Image": "confluentinc/cp-schema-registry:7.2.0",
+                        "Volumes": {
+                            "/etc/schema-registry/secrets": {
+                                
+                            }
+                        },
+                        "WorkingDir": "/home/appuser",
+                        "Entrypoint": null,
+                        "OnBuild": null,
+                        "Labels": {
+                            "architecture": "arm64",
+                            "build-date": "2022-06-17T04:19:24.046256",
+                            "com.docker.compose.config-hash": "f5e137609d9d14f7731c08c066898734074df5b5b425b8f0fa72e6e5cbc48ebc",
+                            "com.docker.compose.container-number": "1",
+                            "com.docker.compose.depends_on": "broker:service_started,zookeeper:service_started",
+                            "com.docker.compose.image": "sha256:85eafff0b7c038343fcec682cdd1494b482878d47c28f9337410880b43fad349",
+                            "com.docker.compose.oneoff": "False",
+                            "com.docker.compose.project": "json",
+                            "com.docker.compose.project.config_files": "/Users/f.garcia/code/perso/schema-registry-plugin/examples/docker-compose.yml",
+                            "com.docker.compose.project.working_dir": "/Users/f.garcia/code/perso/schema-registry-plugin/examples",
+                            "com.docker.compose.service": "schema-registry",
+                            "com.docker.compose.version": "2.10.2",
+                            "com.redhat.build-host": "arm-003.osbs.prod.upshift.rdu2.redhat.com",
+                            "com.redhat.component": "ubi8-minimal-container",
+                            "com.redhat.license_terms": "https://www.redhat.com/en/about/red-hat-end-user-license-agreements#UBI",
+                            "description": "Confluent Schema Registry provides a RESTful interface for developers to define standard schemas for their events, share them across the organization and safely evolve them in a way that is backward compatible and future proof.",
+                            "distribution-scope": "public",
+                            "io.confluent.docker": "true",
+                            "io.confluent.docker.build.number": "2",
+                            "io.confluent.docker.git.id": "888644d",
+                            "io.confluent.docker.git.repo": "confluentinc/schema-registry-images",
+                            "io.k8s.description": "The Universal Base Image Minimal is a stripped down image that uses microdnf as a package manager. This base image is freely redistributable, but Red Hat only supports Red Hat technologies through subscriptions for Red Hat products. This image is maintained by Red Hat and updated regularly.",
+                            "io.k8s.display-name": "Red Hat Universal Base Image 8 Minimal",
+                            "io.openshift.expose-services": "",
+                            "io.openshift.tags": "minimal rhel8",
+                            "maintainer": "partner-support@confluent.io",
+                            "name": "cp-schema-registry",
+                            "release": "7.2.0",
+                            "summary": "Confluent Schema Registry provides a RESTful interface for developers to define standard schemas for their events, share them across the organization and safely evolve them in a way that is backward compatible and future proof.",
+                            "url": "https://access.redhat.com/containers/#/registry.access.redhat.com/ubi8-minimal/images/8.6-854",
+                            "vcs-ref": "50293e4ba66ca2194d8ee5a149a665cb9a375c71",
+                            "vcs-type": "git",
+                            "vendor": "Confluent",
+                            "version": "888644d"
+                        }
+                    },
+                    "NetworkSettings": {
+                        "Bridge": "",
+                        "SandboxID": "58d1964eb521166c71406d71cd1a52100eb6fd6f25969fa92e8a5e96c4459b90",
+                        "HairpinMode": false,
+                        "LinkLocalIPv6Address": "",
+                        "LinkLocalIPv6PrefixLen": 0,
+                        "Ports": {
+                            "8081/tcp": [
+                                {
+                                    "HostIp": "0.0.0.0",
+                                    "HostPort": "8081"
+                                }
+                            ]
+                        },
+                        "SandboxKey": "/var/run/docker/netns/58d1964eb521",
+                        "SecondaryIPAddresses": null,
+                        "SecondaryIPv6Addresses": null,
+                        "EndpointID": "",
+                        "Gateway": "",
+                        "GlobalIPv6Address": "",
+                        "GlobalIPv6PrefixLen": 0,
+                        "IPAddress": "",
+                        "IPPrefixLen": 0,
+                        "IPv6Gateway": "",
+                        "MacAddress": "",
+                        "Networks": {
+                            "json_default": {
+                                "IPAMConfig": null,
+                                "Links": null,
+                                "Aliases": [
+                                    "schema-registry",
+                                    "schema-registry",
+                                    "38d243920ed0"
+                                ],
+                                "NetworkID": "30a033bbafb3a45d533698ab46b2771488fb52d20afa98fcdd62a5a214fb56d7",
+                                "EndpointID": "c598614655c7c249163a0b1337723d37835df05b7d3cac437782235e16a3d71e",
+                                "Gateway": "172.28.0.1",
+                                "IPAddress": "172.28.0.4",
+                                "IPPrefixLen": 16,
+                                "IPv6Gateway": "",
+                                "GlobalIPv6Address": "",
+                                "GlobalIPv6PrefixLen": 0,
+                                "MacAddress": "02:42:ac:1c:00:04",
+                                "DriverOpts": null
+                            }
+                        }
+                    }
+                },
+                "udpPorts": {
+                    
+                }
+            }
+        },
+        "udpPorts": {
+            
+        },
+        "name": "schema-registry"
+    }
+}

@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.imflog.schema.registry.SchemaParsingException
 import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.ParsedSchema
@@ -9,6 +10,8 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import java.io.File
 import org.apache.avro.Schema
+import org.everit.json.schema.loader.SchemaClient
+import org.everit.json.schema.loader.SchemaLoader
 import org.slf4j.Logger
 
 abstract class BaseTaskAction(
@@ -91,8 +94,13 @@ abstract class BaseTaskAction(
         schemaContent: String,
         localReferences: Map<String, String>
     ): ParsedSchema {
-        val schema = JsonSchema(schemaContent, emptyList(), localReferences, null)
-        return client.parseSchema(JsonSchema.TYPE, schema.toString(), emptyList())
+        val loader = SchemaLoader.builder()
+            .schemaClient(SchemaClient.classPathAwareClient())
+            .schemaJson(schemaContent)
+            .build()
+//        val resolvedReferences = localReferences.mapValues { File(rootDir.toURI()).resolve(it.value).readText() }
+        val schema = JsonSchema(schemaContent)
+        return client.parseSchema(JsonSchema.TYPE, schema.rawSchema().toString(), emptyList())
             .orElseThrow { SchemaParsingException(subject, SchemaType.JSON) }
     }
 }
