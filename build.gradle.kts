@@ -18,7 +18,7 @@ repositories {
 
 // Dependencies versions
 val kotlinVersion = "1.6.0"
-val confluentVersion = "7.2.0"
+val confluentVersion = "7.2.1"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib", kotlinVersion))
