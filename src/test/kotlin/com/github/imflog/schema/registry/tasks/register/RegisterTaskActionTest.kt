@@ -55,7 +55,8 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false
+            false,
+            null
         ).run()
 
         // then
@@ -103,7 +104,8 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false
+            false,
+            null
         ).run()
 
         // then
@@ -188,7 +190,8 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false
+            false,
+            null
         ).run()
 
         // then

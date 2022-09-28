@@ -64,6 +64,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     it.basicAuth.set(basicAuthExtension.basicAuth)
                     it.ssl.set(sslExtension.configs)
                     it.subjects.set(registerExtension.subjects)
+                    it.outputDirectory.set(globalExtension.outputDirectory)
                 }
 
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
