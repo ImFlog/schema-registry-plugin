@@ -4,6 +4,8 @@ plugins {
 
 schemaRegistry {
     url = 'http://localhost:8081'
+    quiet = false
+    outputDirectory = 'schemas/avro/results/'
 
     register {
         subject('company', 'schemas/avro/company.avsc', 'AVRO')

@@ -1,25 +1,16 @@
 package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
-import groovy.cli.Option
-import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
-import org.gradle.api.file.Directory
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import javax.inject.Inject
 
 abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
 
