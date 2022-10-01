@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry
 
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 
@@ -17,4 +18,6 @@ open class SchemaRegistryExtension(objects: ObjectFactory) {
     val quiet: Property<Boolean> = objects.property(Boolean::class.java).apply {
         convention(false)
     }
+
+    val outputDirectory: Property<String> = objects.property(String::class.java)
 }

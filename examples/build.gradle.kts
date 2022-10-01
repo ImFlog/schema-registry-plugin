@@ -4,15 +4,12 @@ buildscript {
         maven {
             url = uri("https://packages.confluent.io/maven/")
         }
-        maven {
-            url = uri("https://jitpack.io")
-        }
     }
 }
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.6.1" apply false
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.7.0" apply false
     id("com.avast.gradle.docker-compose") version "0.16.8" apply true
 }
 

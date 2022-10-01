@@ -39,19 +39,19 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         playerSchema: String
     ) {
         folderRule.create()
-        folderRule.newFolder(type.name)
+        val typeFolder = folderRule.newFolder(type.name)
+        val resultFolder = folderRule.newFolder("${type.name}/results")
         val subjectName = "parameterized-${type.name}"
         val extension = type.extension
 
-        val userPath = "${type.name}/user.$extension"
-        val userSubject = "$subjectName-user-local"
-        val userFile = folderRule.newFile(userPath)
+        val userFile = typeFolder.resolve("user.$extension")
         userFile.writeText(userSchema)
+        val userSubject = "$subjectName-user-local"
 
-        val playerPath = "${type.name}/player.$extension"
-        val playerSubject = "$subjectName-player-local"
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = typeFolder.resolve("player.$extension")
+        val playerPath = playerFile.relativeTo(folderRule.root).path
         playerFile.writeText(playerSchema)
+        val playerSubject = "$subjectName-player-local"
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
@@ -66,6 +66,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
                 register {
                     subject('$userSubject', '${userFile.absolutePath}', '${type.name}')
                     subject('$playerSubject', '$playerPath', '${type.name}')
@@ -83,6 +84,13 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
             .withDebug(true)
             .build()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(resultFolder.resolve("registered.csv")).exists()
+        Assertions.assertThat(resultFolder.resolve("registered.csv").readText())
+            .matches(
+                """subject, path, id
+                |$userSubject, ${userFile.absolutePath}, \d
+                |$playerSubject, $playerPath, \d
+                |""".trimMargin())
     }
 
     @ParameterizedTest

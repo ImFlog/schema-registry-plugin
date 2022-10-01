@@ -13,6 +13,7 @@ import com.github.imflog.schema.registry.tasks.register.RegisterSubjectExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import java.io.File
 
 class SchemaRegistryPlugin : Plugin<Project> {
 
@@ -49,38 +50,39 @@ class SchemaRegistryPlugin : Plugin<Project> {
             )
 
             tasks.register(DownloadTask.TASK_NAME, DownloadTask::class.java)
-                .configure {
-                    it.url.set(globalExtension.url)
-                    it.quietLogging.set(globalExtension.quiet)
-                    it.basicAuth.set(basicAuthExtension.basicAuth)
-                    it.ssl.set(sslExtension.configs)
-                    it.subjects.set(downloadExtension.subjects)
+                .configure { downloadTask ->
+                    downloadTask.url.set(globalExtension.url)
+                    downloadTask.quietLogging.set(globalExtension.quiet)
+                    downloadTask.basicAuth.set(basicAuthExtension.basicAuth)
+                    downloadTask.ssl.set(sslExtension.configs)
+                    downloadTask.subjects.set(downloadExtension.subjects)
                 }
 
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
-                .configure {
-                    it.url.set(globalExtension.url)
-                    it.quietLogging.set(globalExtension.quiet)
-                    it.basicAuth.set(basicAuthExtension.basicAuth)
-                    it.ssl.set(sslExtension.configs)
-                    it.subjects.set(registerExtension.subjects)
+                .configure { registerSchemasTask ->
+                    registerSchemasTask.url.set(globalExtension.url)
+                    registerSchemasTask.quietLogging.set(globalExtension.quiet)
+                    registerSchemasTask.basicAuth.set(basicAuthExtension.basicAuth)
+                    registerSchemasTask.ssl.set(sslExtension.configs)
+                    registerSchemasTask.subjects.set(registerExtension.subjects)
+                    registerSchemasTask.outputDirectory.set(globalExtension.outputDirectory)
                 }
 
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
-                .configure {
-                    it.url.set(globalExtension.url)
-                    it.quietLogging.set(globalExtension.quiet)
-                    it.basicAuth.set(basicAuthExtension.basicAuth)
-                    it.ssl.set(sslExtension.configs)
-                    it.subjects.set(compatibilityExtension.subjects)
+                .configure { compatibilityTask ->
+                    compatibilityTask.url.set(globalExtension.url)
+                    compatibilityTask.quietLogging.set(globalExtension.quiet)
+                    compatibilityTask.basicAuth.set(basicAuthExtension.basicAuth)
+                    compatibilityTask.ssl.set(sslExtension.configs)
+                    compatibilityTask.subjects.set(compatibilityExtension.subjects)
                 }
 
             tasks.register(ConfigTask.TASK_NAME, ConfigTask::class.java)
-                .configure {
-                    it.url.set(globalExtension.url)
-                    it.basicAuth.set(basicAuthExtension.basicAuth)
-                    it.ssl.set(sslExtension.configs)
-                    it.subjects.set(configExtension.subjects)
+                .configure { configTask ->
+                    configTask.url.set(globalExtension.url)
+                    configTask.basicAuth.set(basicAuthExtension.basicAuth)
+                    configTask.ssl.set(sslExtension.configs)
+                    configTask.subjects.set(configExtension.subjects)
                 }
         }
     }

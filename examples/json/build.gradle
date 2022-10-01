@@ -4,6 +4,8 @@ plugins {
 
 schemaRegistry {
     url = 'http://localhost:8081'
+    quiet = false
+    outputDirectory = 'schemas/json/results/'
 
     register {
         subject('company', 'schemas/json/company.json', 'JSON')

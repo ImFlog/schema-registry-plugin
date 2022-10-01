@@ -55,7 +55,8 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false
+            false,
+            null
         ).run()
 
         // then
@@ -103,7 +104,8 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false
+            false,
+            null
         ).run()
 
         // then
@@ -113,7 +115,7 @@ class RegisterTaskActionTest {
     }
 
     @Test
-    internal fun `Should register schema with references`() {
+    fun `Should register schema with references`() {
         // given
         val registryClient =
             MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
@@ -188,10 +190,68 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false
+            false,
+            null
         ).run()
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `Should register schema and write the output to a file`() {
+        // given
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        folderRule.newFolder("src", "main", "avro", "external")
+        val resultFolder = folderRule.newFolder("results", "avro")
+        File(folderRule.root, "src/main/avro/external/test.avsc")
+            .writeText(
+                """
+                {"type": "record",
+                 "name": "test",
+                 "fields": [
+                    {"name": "name", "type": "string" },
+                    {"name": "newField", "type": "string", "default": ""}
+                 ]
+                }
+            """
+            )
+        File(folderRule.root, "src/main/avro/external/test_2.avsc")
+            .writeText(
+                """
+                {"type": "record",
+                 "name": "test_2",
+                 "fields": [
+                    {"name": "name", "type": "string" },
+                    {"name": "newField", "type": "string", "default": ""}
+                 ]
+                }
+            """
+            )
+
+        val subjects = listOf(
+            RegisterSubject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO),
+            RegisterSubject("test_2", "src/main/avro/external/test_2.avsc", SchemaType.AVRO),
+        )
+
+        // when
+        RegisterTaskAction(
+            registryClient,
+            folderRule.root,
+            subjects,
+            false,
+            resultFolder.path
+        ).run()
+
+        // then
+        val expectedOutputFile = resultFolder.resolve("registered.csv")
+        Assertions.assertThat(expectedOutputFile).exists()
+            .hasContent(
+                """subject, path, id
+               |test, src/main/avro/external/test.avsc, 1
+               |test_2, src/main/avro/external/test_2.avsc, 2
+               |""".trimMargin()
+            )
     }
 }
