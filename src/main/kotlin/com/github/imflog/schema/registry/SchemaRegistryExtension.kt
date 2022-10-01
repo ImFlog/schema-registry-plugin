@@ -19,5 +19,5 @@ open class SchemaRegistryExtension(objects: ObjectFactory) {
         convention(false)
     }
 
-    val outputDirectory: DirectoryProperty = objects.directoryProperty()
+    val outputDirectory: Property<String> = objects.property(String::class.java)
 }

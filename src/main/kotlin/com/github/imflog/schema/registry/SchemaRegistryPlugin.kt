@@ -13,6 +13,7 @@ import com.github.imflog.schema.registry.tasks.register.RegisterSubjectExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import java.io.File
 
 class SchemaRegistryPlugin : Plugin<Project> {
 
@@ -64,7 +65,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     it.basicAuth.set(basicAuthExtension.basicAuth)
                     it.ssl.set(sslExtension.configs)
                     it.subjects.set(registerExtension.subjects)
-                    it.outputDirectory.set(globalExtension.outputDirectory)
+                    it.outputDirectory.set(layout.dir(globalExtension.outputDirectory.map { outDir -> File(outDir) }))
                 }
 
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)

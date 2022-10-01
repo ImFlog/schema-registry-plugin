@@ -4,7 +4,6 @@ import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.tasks.BaseTaskAction
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
-import org.gradle.api.file.Directory
 import org.gradle.api.logging.Logging
 import java.io.File
 
@@ -14,11 +13,11 @@ class RegisterTaskAction(
     rootDir: File,
     private val subjects: List<RegisterSubject>,
     quietLogging: Boolean,
-    outputDir: Directory?
+    outputDir: File?
 ) : BaseTaskAction(client, rootDir, quietLogging) {
 
     private val logger = Logging.getLogger(RegisterTaskAction::class.java)
-    private val outputFile = outputDir?.file("register.csv")
+    private val outputFile = outputDir?.resolve("registered.csv")
 
     fun run(): Int {
         var errorCount = 0
@@ -51,11 +50,11 @@ class RegisterTaskAction(
 
     private fun writeOutputFileHeader() {
         if (subjects.isNotEmpty() && outputFile != null) {
-            outputFile.asFile.writeText("subject; path; id\n")
+            outputFile.writeText("subject, path, id\n")
         }
     }
 
     private fun writeRegisteredSchemaOutput(subject: String, path: String, schemaId: Int) {
-        outputFile?.asFile?.writeText("$subject; $path; $schemaId\n")
+        outputFile?.appendText("$subject, $path, $schemaId\n")
     }
 }

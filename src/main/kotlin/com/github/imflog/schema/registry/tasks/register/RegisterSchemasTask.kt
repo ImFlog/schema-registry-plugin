@@ -58,7 +58,7 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
             project.rootDir,
             subjects.get(),
             quietLogging.get(),
-            outputDirectory.orNull
+            outputDirectory.orNull?.asFile
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not registered, see logs for details", Throwable())
