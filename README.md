@@ -30,6 +30,7 @@ schemaRegistry {
   This can be useful if you test the compatibility of a lot of schema.
   Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
 * `outputDirectory` is the directory where action result will be stored as files (only register for now).
+  This is an optional parameter.
 
 ### Download schemas
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
