@@ -47,9 +47,9 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     @Input
     val quietLogging: Property<Boolean> = objects.property(Boolean::class.java)
 
-    @InputDirectory
+    @Input
     @Optional
-    val outputDirectory: DirectoryProperty = objects.directoryProperty()
+    val outputDirectory: Property<String> = objects.property(String::class.java)
 
     @TaskAction
     fun registerSchemas() {
@@ -58,7 +58,7 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
             project.rootDir,
             subjects.get(),
             quietLogging.get(),
-            outputDirectory.orNull?.asFile
+            outputDirectory.orNull
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not registered, see logs for details", Throwable())

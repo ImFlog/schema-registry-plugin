@@ -241,7 +241,7 @@ class RegisterTaskActionTest {
             folderRule.root,
             subjects,
             false,
-            resultFolder
+            resultFolder.path
         ).run()
 
         // then

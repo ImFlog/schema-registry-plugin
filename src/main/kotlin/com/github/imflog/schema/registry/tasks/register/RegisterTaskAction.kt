@@ -13,11 +13,13 @@ class RegisterTaskAction(
     rootDir: File,
     private val subjects: List<RegisterSubject>,
     quietLogging: Boolean,
-    outputDir: File?
+    outputDir: String?
 ) : BaseTaskAction(client, rootDir, quietLogging) {
 
     private val logger = Logging.getLogger(RegisterTaskAction::class.java)
-    private val outputFile = outputDir?.resolve("registered.csv")
+    private val outputFile = outputDir?.let {
+        rootDir.resolve(it).resolve("registered.csv")
+    }
 
     fun run(): Int {
         var errorCount = 0

@@ -6,9 +6,9 @@ import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
-import java.io.File
 import org.apache.avro.Schema
 import org.slf4j.Logger
+import java.io.File
 
 abstract class BaseTaskAction(
     val client: SchemaRegistryClient,
@@ -23,7 +23,7 @@ abstract class BaseTaskAction(
         references: List<SchemaReference>,
         localReferences: Map<String, String>
     ): ParsedSchema {
-        val schemaContent = File(rootDir.toURI()).resolve(schemaPath).readText()
+        val schemaContent = rootDir.resolve(schemaPath).readText()
         return if (localReferences.isEmpty()) {
             parseSchemaWithRemoteReferences(subject, schemaType, schemaContent, references)
         } else {
@@ -72,7 +72,7 @@ abstract class BaseTaskAction(
         localReferences: Map<String, String>
     ): ParsedSchema {
         val parser = Schema.Parser()
-        localReferences.mapValues { File(rootDir.toURI()).resolve(it.value) }.entries.reversed()
+        localReferences.mapValues { rootDir.resolve(it.value) }.entries.reversed()
             .forEach { parser.parse(it.value.readText()) }
         val parsedLocalSchema = parser.parse(schemaString)
         return client.parseSchema(AvroSchema.TYPE, parsedLocalSchema.toString(), emptyList())
