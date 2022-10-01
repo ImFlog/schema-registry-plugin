@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "1.7.0-SNAPSHOT"
+version = "1.7.0"
 
 plugins {
     kotlin("jvm") version "1.7.10"
