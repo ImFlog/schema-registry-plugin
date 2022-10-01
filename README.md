@@ -6,48 +6,7 @@ The aim of this plugin is to adapt the [Confluent schema registry maven plugin](
 ## Usage
 
 The plugin requires external dependencies coming from Confluent and Jitpack repositories.
-
-### `plugins` block
-```groovy
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-    maven {
-      url "https://packages.confluent.io/maven/"
-    }
-    maven {
-      url = uri("https://jitpack.io")
-    }
-  }
-}
-
-plugins {
-  id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
-}
-```
-
-### `buildscript` block
-```groovy
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-    maven {
-      url "https://packages.confluent.io/maven/"
-    }
-    maven {
-      url = uri("https://jitpack.io")
-    }
-  }
-
-  dependencies {
-    classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X"
-  }
-}
-```
+You can follow the instructions on the [gradle plugin portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin).
 
 ## Tasks
 When you install the plugin, four tasks are added under `registry` group:
@@ -62,13 +21,15 @@ What these tasks do and how to configure them is described in the following sect
 ```groovy
 schemaRegistry {
     url = 'http://registry-url:8081/'
-    quiet = true 
+    quiet = true
+    outputDirectory = "/home/kafka/results"
 }
 ```
 * `url` is where the script can reach the Schema Registry.
 * `quiet` is whether you want to disable "INFO" level logs.
   This can be useful if you test the compatibility of a lot of schema.
   Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
+* `outputDirectory` is the directory where action result will be stored as files (only register for now).
 
 ### Download schemas
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
@@ -159,6 +120,9 @@ If you have local references to add before calling the register,
 you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
+
+A registered.csv file will be created with the following format `subject, path, id` 
+if you need information about the registered id.
 
 :warning: For now you cannot mix local and remote reference (parse order issues).
 :warning: The local reference is not yet supported for JSON and PROTOBUF.
