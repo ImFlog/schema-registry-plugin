@@ -17,7 +17,7 @@ abstract class KafkaTestContainersUtils {
     companion object {
         private const val SCHEMA_REGISTRY_INTERNAL_PORT = 8081
 
-        private val CONFLUENT_VERSION = System.getenv().getOrDefault("KAFKA_VERSION", "7.2.1")
+        private val CONFLUENT_VERSION = System.getenv().getOrDefault("KAFKA_VERSION", "7.2.2")
         private val KAFKA_NETWORK_ALIAS = "kafka-${CONFLUENT_VERSION}"
 
         private val network: Network = Network.newNetwork()
