@@ -125,8 +125,18 @@ The addLocalReference calls can be chained.
 A registered.csv file will be created with the following format `subject, path, id` 
 if you need information about the registered id.
 
+#### Avro
 :warning: For now you cannot mix local and remote reference (parse order issues).
-:warning: The local reference is not yet supported for JSON and PROTOBUF.
+
+#### Json
+Mixing local and remote references is perfectly fine for JSON.
+
+If you need to add reference to local schema to a JSON schema, make sure that the local reference contains a `$id` attribute.
+This id is the value that need to be put on the `$ref` part.
+For more concrete example, take a look at the [json example](examples/json/build.gradle).
+
+#### Protobuf
+:warning: Local references is not yet supported for PROTOBUF.
 
 ### Configure subjects
 This task sets the schema compatibility level for registered subjects.

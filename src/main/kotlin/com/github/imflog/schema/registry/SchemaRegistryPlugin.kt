@@ -13,7 +13,6 @@ import com.github.imflog.schema.registry.tasks.register.RegisterSubjectExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import java.io.File
 
 class SchemaRegistryPlugin : Plugin<Project> {
 
@@ -49,10 +48,13 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 ConfigSubjectExtension::class.java
             )
 
+            globalExtension.quiet.map {
+                LoggingUtils.quietLogging = it
+            }
+
             tasks.register(DownloadTask.TASK_NAME, DownloadTask::class.java)
                 .configure { downloadTask ->
                     downloadTask.url.set(globalExtension.url)
-                    downloadTask.quietLogging.set(globalExtension.quiet)
                     downloadTask.basicAuth.set(basicAuthExtension.basicAuth)
                     downloadTask.ssl.set(sslExtension.configs)
                     downloadTask.subjects.set(downloadExtension.subjects)
@@ -61,7 +63,6 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
                 .configure { registerSchemasTask ->
                     registerSchemasTask.url.set(globalExtension.url)
-                    registerSchemasTask.quietLogging.set(globalExtension.quiet)
                     registerSchemasTask.basicAuth.set(basicAuthExtension.basicAuth)
                     registerSchemasTask.ssl.set(sslExtension.configs)
                     registerSchemasTask.subjects.set(registerExtension.subjects)
@@ -71,7 +72,6 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
                 .configure { compatibilityTask ->
                     compatibilityTask.url.set(globalExtension.url)
-                    compatibilityTask.quietLogging.set(globalExtension.quiet)
                     compatibilityTask.basicAuth.set(basicAuthExtension.basicAuth)
                     compatibilityTask.ssl.set(sslExtension.configs)
                     compatibilityTask.subjects.set(compatibilityExtension.subjects)

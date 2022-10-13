@@ -1,19 +1,19 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
-import com.github.imflog.schema.registry.tasks.BaseTaskAction
+import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
+import com.github.imflog.schema.registry.parser.SchemaParser
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
+import org.gradle.api.logging.Logging
 import java.io.File
 import java.io.IOException
-import org.gradle.api.logging.Logging
 
 class CompatibilityTaskAction(
-    client: SchemaRegistryClient,
-    rootDir: File,
+    private val client: SchemaRegistryClient,
+    private val rootDir: File,
     private val subjects: List<CompatibilitySubject>,
-    quietLogging: Boolean
-) : BaseTaskAction(client, rootDir, quietLogging) {
+) {
 
     private val logger = Logging.getLogger(CompatibilityTaskAction::class.java)
 
@@ -22,13 +22,14 @@ class CompatibilityTaskAction(
         for ((subject, path, type, remoteReferences, localReferences) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
-                val parsedSchema = parseSchemaFromFile(
-                    subject,
-                    path,
-                    type,
-                    remoteReferences,
-                    localReferences
-                )
+                val parsedSchema = SchemaParser
+                    .provide(type, client, rootDir)
+                    .parseSchemaFromFile(
+                        subject,
+                        path,
+                        remoteReferences,
+                        localReferences
+                    )
                 val isCompatible = client.testCompatibility(subject, parsedSchema)
                 if (!isCompatible) {
                     try {

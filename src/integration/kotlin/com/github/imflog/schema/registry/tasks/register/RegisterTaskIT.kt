@@ -171,30 +171,20 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                     SchemaType.JSON,
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-    
-                        "definitions": {
-                            "User": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"}
-                                },
-                                "additionalProperties": false
-                            }
-                        }
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"}
+                        },
+                        "additionalProperties": false
                     }""",
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-    
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": {"type": "string"},
-                                    "user": {"type": "User"}
-                                },
-                                "additionalProperties": false
-                            }
-                        }
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "user": {"${"$"}ref": "User"}
+                        },
+                        "additionalProperties": false
                     }"""
                 ),
                 Arguments.of(
@@ -244,12 +234,9 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                     }"""
                 ),
                 Arguments.of(
-                    // TODO: definitions is for draft 4. Also we are not defining objects but definitions ...
-                    //  See https://json-schema.org/understanding-json-schema/structuring.html
                     SchemaType.JSON,
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-
                         "${"$"}id": "User",
                         "type": "object",
                         "properties": {
@@ -259,12 +246,10 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                     }""",
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-
-                        "${"$"}id": "Player",
                         "type": "object",
                         "properties": {
                             "identifier": {"type": "string"},
-                            "user": {"${"$"}ref": "classpath://json/user.json"}
+                            "user": {"${"$"}ref": "User"}
                         },
                         "additionalProperties": false
                     }"""

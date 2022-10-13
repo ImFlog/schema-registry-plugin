@@ -55,7 +55,6 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false,
             null
         ).run()
 
@@ -104,7 +103,6 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false,
             null
         ).run()
 
@@ -190,12 +188,12 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false,
             null
         ).run()
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(registryClient.getLatestSchemaMetadata("test")).isNotNull
     }
 
     @Test
@@ -240,7 +238,6 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root,
             subjects,
-            false,
             resultFolder.path
         ).run()
 

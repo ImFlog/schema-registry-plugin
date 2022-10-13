@@ -1,7 +1,9 @@
 package com.github.imflog.schema.registry.tasks.register
 
+import com.github.imflog.schema.registry.LocalReference
+import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
 import com.github.imflog.schema.registry.SchemaType
-import com.github.imflog.schema.registry.tasks.BaseTaskAction
+import com.github.imflog.schema.registry.parser.SchemaParser
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
@@ -9,12 +11,11 @@ import java.io.File
 
 
 class RegisterTaskAction(
-    client: SchemaRegistryClient,
-    rootDir: File,
+    private val client: SchemaRegistryClient,
+    private val rootDir: File,
     private val subjects: List<RegisterSubject>,
-    quietLogging: Boolean,
     outputDir: String?
-) : BaseTaskAction(client, rootDir, quietLogging) {
+) {
 
     private val logger = Logging.getLogger(RegisterTaskAction::class.java)
     private val outputFile = outputDir?.let {
@@ -40,10 +41,13 @@ class RegisterTaskAction(
         subject: String,
         path: String,
         type: SchemaType,
-        references: MutableList<SchemaReference>,
-        localReferences: MutableMap<String, String>
+        references: List<SchemaReference>,
+        localReferences: List<LocalReference>
     ): Int {
-        val parsedSchema = parseSchemaFromFile(subject, path, type, references, localReferences)
+        // TODO: Can we improve this ?
+        val parsedSchema = SchemaParser
+            .provide(type, client, rootDir)
+            .parseSchemaFromFile(subject, path, references, localReferences)
         logger.infoIfNotQuiet("Registering $subject (from $path)")
         val schemaId = client.register(subject, parsedSchema)
         logger.infoIfNotQuiet("$subject (from $path) has been registered with id $schemaId")
