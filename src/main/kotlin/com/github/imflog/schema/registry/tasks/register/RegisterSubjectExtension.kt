@@ -37,13 +37,11 @@ data class RegisterSubject(
     val localReferences: MutableList<LocalReference> = mutableListOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): RegisterSubject {
-        if (localReferences.isNotEmpty()) throw MixedReferenceException()
         references.add(SchemaReference(name, subject, version))
         return this
     }
 
     fun addLocalReference(name: String, path: String): RegisterSubject {
-        if (references.isNotEmpty()) throw MixedReferenceException() // We can probably lift this constraint
         localReferences.add(LocalReference(name, path))
         return this
     }

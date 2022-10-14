@@ -44,7 +44,6 @@ class RegisterTaskAction(
         references: List<SchemaReference>,
         localReferences: List<LocalReference>
     ): Int {
-        // TODO: Can we improve this ?
         val parsedSchema = SchemaParser
             .provide(type, client, rootDir)
             .parseSchemaFromFile(subject, path, references, localReferences)

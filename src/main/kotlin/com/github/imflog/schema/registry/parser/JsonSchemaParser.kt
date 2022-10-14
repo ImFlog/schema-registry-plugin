@@ -17,9 +17,6 @@ class JsonSchemaParser(
         private const val DEFS_NODE = "${"$"}defs"
     }
 
-    // TODO:
-    //  * Test local + remote
-    //  * Create an unit test that use https://github.com/everit-org/json-schema to check the schema validity
     override fun resolveLocalReferences(
         subject: String,
         schemaContent: String,
@@ -27,7 +24,12 @@ class JsonSchemaParser(
     ): String {
         val jsonObj = JSONObject(schemaContent)
         val localDefNodes = JSONObject()
-        localReferences.forEach { reference -> localDefNodes.put(reference.name, JSONObject(reference.content(rootDir))) }
+        localReferences.forEach { reference ->
+            localDefNodes.put(
+                reference.name,
+                JSONObject(reference.content(rootDir))
+            )
+        }
         jsonObj.append(DEFS_NODE, localDefNodes)
         return jsonObj.toString()
     }
