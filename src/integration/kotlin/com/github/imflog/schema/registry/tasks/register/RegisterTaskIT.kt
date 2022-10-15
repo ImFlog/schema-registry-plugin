@@ -103,7 +103,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     ) {
         folderRule.create()
         folderRule.newFolder(type.name)
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-local"
         val extension = type.extension
 
         val userPath = "$type/user.$extension"
@@ -111,7 +111,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         userFile.writeText(userSchema)
 
         val playerPath = "$type/player.$extension"
-        val playerSubject = "$subjectName-player"
+        val playerSubject = "$subjectName-player-local"
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchema)
 
@@ -158,24 +158,24 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         //  Also, when all format support mixed local + remote, we will keep only this test.
         folderRule.create()
         folderRule.newFolder(type.name)
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-mixed"
         val extension = type.extension
 
         // Local
         val userPath = "$type/user.$extension"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema)
-        val userSubject = "$subjectName-user-local"
+        val userSubject = "$subjectName-user-mixed"
 
         // Remote
         val addressPath = "$type/address.$extension"
         val addressFile = folderRule.newFile(addressPath)
         addressFile.writeText(addressSchema)
         val addressReferenceName = "Address"
-        val addressSubject = "$subjectName-address-remote"
+        val addressSubject = "$subjectName-address-mixed"
 
         val playerPath = "$type/player.$extension"
-        val playerSubject = "$subjectName-player"
+        val playerSubject = "$subjectName-player-mixed"
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchema)
 

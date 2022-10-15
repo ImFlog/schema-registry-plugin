@@ -9,12 +9,15 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
+//import org.skyscreamer.jsonassert.JSONAssert
+//import org.skyscreamer.jsonassert.JSONCompareMode
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class JsonSchemaParserTest {
+class AvroSchemaParserTest {
 
     private val schemaRegistryClient = MockSchemaRegistryClient()
     private val folderRule: TemporaryFolder = TemporaryFolder().apply { create() }
-    private val parser = JsonSchemaParser(
+    private val parser = AvroSchemaParser(
         schemaRegistryClient,
         folderRule.root
     )
@@ -23,23 +26,19 @@ class JsonSchemaParserTest {
         private const val ADDRESS_REFERENCE_NAME = "Address"
         private const val USER_REFERENCE_NAME = "User"
         private const val ADDRESS_SCHEMA = """{
-            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-            "${"$"}id": "$ADDRESS_REFERENCE_NAME",
-            "type": "object",
-            "properties": {
-                "street": {"type": "string"}
-            },
-            "additionalProperties": false
+             "type": "record",
+             "name": "$ADDRESS_REFERENCE_NAME",
+             "fields": [
+                {"name": "street", "type": "string" }
+             ]
         }"""
         private const val USER_SCHEMA = """{
-            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-            "${"$"}id": "$USER_REFERENCE_NAME",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "address": {"${"$"}ref": "$ADDRESS_REFERENCE_NAME"}
-            },
-            "additionalProperties": false
+             "type": "record",
+             "name": "$USER_REFERENCE_NAME",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "address", "type": "$ADDRESS_REFERENCE_NAME"}
+             ]
         }"""
     }
 
@@ -65,15 +64,20 @@ class JsonSchemaParserTest {
     }
 
     private fun givenALocalReference(): LocalReference {
-        val addressLocalFile = folderRule.root.resolve("Address.json")
+        val addressLocalFile = folderRule.root.resolve("Address.avsc")
         addressLocalFile.writeText(ADDRESS_SCHEMA)
         return LocalReference(ADDRESS_REFERENCE_NAME, addressLocalFile.path)
     }
 
     private fun localSchemaShouldBeAppended(resolvedSchema: String) {
         Assertions
-            .assertThat(JSONObject(resolvedSchema).getJSONArray("${"$"}defs").get(0))
+            .assertThat(
+                JSONObject(resolvedSchema)
+                    .getJSONArray("fields")
+                    .getJSONObject(1)
+                    .getJSONObject("type")
+            )
             .usingRecursiveComparison() // To check the content of the JSON Objects instead of the equal method
-            .isEqualTo(JSONObject(mapOf(ADDRESS_REFERENCE_NAME to JSONObject(ADDRESS_SCHEMA))))
+            .isEqualTo(JSONObject(ADDRESS_SCHEMA))
     }
 }
