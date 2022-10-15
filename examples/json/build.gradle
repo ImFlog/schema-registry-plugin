@@ -9,7 +9,7 @@ schemaRegistry {
 
     register {
         subject('company', 'schemas/json/company.json', 'JSON')
-//            .addLocalReference('Address', 'schemas/json/location-address.json')
+            .addLocalReference('Address', 'schemas/json/location-address.json')
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
         subject('location-address', 'schemas/json/location-address.json', 'JSON')

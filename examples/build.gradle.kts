@@ -1,20 +1,15 @@
 buildscript {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
         maven {
             url = uri("https://packages.confluent.io/maven/")
         }
     }
-
-    dependencies {
-        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:1.7.0-SNAPSHOT")
-    }
 }
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.7.0-SNAPSHOT" apply false
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.8.0" apply false
     id("com.avast.gradle.docker-compose") version "0.16.8" apply true
 }
 
@@ -42,8 +37,8 @@ subprojects {
     dockerCompose {
         useComposeFiles.addAll(listOf("${project.rootDir}/docker-compose.yml"))
         captureContainersOutput.set(false)
-        stopContainers.set(false) // rollback to true
-        removeContainers.set(false) // rollback to true
+        stopContainers.set(true)
+        removeContainers.set(true)
         removeVolumes.set(true)
         removeOrphans.set(true)
         forceRecreate.set(true)
