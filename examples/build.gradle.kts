@@ -9,16 +9,17 @@ buildscript {
 
 plugins {
     // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.7.0" apply false
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.8.0" apply false
     id("com.avast.gradle.docker-compose") version "0.16.8" apply true
 }
+
 
 subprojects {
     apply(plugin = "docker-compose")
 
     val currentProject = this
     // Creates a run task for all the project
-    val runTask = tasks.register("run") {
+    tasks.register("run") {
         this.group = "build"
         val register = currentProject.tasks.getByName("registerSchemasTask")
         val configure = currentProject.tasks.getByName("configSubjectsTask")

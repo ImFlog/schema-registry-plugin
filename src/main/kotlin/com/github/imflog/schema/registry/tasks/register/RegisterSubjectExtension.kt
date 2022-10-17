@@ -1,5 +1,6 @@
 package com.github.imflog.schema.registry.tasks.register
 
+import com.github.imflog.schema.registry.LocalReference
 import com.github.imflog.schema.registry.MixedReferenceException
 import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
@@ -33,17 +34,15 @@ data class RegisterSubject(
     val file: String,
     val type: SchemaType,
     val references: MutableList<SchemaReference> = mutableListOf(),
-    val localReferences: MutableMap<String, String> = mutableMapOf()
+    val localReferences: MutableList<LocalReference> = mutableListOf()
 ) {
     fun addReference(name: String, subject: String, version: Int): RegisterSubject {
-        if (localReferences.isNotEmpty()) throw MixedReferenceException()
         references.add(SchemaReference(name, subject, version))
         return this
     }
 
     fun addLocalReference(name: String, path: String): RegisterSubject {
-        if (references.isNotEmpty()) throw MixedReferenceException()
-        localReferences[name] = path
+        localReferences.add(LocalReference(name, path))
         return this
     }
 }

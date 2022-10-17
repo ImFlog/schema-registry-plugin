@@ -36,9 +36,6 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)
 
     @Input
-    val quietLogging: Property<Boolean> = objects.property(Boolean::class.java)
-
-    @Input
     @Optional
     val outputDirectory: Property<String> = objects.property(String::class.java)
 
@@ -48,7 +45,6 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
             project.rootDir,
             subjects.get(),
-            quietLogging.get(),
             outputDirectory.orNull
         ).run()
         if (errorCount > 0) {

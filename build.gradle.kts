@@ -48,7 +48,6 @@ java {
 val junitVersion = "5.7.2"
 val mockkVersion = "1.11.0"
 val assertJVersion = "3.20.2"
-val awaitabilityVersion = "4.0.3"
 dependencies {
     testImplementation(gradleTestKit())
     testImplementation("org.junit.jupiter", "junit-jupiter-api", junitVersion)

@@ -1,1 +1,0 @@
-{"type":"record","name":"User","namespace":"com.github.imflog","fields":[{"name":"id","type":"string"},{"name":"fist_name","type":"string"},{"name":"last_name","type":"string"},{"name":"thumbnail_url","type":"string"},{"name":"email","type":"string"},{"name":"company","type":"Company"}]}

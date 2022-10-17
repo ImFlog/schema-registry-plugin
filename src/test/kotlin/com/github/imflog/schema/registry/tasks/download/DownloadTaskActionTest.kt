@@ -73,15 +73,14 @@ class DownloadTaskActionTest {
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
             ),
-            false
         ).run()
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull
         Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc")).isNotNull()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc")).isNotNull
         Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc").readText())
             .containsIgnoringCase("foo")
     }
@@ -145,7 +144,6 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("te.*", outputDir, null, true)
             ),
-            false
         ).run()
 
         // then
@@ -192,7 +190,6 @@ class DownloadTaskActionTest {
             registryClient,
             folderRule.root,
             arrayListOf(DownloadSubject(subject, outputDir)),
-            false
         ).run()
 
         // then
@@ -227,7 +224,6 @@ class DownloadTaskActionTest {
                 DownloadSubject(invalidSubjectPattern, outputDir, null, true),
                 DownloadSubject("test", outputDir)
             ),
-            false
         ).run()
 
         // then
@@ -280,12 +276,11 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
             ),
-            false
         ).run()
 
         // Then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull
         Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
         Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())

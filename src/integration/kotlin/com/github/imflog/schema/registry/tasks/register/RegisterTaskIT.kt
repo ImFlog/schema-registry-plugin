@@ -90,7 +90,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 """subject, path, id
                 |$userSubject, ${userFile.absolutePath}, \d
                 |$playerSubject, $playerPath, \d
-                |""".trimMargin())
+                |""".trimMargin()
+            )
     }
 
     @ParameterizedTest
@@ -102,7 +103,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     ) {
         folderRule.create()
         folderRule.newFolder(type.name)
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-local"
         val extension = type.extension
 
         val userPath = "$type/user.$extension"
@@ -110,7 +111,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         userFile.writeText(userSchema)
 
         val playerPath = "$type/player.$extension"
-        val playerSubject = "$subjectName-player"
+        val playerSubject = "$subjectName-player-local"
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchema)
 
@@ -143,8 +144,71 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
             .withDebug(true)
             .build()
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-
     }
+
+    @ParameterizedTest
+    @ArgumentsSource(RemoteLocalSchemaArgumentProvider::class)
+    fun `Should register mixed references`(
+        type: SchemaType,
+        addressSchema: String,
+        userSchema: String,
+        playerSchema: String
+    ) {
+        // TODO: Instead of repeating code, we could create build.gradle files in resources.
+        //  Also, when all format support mixed local + remote, we will keep only this test.
+        folderRule.create()
+        folderRule.newFolder(type.name)
+        val subjectName = "parameterized-${type.name}-mixed"
+        val extension = type.extension
+
+        // Local
+        val userPath = "$type/user.$extension"
+        val userFile = folderRule.newFile(userPath)
+        userFile.writeText(userSchema)
+        val userSubject = "$subjectName-user-mixed"
+
+        // Remote
+        val addressPath = "$type/address.$extension"
+        val addressFile = folderRule.newFile(addressPath)
+        addressFile.writeText(addressSchema)
+        val addressReferenceName = "Address"
+        val addressSubject = "$subjectName-address-mixed"
+
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player-mixed"
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchema)
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                register {
+                    subject('$addressSubject', '${addressFile.absolutePath}', '${type.name}')
+                    subject('$playerSubject', '$playerPath', '${type.name}')
+                        .addLocalReference('$userSubject', '$userPath')
+                        .addReference('$addressReferenceName', '$addressSubject', 1)
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
 
     private class SchemaArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
@@ -171,30 +235,20 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                     SchemaType.JSON,
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-    
-                        "definitions": {
-                            "User": {
-                                "type": "object",
-                                "properties": {
-                                    "name": {"type": "string"}
-                                },
-                                "additionalProperties": false
-                            }
-                        }
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"}
+                        },
+                        "additionalProperties": false
                     }""",
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-    
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": {"type": "string"},
-                                    "user": {"type": "User"}
-                                },
-                                "additionalProperties": false
-                            }
-                        }
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "user": {"${"$"}ref": "User"}
+                        },
+                        "additionalProperties": false
                     }"""
                 ),
                 Arguments.of(
@@ -243,37 +297,28 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                         ]
                     }"""
                 ),
+                Arguments.of(
+                    SchemaType.JSON,
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "User",
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"}
+                        },
+                        "additionalProperties": false
+                    }""",
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "user": {"${"$"}ref": "User"}
+                        },
+                        "additionalProperties": false
+                    }"""
+                ),
                 // TODO: Uncomment this when the other types support local references
-//                Arguments.of(
-//                    SchemaType.JSON,
-//                    """{
-//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-//
-//                        "definitions": {
-//                            "User": {
-//                                "type": "object",
-//                                "properties": {
-//                                    "name": {"type": "string"}
-//                                },
-//                                "additionalProperties": false
-//                            }
-//                        }
-//                    }""",
-//                    """{
-//                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-//
-//                        "definitions": {
-//                            "Player": {
-//                                "type": "object",
-//                                "properties": {
-//                                    "identifier": {"type": "string"},
-//                                    "user": {"type": "User"}
-//                                },
-//                                "additionalProperties": false
-//                            }
-//                        }
-//                    }"""
-//                ),
 //                Arguments.of(
 //                    SchemaType.PROTOBUF,
 //                    """
@@ -296,6 +341,44 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 //                    }
 //                    """,
 //                )
+            )
+    }
+
+    private class RemoteLocalSchemaArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    SchemaType.JSON,
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "Address",
+                        "type": "object",
+                        "properties": {
+                            "street": {"type": "string"}
+                        },
+                        "additionalProperties": false
+                    }""",
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "User",
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "address": {"${"$"}ref": "Address"}
+                        },
+                        "additionalProperties": false
+                    }""",
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "Player",
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "user": {"${"$"}ref": "User"}
+                        },
+                        "additionalProperties": false
+                    }"""
+                )
             )
     }
 }

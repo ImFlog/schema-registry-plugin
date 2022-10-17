@@ -1,20 +1,22 @@
 package com.github.imflog.schema.registry.tasks.download
 
-import com.github.imflog.schema.registry.tasks.BaseTaskAction
+import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
+import com.github.imflog.schema.registry.SchemaParsingException
+import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import com.google.common.base.Suppliers
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+import org.gradle.api.logging.Logging
 import java.io.File
 import java.util.regex.PatternSyntaxException
-import org.gradle.api.logging.Logging
 
 class DownloadTaskAction(
-    client: SchemaRegistryClient,
-    rootDir: File,
+    private val client: SchemaRegistryClient,
+    private val rootDir: File,
     private val subjects: List<DownloadSubject>,
-    quietLogging: Boolean
-) : BaseTaskAction(client, rootDir, quietLogging) {
+) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
 
@@ -89,4 +91,13 @@ class DownloadTaskAction(
             out.println(schema.toString())
         }
     }
+
+    private fun parseSchemaWithRemoteReferences(
+        subject: String,
+        schemaType: SchemaType,
+        schemaContent: String,
+        references: List<SchemaReference>,
+    ): ParsedSchema = client
+        .parseSchema(schemaType.registryType, schemaContent, references)
+        .orElseThrow { SchemaParsingException(subject, schemaType) }
 }
