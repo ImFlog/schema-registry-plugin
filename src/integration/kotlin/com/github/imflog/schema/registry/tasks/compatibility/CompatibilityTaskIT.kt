@@ -238,60 +238,37 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                     SchemaType.JSON,
                     JsonSchema(
                         """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/user.json",
-    
-                        "definitions": {
-                            "User": {
-                                "type": "object",
-                                "properties": {
-                                    "name": { "type": "string" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
-                        "properties": {
-                            "user": { "${"$"}ref": "#/definitions/User" }
-                        }
-                    }"""
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "User",
+        
+                            "type": "object",
+                            "properties": {
+                                "name": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
                     ),
                     JsonSchema(
                         """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
-    
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": { "type": "string" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
-                        
-                        "properties": {
-                            "player": { "${"$"}ref": "#/definitions/Player" }
-                        }
-                    }"""
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Player",
+                            "type": "object",
+                            "properties": {
+                                "identifier": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
                     ),
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+                        "${"$"}id": "Player",
     
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": { "type": "string" },
-                                    "user": { "${"$"}ref": "#user" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
+                        "type": "object",
                         "properties": {
-                            "player": { "${"$"}ref": "#/definitions/Player" }
-                        }
+                            "identifier": { "type": "string" },
+                            "user": { "${"$"}ref": "#User" }
+                        },
+                        "additionalProperties": false
                     }"""
                 ),
                 Arguments.of(
@@ -367,60 +344,35 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                     SchemaType.JSON,
                     JsonSchema(
                         """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/user.json",
-
-                        "definitions": {
-                            "User": {
-                                "type": "object",
-                                "properties": {
-                                    "name": { "type": "string" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
-                        "properties": {
-                            "user": { "${"$"}ref": "#/definitions/User" }
-                        }
-                    }"""
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "User",
+                            "type": "object",
+                            "properties": {
+                                "name": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
                     ),
                     JsonSchema(
                         """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
-
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": { "type": "string" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
-
-                        "properties": {
-                            "player": { "${"$"}ref": "#/definitions/Player" }
-                        }
-                    }"""
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Player",
+                            "type": "object",
+                            "properties": {
+                                "identifier": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
                     ),
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
-
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": { "type": "string" },
-                                    "user": { "${"$"}ref": "#user" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
+                        "${"$"}id": "Player",
+                        "type": "object",
                         "properties": {
-                            "player": { "${"$"}ref": "#/definitions/Player" }
-                        }
+                            "identifier": { "type": "string" },
+                            "user": { "${"$"}ref": "#User" }
+                        },
+                        "additionalProperties": false
                     }"""
                 ),
                 // TODO: Uncomment this when the other types support local references
@@ -496,56 +448,39 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 Arguments.of(
                     JsonSchema.TYPE,
                     JsonSchema(
-                        """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/user.json",
-    
-                        "definitions": {
-                            "User": {
-                                "type": "object",
-                                "properties": {
-                                    "name": { "type": "string" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
-                        "properties": {
-                            "user": { "${"$"}ref": "#/definitions/User" }
-                        }
-                    }"""
+            """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "User",
+        
+                            "type": "object",
+                            "properties": {
+                                "name": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
                     ),
                     JsonSchema(
-                        """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
-    
-                        "definitions": {
-                            "Player": {
-                                "type": "object",
-                                "properties": {
-                                    "identifier": { "type": "string" }
-                                },
-                                "additionalProperties": false
-                            }
-                        },
-                        
-                        "properties": {
-                            "player": { "${"$"}ref": "#/definitions/Player" }
-                        }
-                    }"""
+            """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Player",
+        
+                            "type": "object",
+                            "properties": {
+                                "identifier": { "type": "string" },
+                                "user": { "${"$"}ref": "#User" }
+                            },
+                            "additionalProperties": false
+                        }"""
                     ),
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "http://github.com/imflog/kafka-schema-registry/player.json",
+                        "${"$"}id": "Player",
     
-                        "definitions": {
-                            "Player": {
-                                "type": "number"
-                            }
-                        },
                         "properties": {
-                            "player": { "${"$"}ref": "#/definitions/Player" }
-                        }
+                            "identifier": {"type": "number"},
+                            "user": { "${"$"}ref": "#User" }
+                        },
+                        "additionalProperties": false
                     }"""
                 ),
                 Arguments.of(
