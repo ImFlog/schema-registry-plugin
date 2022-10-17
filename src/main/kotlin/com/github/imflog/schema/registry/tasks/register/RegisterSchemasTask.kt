@@ -41,9 +41,8 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
 
     @TaskAction
     fun registerSchemas() {
-        val client = RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get())
         val errorCount = RegisterTaskAction(
-            client,
+            RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
             project.rootDir,
             subjects.get(),
             outputDirectory.orNull

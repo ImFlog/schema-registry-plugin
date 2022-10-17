@@ -9,9 +9,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
-//import org.skyscreamer.jsonassert.JSONAssert
-//import org.skyscreamer.jsonassert.JSONCompareMode
-
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AvroSchemaParserTest {
 
