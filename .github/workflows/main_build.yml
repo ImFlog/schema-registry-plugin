@@ -13,7 +13,7 @@ jobs:
       matrix:
         kafka_version: [ "5.5.1", "6.2.6", "7.2.2" ]
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v3"
       - uses: "gradle/wrapper-validation-action@v1"
       - uses: "actions/setup-java@v2"
         with:
