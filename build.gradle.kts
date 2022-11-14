@@ -6,7 +6,7 @@ version = "1.8.1-SNASHOT"
 plugins {
     kotlin("jvm") version "1.7.20"
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "1.0.0"
+    id("com.gradle.plugin-publish") version "1.1.0"
     id("maven-publish")
 }
 
