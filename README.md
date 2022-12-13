@@ -51,11 +51,11 @@ schemaRegistry {
 }
 ```
 Here is the list of all the signatures for the `subject` extension:
-* subject(inputSubject: String, outputPath: String)
-* subject(inputSubject: String, outputPath: String, outputFileName: String)
-* subject(inputSubject: String, outputPath: String, version: Int)
-* subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String)
-* subjectPattern(inputPattern: String, outputPath: String)
+* `subject(inputSubject: String, outputPath: String)`
+* `subject(inputSubject: String, outputPath: String, outputFileName: String)`
+* `subject(inputSubject: String, outputPath: String, version: Int)`
+* `subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String)`
+* `subjectPattern(inputPattern: String, outputPath: String)`
 
 NB:
 * If not provided, the outputFileName is equal to the inputSubject.
@@ -90,8 +90,18 @@ you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
 
+#### Avro
 :warning: For now you cannot mix local and remote reference (parse order issues).
-:warning: The local reference is not yet supported for JSON and PROTOBUF.
+
+#### Json
+Mixing local and remote references is perfectly fine for JSON.
+
+If you need to add reference to local schema to a JSON schema, make sure that the local reference contains a `$id` attribute.
+This id is the value that need to be put on the `$ref` part.
+For more concrete example, take a look at the [json example](examples/json/build.gradle).
+
+#### Protobuf
+:warning: Local references is not yet supported for PROTOBUF.
 
 ### Register schemas
 Once again the name speaks for itself.

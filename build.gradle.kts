@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "1.8.1-SNASHOT"
+version = "1.8.1-SNAPSHOT"
 
 plugins {
     kotlin("jvm") version "1.7.22"
@@ -17,7 +17,7 @@ repositories {
 }
 
 // Dependencies versions
-val kotlinVersion = "1.6.0"
+val kotlinVersion = "1.7.22"
 val confluentVersion = "7.2.2"
 dependencies {
     implementation(gradleApi())
