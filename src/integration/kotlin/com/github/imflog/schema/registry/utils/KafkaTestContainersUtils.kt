@@ -17,7 +17,7 @@ abstract class KafkaTestContainersUtils {
     companion object {
         private const val SCHEMA_REGISTRY_INTERNAL_PORT = 8081
 
-        private val CONFLUENT_VERSION = System.getenv().getOrDefault("KAFKA_VERSION", "7.2.2")
+        private val CONFLUENT_VERSION = System.getenv().getOrDefault("KAFKA_VERSION", "7.3.1")
         private val KAFKA_NETWORK_ALIAS = "kafka-${CONFLUENT_VERSION}"
 
         private val network: Network = Network.newNetwork()
@@ -33,7 +33,6 @@ abstract class KafkaTestContainersUtils {
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9092")
                 .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
         }
-
 
         val schemaRegistrySslContainer: GenericContainer<*> by lazy {
             GenericContainer("confluentinc/cp-schema-registry:$CONFLUENT_VERSION")
