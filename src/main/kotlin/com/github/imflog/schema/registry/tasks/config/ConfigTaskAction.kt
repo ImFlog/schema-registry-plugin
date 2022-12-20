@@ -1,6 +1,6 @@
 package com.github.imflog.schema.registry.tasks.config
 
-import io.confluent.kafka.schemaregistry.avro.AvroCompatibilityLevel
+import io.confluent.kafka.schemaregistry.CompatibilityLevel
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import org.gradle.api.logging.Logging
@@ -17,14 +17,12 @@ class ConfigTaskAction(
         for ((subject, config) in subjects) {
             logger.debug("$subject: setting config $config")
             try {
-                // validate that subject pair includes a valid AvroCompatibilityValue:
-                // can't use the enum directly due to https://youtrack.jetbrains.net/issue/KT-31244
-                @Suppress("DEPRECATION")
-                AvroCompatibilityLevel.valueOf(config)
-                client.updateCompatibility(subject, config)
-            } catch (ex: IllegalArgumentException) {
-                logger.error("'$config' is not a valid schema registry compatibility", ex)
-                errorCount++
+                if (CompatibilityLevel.forName(config) == null) {
+                    logger.error("'$config' is not a valid schema registry compatibility")
+                    errorCount++
+                } else {
+                    client.updateCompatibility(subject, config)
+                }
             } catch (ex: RestClientException) {
                 logger.error("Error during compatibility update for $subject", ex)
                 errorCount++
