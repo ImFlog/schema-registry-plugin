@@ -161,6 +161,87 @@ class CompatibilityTaskActionTest {
         Assertions.assertThat(errorCount).isEqualTo(0)
     }
 
+
+    @Test
+    fun `Should verify compatibility with local and remote references`() {
+        // given
+        val registryClient = MockSchemaRegistryClient()
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        // Register dependency
+        registryClient.register(
+            "Street",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Street",
+                    "fields": [
+                        {"name": "street", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        folderRule.newFolder("src", "main", "avro", "external")
+        File(folderRule.root, "src/main/avro/external/address.avsc").writeText(
+            """{
+                    "type": "record",
+                    "name": "Address",
+                    "fields": [
+                        {"name": "city", "type": "string" },
+                        {"name": "street", "type": "Street" }
+                    ]
+                }"""
+        )
+
+        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "address", "type": [ "null", "Address" ], "default": null}
+             ]
+            }
+        """
+        )
+
+        val subjects = listOf(
+            CompatibilitySubject(
+                "test",
+                "src/main/avro/external/test.avsc",
+                SchemaType.AVRO
+            )
+                .addReference("Street", "Street", 1)
+                .addLocalReference("Address", "src/main/avro/external/address.avsc")
+        )
+
+        // when
+        val errorCount = CompatibilityTaskAction(
+            registryClient,
+            folderRule.root,
+            subjects
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+    }
+
     @Test
     fun `Should fail on incompatible schemas`() {
         // given

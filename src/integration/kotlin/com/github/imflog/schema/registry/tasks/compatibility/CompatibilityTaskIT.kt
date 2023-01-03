@@ -202,6 +202,69 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
+
+    @ParameterizedTest
+    @ArgumentsSource(SchemaLocalAndRemoteReferenceSuccessArgumentProvider::class)
+    fun `CompatibilityTask should succeed for compatible schemas with local and remote references`(
+        type: SchemaType,
+        carSchema: ParsedSchema,
+        userSchema: ParsedSchema,
+        playerSchema: ParsedSchema,
+        playerSchemaUpdated: String
+    ) {
+        folderRule.create()
+        folderRule.newFolder(type.name)
+
+        val subjectName = "parameterized-$type"
+
+        val carSubject = "$subjectName-car"
+        client.register(carSubject, carSchema)
+
+        val playerPath = "$type/player.${type.extension}"
+        val playerSubject = "$subjectName-player"
+
+        client.register(playerSubject, playerSchema)
+
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchemaUpdated)
+
+        val userPath = "$type/user.${type.extension}"
+        val userFile = folderRule.newFile(userPath)
+        userFile.writeText(userSchema.canonicalString())
+
+        // Small trick, for protobuf the name to import is not User but user.proto
+        val carReferenceName = if (type == SchemaType.PROTOBUF) "car.proto" else "Car"
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                compatibility {
+                    subject('$playerSubject', '${playerFile.absolutePath}', "$type")
+                        .addReference('$carReferenceName', '$carSubject', 1)
+                        .addLocalReference('$referenceName', '$userPath')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
     private class SchemaSuccessArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
@@ -305,6 +368,121 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                     }
                     """
                 )
+            )
+    }
+
+    private class SchemaLocalAndRemoteReferenceSuccessArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    SchemaType.AVRO,
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "Car",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }"""
+                    ),
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" },
+                            { "name": "car", "type": "Car"] }
+                        ]
+                    }"""
+                    ),
+                    AvroSchema(
+                        """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }
+                        ]
+                    }"""
+                    ),
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" },
+                            { "name": "user", "type": ["null", "User"], "default": null}
+                        ]
+                    }"""
+                ),
+                Arguments.of(
+                    SchemaType.JSON,
+                    JsonSchema(
+                        """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "User",
+                            "type": "object",
+                            "properties": {
+                                "name": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
+                    ),
+                    JsonSchema(
+                        """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Player",
+                            "type": "object",
+                            "properties": {
+                                "identifier": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }"""
+                    ),
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "Player",
+                        "type": "object",
+                        "properties": {
+                            "identifier": { "type": "string" },
+                            "user": { "${"$"}ref": "#User" }
+                        },
+                        "additionalProperties": false
+                    }"""
+                ),
+                // TODO: Uncomment this when the other types support local references
+//                Arguments.of(
+//                    SchemaType.PROTOBUF,
+//                    ProtobufSchema(
+//                        """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message User {
+//                        string name = 1;
+//                    }
+//                    """
+//                    ),
+//                    ProtobufSchema(
+//                        """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message Player {
+//                        string identifier = 1;
+//                    }
+//                    """
+//                    ),
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    import "user.proto";
+//
+//                    message Player {
+//                        string identifier = 1;
+//                        User user = 2;
+//                    }
+//                    """
+//                )
             )
     }
 

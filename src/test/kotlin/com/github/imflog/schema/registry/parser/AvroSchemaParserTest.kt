@@ -50,10 +50,11 @@ class AvroSchemaParserTest {
         val aLocalReference = givenALocalReference()
 
         // When
-        val resolvedSchema = parser.resolveLocalReferences(
+        val resolvedSchema = parser.resolveLocalAndRemoteReferences(
             USER_REFERENCE_NAME,
             USER_SCHEMA,
-            listOf(aLocalReference)
+            listOf(aLocalReference),
+            listOf()
         )
 
         // Then

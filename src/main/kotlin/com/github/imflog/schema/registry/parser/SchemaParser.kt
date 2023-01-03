@@ -36,18 +36,20 @@ abstract class SchemaParser(
     ): ParsedSchema {
         val schemaContent = rootDir.resolve(schemaPath).readText()
         val parsedLocalSchemaString = if (localReferences.isNotEmpty()) {
-            resolveLocalReferences(subject, schemaContent, localReferences)
+            resolveLocalAndRemoteReferences(subject, schemaContent, localReferences,remoteReferences)
         } else schemaContent
 
         return client
-            .parseSchema(schemaType.registryType, parsedLocalSchemaString, remoteReferences)
+            .parseSchema(schemaType.registryType, parsedLocalSchemaString, if (localReferences.isNotEmpty()) listOf() else remoteReferences)
             .orElseThrow { SchemaParsingException(subject, schemaType) }
     }
 
-    abstract fun resolveLocalReferences(
+    abstract fun resolveLocalAndRemoteReferences(
         subject: String,
         schemaContent: String,
-        localReferences: List<LocalReference>
+        localReferences: List<LocalReference>,
+        remoteReferences: List<SchemaReference>
     ): String
+
 }
 
