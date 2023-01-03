@@ -36,7 +36,7 @@ abstract class SchemaParser(
     ): ParsedSchema {
         val schemaContent = rootDir.resolve(schemaPath).readText()
         val parsedLocalSchemaString = if (localReferences.isNotEmpty()) {
-            resolveLocalAndRemoteReferences(subject, schemaContent, localReferences,remoteReferences)
+            resolveLocalAndRemoteReferences(subject, schemaContent, localReferences, remoteReferences)
         } else schemaContent
 
         return client
