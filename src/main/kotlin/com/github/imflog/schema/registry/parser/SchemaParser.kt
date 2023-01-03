@@ -44,12 +44,10 @@ abstract class SchemaParser(
             .orElseThrow { SchemaParsingException(subject, schemaType) }
     }
 
-    abstract fun resolveLocalAndRemoteReferences(
+    abstract fun resolveLocalReferences(
         subject: String,
         schemaContent: String,
-        localReferences: List<LocalReference>,
-        remoteReferences: List<SchemaReference>
+        localReferences: List<LocalReference>
     ): String
-
 }
 
