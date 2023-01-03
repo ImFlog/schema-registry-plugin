@@ -19,6 +19,7 @@ repositories {
 // Dependencies versions
 val kotlinVersion = "1.7.22"
 val confluentVersion = "7.3.1"
+val protobufVersion = "3.21.11"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib", kotlinVersion))
@@ -29,6 +30,7 @@ dependencies {
     }
     implementation("io.confluent", "kafka-json-schema-provider")
     implementation("io.confluent", "kafka-protobuf-provider")
+    implementation("com.google.protobuf:protobuf-java:$protobufVersion")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
