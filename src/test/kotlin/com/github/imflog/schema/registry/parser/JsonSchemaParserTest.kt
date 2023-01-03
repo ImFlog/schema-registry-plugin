@@ -54,11 +54,10 @@ class JsonSchemaParserTest {
         val aLocalReference = givenALocalReference()
 
         // When
-        val resolvedSchema = parser.resolveLocalAndRemoteReferences(
+        val resolvedSchema = parser.resolveLocalReferences(
             USER_REFERENCE_NAME,
             USER_SCHEMA,
-            listOf(aLocalReference),
-            listOf()
+            listOf(aLocalReference)
         )
 
         // Then

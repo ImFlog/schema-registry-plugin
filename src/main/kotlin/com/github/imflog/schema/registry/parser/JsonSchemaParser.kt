@@ -18,11 +18,10 @@ class JsonSchemaParser(
         private const val DEFS_NODE = "${"$"}defs"
     }
 
-    override fun resolveLocalAndRemoteReferences(
+    override fun resolveLocalReferences(
         subject: String,
         schemaContent: String,
-        localReferences: List<LocalReference>,
-        remoteReferences: List<SchemaReference>
+        localReferences: List<LocalReference>
     ): String {
         val jsonObj = JSONObject(schemaContent)
         val localDefNodes = JSONObject()

@@ -378,6 +378,32 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                         },
                         "additionalProperties": false
                     }"""
+                ),
+                Arguments.of(
+                    SchemaType.AVRO,
+                    """{
+                        "type": "record",
+                        "name": "Address",
+                        "fields": [
+                            { "name": "street", "type": "string" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" },
+                            { "name": "address", "type": "Address" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }, 
+                            { "name": "user", "type": "User" }
+                        ]
+                    }"""
                 )
             )
     }

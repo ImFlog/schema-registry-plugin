@@ -13,11 +13,10 @@ class ProtobufSchemaParser(
 
     override val schemaType: SchemaType = SchemaType.PROTOBUF
 
-    override fun resolveLocalAndRemoteReferences(
+    override fun resolveLocalReferences(
         subject: String,
         schemaContent: String,
-        localReferences: List<LocalReference>,
-        remoteReferences: List<SchemaReference>
+        localReferences: List<LocalReference>
     ): String {
         throw NotImplementedError("Local reference is not available for Protobuf yet")
     }

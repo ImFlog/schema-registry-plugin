@@ -207,7 +207,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     @ArgumentsSource(SchemaLocalAndRemoteReferenceSuccessArgumentProvider::class)
     fun `CompatibilityTask should succeed for compatible schemas with local and remote references`(
         type: SchemaType,
-        carSchema: ParsedSchema,
+        addressSchema: ParsedSchema,
         userSchema: ParsedSchema,
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
@@ -217,8 +217,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
         val subjectName = "parameterized-$type"
 
-        val carSubject = "$subjectName-car"
-        client.register(carSubject, carSchema)
+        val addressSubject = "$subjectName-car"
+        client.register(addressSubject, addressSchema)
 
         val playerPath = "$type/player.${type.extension}"
         val playerSubject = "$subjectName-player"
@@ -233,7 +233,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         userFile.writeText(userSchema.canonicalString())
 
         // Small trick, for protobuf the name to import is not User but user.proto
-        val carReferenceName = if (type == SchemaType.PROTOBUF) "car.proto" else "Car"
+        val addressReferenceName = if (type == SchemaType.PROTOBUF) "car.proto" else "Address"
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
         buildFile = folderRule.newFile("build.gradle")
@@ -248,7 +248,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
                     subject('$playerSubject', '${playerFile.absolutePath}', "$type")
-                        .addReference('$carReferenceName', '$carSubject', 1)
+                        .addReference('$addressReferenceName', '$addressSubject', 1)
                         .addLocalReference('$referenceName', '$userPath')
                 }
             }
@@ -379,11 +379,11 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                     AvroSchema(
                         """{
                         "type": "record",
-                        "name": "Car",
+                        "name": "Address",
                         "fields": [
-                            { "name": "name", "type": "string" }
+                            { "name": "street", "type": "string" }
                         ]
-                    }"""
+                    }""",
                     ),
                     AvroSchema(
                         """{
@@ -391,7 +391,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                         "name": "User",
                         "fields": [
                             { "name": "name", "type": "string" },
-                            { "name": "car", "type": "Car"] }
+                            { "name": "address", "type": "Address"] }
                         ]
                     }"""
                     ),
@@ -418,13 +418,25 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                     JsonSchema(
                         """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Address",
+                            "type": "object",
+                            "properties": {
+                                "street": {"type": "string"}
+                            },
+                            "additionalProperties": false
+                        }""",
+                    ),
+                    JsonSchema(
+                        """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "User",
                             "type": "object",
                             "properties": {
-                                "name": { "type": "string" }
+                                "name": {"type": "string"},
+                                "address": {"${"$"}ref": "Address"}
                             },
                             "additionalProperties": false
-                        }"""
+                        }""",
                     ),
                     JsonSchema(
                         """{
@@ -456,8 +468,20 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 //                    syntax = "proto3";
 //                    package com.github.imflog;
 //
+//                    message Address {
+//                        string street = 1;
+//                    }
+//                    """
+//                    ProtobufSchema(
+//                        """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    import "address.proto";
+
 //                    message User {
 //                        string name = 1;
+//                        Address address = 2;
 //                    }
 //                    """
 //                    ),
