@@ -40,7 +40,7 @@ abstract class SchemaParser(
         } else schemaContent
 
         return client
-            .parseSchema(schemaType.registryType, parsedLocalSchemaString, if (localReferences.isNotEmpty()) listOf() else remoteReferences)
+            .parseSchema(schemaType.registryType, parsedLocalSchemaString, remoteReferences)
             .orElseThrow { SchemaParsingException(subject, schemaType) }
     }
 
