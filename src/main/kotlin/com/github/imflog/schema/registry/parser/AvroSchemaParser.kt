@@ -9,6 +9,10 @@ import java.io.File
 
 private const val TYPE = "type"
 
+private const val ITEMS = "items"
+
+private const val VALUES = "values"
+
 private const val FIELDS = "fields"
 
 class AvroSchemaParser(
@@ -27,8 +31,7 @@ class AvroSchemaParser(
             jsonObj.put(FIELDS,
                 JSONArray(jsonObj
                     .getJSONArray(FIELDS)
-                    .toMutableList()
-                    .mapInPlace { if (it is JSONObject) replaceLocalReference(it, localReferences) else it }
+                    .map{if (it is JSONObject) replaceLocalReference(it, localReferences) else it }
                 )
             )
         }
@@ -37,10 +40,15 @@ class AvroSchemaParser(
 
     fun replaceLocalReference(jsonObject: JSONObject, localReferences: List<LocalReference>): JSONObject {
         if(jsonObject.has(TYPE)) {
-            jsonObject.put(TYPE, replaceType(jsonObject.opt(TYPE),localReferences))
+            jsonObject.put(TYPE, replaceType(jsonObject.opt(TYPE), localReferences))
+        }else if(jsonObject.has(ITEMS)) {
+            jsonObject.put(ITEMS, replaceType(jsonObject.opt(ITEMS), localReferences))
+        }else if(jsonObject.has(VALUES)) {
+            jsonObject.put(VALUES, replaceType(jsonObject.opt(VALUES), localReferences))
         }
         return jsonObject
     }
+
 
     fun replaceType(type: Any, localReferences: List<LocalReference>): Any{
         return when (type) {
@@ -53,14 +61,5 @@ class AvroSchemaParser(
             is JSONObject -> replaceLocalReference(type, localReferences)
             else -> type
         }
-    }
-
-    inline fun <T> MutableList<T>.mapInPlace(mutator: (T)->T):MutableList<T> {
-        this.forEachIndexed { idx, value ->
-            mutator(value).let { newValue ->
-                if (newValue !== value) this.set(idx,newValue)
-            }
-        }
-        return this;
     }
 }

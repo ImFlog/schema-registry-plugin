@@ -197,8 +197,8 @@ class CompatibilityTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/address.avsc").writeText(
+        folderRule.newFolder("src", "main", "avro", "local")
+        File(folderRule.root, "src/main/avro/local/address.avsc").writeText(
             """{
                     "type": "record",
                     "name": "Address",
@@ -209,7 +209,7 @@ class CompatibilityTaskActionTest {
                 }"""
         )
 
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.root, "src/main/avro/local/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -224,11 +224,11 @@ class CompatibilityTaskActionTest {
         val subjects = listOf(
             CompatibilitySubject(
                 "test",
-                "src/main/avro/external/test.avsc",
+                "src/main/avro/local/test.avsc",
                 SchemaType.AVRO
             )
                 .addReference("Street", "Street", 1)
-                .addLocalReference("Address", "src/main/avro/external/address.avsc")
+                .addLocalReference("Address", "src/main/avro/local/address.avsc")
         )
 
         // when
