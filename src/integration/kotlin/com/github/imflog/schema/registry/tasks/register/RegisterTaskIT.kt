@@ -28,6 +28,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
     @AfterEach
     fun afterEach() {
+        client.reset()
         folderRule.delete()
     }
 
@@ -88,8 +89,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(resultFolder.resolve("registered.csv").readText())
             .matches(
                 """subject, path, id
-                |$userSubject, ${userFile.absolutePath}, \d
-                |$playerSubject, $playerPath, \d
+                |$userSubject, ${userFile.absolutePath}, \d+
+                |$playerSubject, $playerPath, \d+
                 |""".trimMargin()
             )
     }
@@ -165,7 +166,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         val userPath = "$type/user.$extension"
         val userFile = folderRule.newFile(userPath)
         userFile.writeText(userSchema)
-        val userSubject = "$subjectName-user-mixed"
+        val userSubject = "User"
 
         // Remote
         val addressPath = "$type/address.$extension"

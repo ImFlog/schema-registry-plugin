@@ -1,13 +1,13 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.parser.SchemaParser
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
-import java.io.File
-import java.util.stream.Stream
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -20,6 +20,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import java.io.File
+import java.util.stream.Stream
 
 class CompatibilityTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
@@ -32,9 +34,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
     @AfterEach
     fun tearDown() {
-        client.allSubjects.reversed().forEach {
-            client.deleteSubject(it)
-        }
+        client.reset()
         folderRule.delete()
     }
 
@@ -207,34 +207,46 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     @ArgumentsSource(SchemaLocalAndRemoteReferenceSuccessArgumentProvider::class)
     fun `CompatibilityTask should succeed for compatible schemas with local and remote references`(
         type: SchemaType,
-        addressSchema: ParsedSchema,
-        userSchema: ParsedSchema,
-        playerSchema: ParsedSchema,
+        addressSchema: String,
+        userSchema: String,
+        playerSchema: String,
         playerSchemaUpdated: String
     ) {
+        // TODO: Instead of repeating code, we could create build.gradle files in resources.
+        //  Also, when all format support mixed local + remote, we will keep only this test.
         folderRule.create()
-        folderRule.newFolder(type.name)
+        val rootFolder = folderRule.newFolder(type.name)
+        val parser = SchemaParser.provide(type, client, rootFolder)
+        val subjectName = "parameterized-${type.name}-mixed"
+        val extension = type.extension
 
-        val subjectName = "parameterized-$type"
-
-        val addressSubject = "$subjectName-car"
-        client.register(addressSubject, addressSchema)
-
-        val playerPath = "$type/player.${type.extension}"
-        val playerSubject = "$subjectName-player"
-
-        client.register(playerSubject, playerSchema)
-
-        val playerFile = folderRule.newFile(playerPath)
-        playerFile.writeText(playerSchemaUpdated)
-
-        val userPath = "$type/user.${type.extension}"
+        // Local
+        val userPath = "$type/user.$extension"
         val userFile = folderRule.newFile(userPath)
-        userFile.writeText(userSchema.canonicalString())
+        userFile.writeText(userSchema)
+        val userSubject = "User"
 
-        // Small trick, for protobuf the name to import is not User but user.proto
-        val addressReferenceName = if (type == SchemaType.PROTOBUF) "car.proto" else "Address"
-        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
+        // Remote
+        val addressPath = "$type/address.$extension"
+        val addressFile = folderRule.newFile(addressPath)
+        addressFile.writeText(addressSchema)
+        val addressReferenceName = "Address"
+        val addressSubject = "$subjectName-address-mixed"
+        client.register(addressSubject, parser.parseSchemaFromFile(addressSubject, addressPath, listOf(), listOf()))
+
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player-mixed"
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchema)
+        // TODO: Register here before compat call
+//        client.register
+//            addressSubject,
+//            parser.parseSchemaFromFile(
+//                playerSubject,
+//                playerPath,
+//                listOf(SchemaReference()),
+//                listOf()
+//            ))
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -247,9 +259,10 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$playerSubject', '${playerFile.absolutePath}', "$type")
+                    subject('$addressSubject', '${addressFile.absolutePath}', '${type.name}')
+                    subject('$playerSubject', '$playerPath', '${type.name}')
+                        .addLocalReference('$userSubject', '$userPath')
                         .addReference('$addressReferenceName', '$addressSubject', 1)
-                        .addLocalReference('$referenceName', '$userPath')
                 }
             }
         """
@@ -376,34 +389,28 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
-                    AvroSchema(
-                        """{
+                    """{
                         "type": "record",
                         "name": "Address",
                         "fields": [
                             { "name": "street", "type": "string" }
                         ]
                     }""",
-                    ),
-                    AvroSchema(
-                        """{
+                    """{
                         "type": "record",
                         "name": "User",
                         "fields": [
                             { "name": "name", "type": "string" },
-                            { "name": "address", "type": "Address"] }
+                            { "name": "address", "type": "Address" }
                         ]
-                    }"""
-                    ),
-                    AvroSchema(
-                        """{
+                    }""",
+                    """{
                         "type": "record",
                         "name": "Player",
                         "fields": [
                             { "name": "identifier", "type": "string" }
                         ]
-                    }"""
-                    ),
+                    }""",
                     """{
                         "type": "record",
                         "name": "Player",
@@ -415,8 +422,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 ),
                 Arguments.of(
                     SchemaType.JSON,
-                    JsonSchema(
-                        """{
+                    """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "Address",
                             "type": "object",
@@ -425,9 +431,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                             },
                             "additionalProperties": false
                         }""",
-                    ),
-                    JsonSchema(
-                        """{
+                    """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "User",
                             "type": "object",
@@ -437,9 +441,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                             },
                             "additionalProperties": false
                         }""",
-                    ),
-                    JsonSchema(
-                        """{
+
+                    """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "Player",
                             "type": "object",
@@ -447,8 +450,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                                 "identifier": { "type": "string" }
                             },
                             "additionalProperties": false
-                        }"""
-                    ),
+                        }""",
                     """{
                         "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                         "${"$"}id": "Player",
@@ -463,7 +465,6 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 // TODO: Uncomment this when the other types support local references
 //                Arguments.of(
 //                    SchemaType.PROTOBUF,
-//                    ProtobufSchema(
 //                        """
 //                    syntax = "proto3";
 //                    package com.github.imflog;
@@ -471,9 +472,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 //                    message Address {
 //                        string street = 1;
 //                    }
+//                    """,
 //                    """
-//                    ProtobufSchema(
-//                        """
 //                    syntax = "proto3";
 //                    package com.github.imflog;
 //
@@ -483,18 +483,15 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 //                        string name = 1;
 //                        Address address = 2;
 //                    }
+//                    """,
 //                    """
-//                    ),
-//                    ProtobufSchema(
-//                        """
 //                    syntax = "proto3";
 //                    package com.github.imflog;
 //
 //                    message Player {
 //                        string identifier = 1;
 //                    }
-//                    """
-//                    ),
+//                    """ ,
 //                    """
 //                    syntax = "proto3";
 //                    package com.github.imflog;
@@ -506,7 +503,6 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 //                        User user = 2;
 //                    }
 //                    """
-//                )
             )
     }
 
@@ -650,7 +646,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 Arguments.of(
                     JsonSchema.TYPE,
                     JsonSchema(
-            """{
+                        """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "User",
         
@@ -662,7 +658,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                         }"""
                     ),
                     JsonSchema(
-            """{
+                        """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "Player",
         

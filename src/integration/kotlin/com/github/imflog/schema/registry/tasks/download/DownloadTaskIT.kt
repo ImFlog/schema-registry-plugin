@@ -36,6 +36,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @AfterEach
     fun tearDown() {
         folderRule.delete()
+        client.reset()
     }
 
     @ParameterizedTest(name = "{0}")
