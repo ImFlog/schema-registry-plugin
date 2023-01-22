@@ -5,7 +5,6 @@ import com.github.imflog.schema.registry.parser.SchemaParser
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import org.assertj.core.api.Assertions
@@ -34,7 +33,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
     @AfterEach
     fun tearDown() {
-        client.reset()
+        client.allSubjects.reversed().forEach {
+            client.deleteSubject(it)
+        }
         folderRule.delete()
     }
 
@@ -202,10 +203,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
-
     @ParameterizedTest
     @ArgumentsSource(SchemaLocalAndRemoteReferenceSuccessArgumentProvider::class)
-    fun `CompatibilityTask should succeed for compatible schemas with local and remote references`(
+    fun `CompatibilityTask should succeed for compatible schemas with mixed references`(
         type: SchemaType,
         addressSchema: String,
         userSchema: String,
@@ -217,7 +217,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         val rootFolder = folderRule.newFolder(type.name)
         val parser = SchemaParser.provide(type, client, rootFolder)
-        val subjectName = "parameterized-${type.name}-mixed"
+        val subjectName = "parameterized-mixed"
         val extension = type.extension
 
         // Local
@@ -232,21 +232,24 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         addressFile.writeText(addressSchema)
         val addressReferenceName = "Address"
         val addressSubject = "$subjectName-address-mixed"
-        client.register(addressSubject, parser.parseSchemaFromFile(addressSubject, addressPath, listOf(), listOf()))
+        client.register(addressSubject, parser.parseSchemaFromFile(addressSubject, addressFile.path, listOf(), listOf()))
 
         val playerPath = "$type/player.$extension"
         val playerSubject = "$subjectName-player-mixed"
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchema)
-        // TODO: Register here before compat call
-//        client.register
-//            addressSubject,
-//            parser.parseSchemaFromFile(
-//                playerSubject,
-//                playerPath,
-//                listOf(SchemaReference()),
-//                listOf()
-//            ))
+        client.register(
+            playerSubject,
+            parser.parseSchemaFromFile(
+                playerSubject,
+                playerFile.path,
+                listOf(),
+                listOf()
+            )
+        )
+
+        // Update player schema file in place
+        playerFile.writeText(playerSchemaUpdated)
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -259,8 +262,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$addressSubject', '${addressFile.absolutePath}', '${type.name}')
-                    subject('$playerSubject', '$playerPath', '${type.name}')
+                    subject('$playerSubject', '${playerFile.absolutePath}', '${type.name}')
                         .addLocalReference('$userSubject', '$userPath')
                         .addReference('$addressReferenceName', '$addressSubject', 1)
                 }
