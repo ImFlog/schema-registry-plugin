@@ -4,7 +4,7 @@ group = "com.github.imflog"
 version = "1.8.1-SNAPSHOT"
 
 plugins {
-    kotlin("jvm") version "1.7.22"
+    kotlin("jvm") version "1.8.0"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.1.0"
     id("maven-publish")
@@ -17,7 +17,7 @@ repositories {
 }
 
 // Dependencies versions
-val kotlinVersion = "1.7.22"
+val kotlinVersion = "1.8.0"
 val confluentVersion = "7.3.1"
 dependencies {
     implementation(gradleApi())
