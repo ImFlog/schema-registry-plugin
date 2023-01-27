@@ -26,7 +26,7 @@ schemaRegistry {
 
     register {
         subject('company', 'schemas/avro/company.avsc', 'AVRO')
-                .addLocalReference("address", "schemas/avro/location-address.avsc")
+                .addLocalReference("Address", "schemas/avro/location-address.avsc")
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
                 .addReference('company', 'company', -1)
     }
@@ -43,7 +43,7 @@ schemaRegistry {
 
     compatibility {
         subject('company', 'schemas/avro/company_v2.avsc', 'AVRO')
-                .addLocalReference("address", "schemas/avro/location-address.avsc")
+                .addLocalReference("Address", "schemas/avro/location-address.avsc")
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
                 .addReference('company', 'company', -1)
     }
