@@ -1,13 +1,12 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.parser.SchemaParser
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
-import java.io.File
-import java.util.stream.Stream
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -20,6 +19,8 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import java.io.File
+import java.util.stream.Stream
 
 class CompatibilityTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
@@ -202,6 +203,83 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
+    @ParameterizedTest
+    @ArgumentsSource(SchemaLocalAndRemoteReferenceSuccessArgumentProvider::class)
+    fun `CompatibilityTask should succeed for compatible schemas with mixed references`(
+        type: SchemaType,
+        addressSchema: String,
+        userSchema: String,
+        playerSchema: String,
+        playerSchemaUpdated: String
+    ) {
+        // TODO: Instead of repeating code, we could create build.gradle files in resources.
+        //  Also, when all format support mixed local + remote, we will keep only this test.
+        folderRule.create()
+        val rootFolder = folderRule.newFolder(type.name)
+        val parser = SchemaParser.provide(type, client, rootFolder)
+        val subjectName = "parameterized-mixed"
+        val extension = type.extension
+
+        // Local
+        val userPath = "$type/user.$extension"
+        val userFile = folderRule.newFile(userPath)
+        userFile.writeText(userSchema)
+        val userSubject = "User"
+
+        // Remote
+        val addressPath = "$type/address.$extension"
+        val addressFile = folderRule.newFile(addressPath)
+        addressFile.writeText(addressSchema)
+        val addressReferenceName = "Address"
+        val addressSubject = "$subjectName-address-mixed"
+        client.register(addressSubject, parser.parseSchemaFromFile(addressSubject, addressFile.path, listOf(), listOf()))
+
+        val playerPath = "$type/player.$extension"
+        val playerSubject = "$subjectName-player-mixed"
+        val playerFile = folderRule.newFile(playerPath)
+        playerFile.writeText(playerSchema)
+        client.register(
+            playerSubject,
+            parser.parseSchemaFromFile(
+                playerSubject,
+                playerFile.path,
+                listOf(),
+                listOf()
+            )
+        )
+
+        // Update player schema file in place
+        playerFile.writeText(playerSchemaUpdated)
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                compatibility {
+                    subject('$playerSubject', '${playerFile.absolutePath}', '${type.name}')
+                        .addLocalReference('$userSubject', '$userPath')
+                        .addReference('$addressReferenceName', '$addressSubject', 1)
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
     private class SchemaSuccessArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
@@ -305,6 +383,128 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                     }
                     """
                 )
+            )
+    }
+
+    private class SchemaLocalAndRemoteReferenceSuccessArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    SchemaType.AVRO,
+                    """{
+                        "type": "record",
+                        "name": "Address",
+                        "fields": [
+                            { "name": "street", "type": "string" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" },
+                            { "name": "address", "type": "Address" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string" },
+                            { "name": "user", "type": ["null", "User"], "default": null}
+                        ]
+                    }"""
+                ),
+                Arguments.of(
+                    SchemaType.JSON,
+                    """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Address",
+                            "type": "object",
+                            "properties": {
+                                "street": {"type": "string"}
+                            },
+                            "additionalProperties": false
+                        }""",
+                    """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "User",
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "address": {"${"$"}ref": "Address"}
+                            },
+                            "additionalProperties": false
+                        }""",
+
+                    """{
+                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                            "${"$"}id": "Player",
+                            "type": "object",
+                            "properties": {
+                                "identifier": { "type": "string" }
+                            },
+                            "additionalProperties": false
+                        }""",
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "${"$"}id": "Player",
+                        "type": "object",
+                        "properties": {
+                            "identifier": { "type": "string" },
+                            "user": { "${"$"}ref": "#User" }
+                        },
+                        "additionalProperties": false
+                    }"""
+                ),
+                // TODO: Uncomment this when the other types support local references
+//                Arguments.of(
+//                    SchemaType.PROTOBUF,
+//                        """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message Address {
+//                        string street = 1;
+//                    }
+//                    """,
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    import "address.proto";
+
+//                    message User {
+//                        string name = 1;
+//                        Address address = 2;
+//                    }
+//                    """,
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    message Player {
+//                        string identifier = 1;
+//                    }
+//                    """ ,
+//                    """
+//                    syntax = "proto3";
+//                    package com.github.imflog;
+//
+//                    import "user.proto";
+//
+//                    message Player {
+//                        string identifier = 1;
+//                        User user = 2;
+//                    }
+//                    """
             )
     }
 
@@ -448,7 +648,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 Arguments.of(
                     JsonSchema.TYPE,
                     JsonSchema(
-            """{
+                        """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "User",
         
@@ -460,7 +660,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                         }"""
                     ),
                     JsonSchema(
-            """{
+                        """{
                             "${"$"}schema": "http://json-schema.org/draft-07/schema#",
                             "${"$"}id": "Player",
         

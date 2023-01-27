@@ -28,7 +28,7 @@ keytool -genkey -noprompt \
 # Create CSR, sign the key and import back into keystore
 keytool -keystore secrets/registry.keystore.jks -alias registry -certreq -file tmp/registry.csr -storepass registry -keypass registry
 
-openssl x509 -req -CA tmp/registry-ca.crt -CAkey tmp/registry-ca.key -in tmp/registry.csr -out tmp/registry-ca-signed.crt -days 365 -CAcreateserial -passin pass:registry
+openssl x509 -req -CA tmp/registry-ca.crt -CAkey tmp/registry-ca.key -in tmp/registry.csr -out tmp/registry-ca-signed.crt -days 3650 -CAcreateserial -passin pass:registry
 
 keytool -keystore secrets/registry.keystore.jks -alias CARoot -import -noprompt -file tmp/registry-ca.crt -storepass registry -keypass registry
 

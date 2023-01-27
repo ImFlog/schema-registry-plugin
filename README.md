@@ -91,7 +91,7 @@ this will add a reference from a local file and inline it in the schema registry
 The addLocalReference calls can be chained.
 
 #### Avro
-:warning: For now you cannot mix local and remote reference (parse order issues).
+Mixing local and remote references is perfectly fine for Avro without specific configurations.
 
 #### Json
 Mixing local and remote references is perfectly fine for JSON.
@@ -136,7 +136,7 @@ A registered.csv file will be created with the following format `subject, path, 
 if you need information about the registered id.
 
 #### Avro
-:warning: For now you cannot mix local and remote reference (parse order issues).
+Mixing local and remote references is perfectly fine for Avro without specific configurations.
 
 #### Json
 Mixing local and remote references is perfectly fine for JSON.
