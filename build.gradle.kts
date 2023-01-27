@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "1.8.1-SNAPSHOT"
+version = "1.9.0"
 
 plugins {
     kotlin("jvm") version "1.8.0"
@@ -77,7 +77,7 @@ val integrationImplementation: Configuration by configurations.getting {
 configurations["integrationImplementation"].extendsFrom(configurations.runtimeOnly.get())
 
 val wiremockVersion = "2.28.1"
-val testContainersVersion = "1.15.3"
+val testContainersVersion = "1.17.6"
 dependencies {
     integrationImplementation("com.github.tomakehurst", "wiremock-jre8", wiremockVersion)
     integrationImplementation("org.testcontainers", "kafka", testContainersVersion)
