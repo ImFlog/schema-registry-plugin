@@ -27,20 +27,17 @@ class AvroSchemaParser(
         schemaContent: String,
         localReferences: List<LocalReference>
     ): String {
-        val jsonObj = JSONObject(schemaContent)
-        if (jsonObj.has(FIELDS)) {
-            jsonObj.put(FIELDS,
-                JSONArray(jsonObj
-                    .getJSONArray(FIELDS)
-                    .map { if (it is JSONObject) replaceLocalReference(it, localReferences) else it }
-                )
-            )
-        }
-        return jsonObj.toString()
+        return replaceLocalReference(JSONObject(schemaContent),localReferences).toString()
     }
 
     private fun replaceLocalReference(jsonObject: JSONObject, localReferences: List<LocalReference>): JSONObject {
         when {
+            jsonObject.has(FIELDS) -> jsonObject.put(FIELDS,
+                JSONArray(jsonObject
+                    .getJSONArray(FIELDS)
+                    .map { if (it is JSONObject) replaceLocalReference(it, localReferences) else it }
+                )
+            )
             jsonObject.has(TYPE) -> jsonObject.put(TYPE, replaceType(jsonObject.get(TYPE), localReferences))
             jsonObject.has(ITEMS) -> jsonObject.put(ITEMS, replaceType(jsonObject.get(ITEMS), localReferences))
             jsonObject.has(VALUES) -> jsonObject.put(VALUES, replaceType(jsonObject.get(VALUES), localReferences))

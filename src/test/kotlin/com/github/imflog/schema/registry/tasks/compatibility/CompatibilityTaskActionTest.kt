@@ -198,13 +198,30 @@ class CompatibilityTaskActionTest {
         )
 
         folderRule.newFolder("src", "main", "avro", "local")
+        File(folderRule.root, "src/main/avro/local/country.avsc").writeText(
+            """{
+                    "type": "enum",
+                    "name": "Country",
+                    "symbols": [
+                        "UNKNOWN",
+                        "FR",
+                        "DE",
+                        "UK",
+                        "IT",
+                        "ES",
+                        "US"
+                  ],
+                  "default": "UNKNOWN"
+                }"""
+        )
         File(folderRule.root, "src/main/avro/local/address.avsc").writeText(
             """{
                     "type": "record",
                     "name": "Address",
                     "fields": [
                         {"name": "city", "type": "string" },
-                        {"name": "street", "type": "Street" }
+                        {"name": "street", "type": "Street" },
+                        {"name": "country", "type": "Country" }
                     ]
                 }"""
         )
@@ -228,6 +245,7 @@ class CompatibilityTaskActionTest {
                 SchemaType.AVRO
             )
                 .addReference("Street", "Street", 1)
+                .addLocalReference("Country", "src/main/avro/local/country.avsc")
                 .addLocalReference("Address", "src/main/avro/local/address.avsc")
         )
 
