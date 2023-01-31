@@ -22,40 +22,31 @@ class AvroSchemaParser(
 
     override val schemaType: SchemaType = SchemaType.AVRO
 
+    private val keysToUpdate: Collection<String> = listOf(TYPE, ITEMS, VALUES, FIELDS)
+
     override fun resolveLocalReferences(
         subject: String,
         schemaContent: String,
         localReferences: List<LocalReference>
     ): String {
-        return replaceLocalReference(JSONObject(schemaContent),localReferences).toString()
+        return replaceType(JSONObject(schemaContent),localReferences).toString()
     }
 
-    private fun replaceLocalReference(jsonObject: JSONObject, localReferences: List<LocalReference>): JSONObject {
-        when {
-            jsonObject.has(FIELDS) -> jsonObject.put(FIELDS,
-                JSONArray(jsonObject
-                    .getJSONArray(FIELDS)
-                    .map { if (it is JSONObject) replaceLocalReference(it, localReferences) else it }
-                )
-            )
-            jsonObject.has(TYPE) -> jsonObject.put(TYPE, replaceType(jsonObject.get(TYPE), localReferences))
-            jsonObject.has(ITEMS) -> jsonObject.put(ITEMS, replaceType(jsonObject.get(ITEMS), localReferences))
-            jsonObject.has(VALUES) -> jsonObject.put(VALUES, replaceType(jsonObject.get(VALUES), localReferences))
-        }
-        return jsonObject
-    }
-
-    private fun replaceType(type: Any, localReferences: List<LocalReference>): Any {
-        return when (type) {
+    private fun replaceType(type: Any?, localReferences: List<LocalReference>): Any? {
+        return if (type != null) when (type) {
             is String -> localReferences
                 .filter { it.name == type }
                 .map { JSONObject(it.content(rootDir)) }
-                .map { replaceLocalReference(it, localReferences) }
+                .map { replaceType(it, localReferences) }
                 .firstOrNull() ?: type
-
             is JSONArray -> JSONArray(type.map { replaceType(it, localReferences) })
-            is JSONObject -> replaceLocalReference(type, localReferences)
+            is JSONObject -> {
+                    type.keySet()
+                        .filter { keysToUpdate.contains(it) }
+                        .forEach { type.put(it, replaceType(type.get(it), localReferences)) }
+                    return type
+                }
             else -> type
-        }
+        } else null
     }
 }
