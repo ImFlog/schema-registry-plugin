@@ -32,21 +32,22 @@ class AvroSchemaParser(
         return replaceType(JSONObject(schemaContent),localReferences).toString()
     }
 
-    private fun replaceType(type: Any?, localReferences: List<LocalReference>): Any? {
-        return if (type != null) when (type) {
+    private fun replaceType(type: Any, localReferences: List<LocalReference>): Any {
+        return when (type) {
             is String -> localReferences
                 .filter { it.name == type }
                 .map { JSONObject(it.content(rootDir)) }
                 .map { replaceType(it, localReferences) }
                 .firstOrNull() ?: type
+
             is JSONArray -> JSONArray(type.map { replaceType(it, localReferences) })
             is JSONObject -> {
-                    type.keySet()
-                        .filter { keysToUpdate.contains(it) }
-                        .forEach { type.put(it, replaceType(type.get(it), localReferences)) }
-                    return type
-                }
+                type.keySet()
+                    .filter { keysToUpdate.contains(it) }
+                    .forEach { type.put(it, replaceType(type.get(it), localReferences)) }
+                return type
+            }
             else -> type
-        } else null
+        }
     }
 }
