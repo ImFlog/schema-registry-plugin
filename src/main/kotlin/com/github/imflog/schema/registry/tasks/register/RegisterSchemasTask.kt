@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.RegistryClientWrapper
+import com.github.imflog.schema.registry.Subject
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleScriptException
 import org.gradle.api.model.ObjectFactory
@@ -33,7 +34,7 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
-    val subjects: ListProperty<RegisterSubject> = objects.listProperty(RegisterSubject::class.java)
+    val subjects: ListProperty<Subject> = objects.listProperty(Subject::class.java)
 
     @Input
     @Optional
