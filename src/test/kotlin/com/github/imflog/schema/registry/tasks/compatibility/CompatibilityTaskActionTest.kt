@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.Subject
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
@@ -52,7 +53,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
+            arrayListOf(Subject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -141,7 +142,7 @@ class CompatibilityTaskActionTest {
         )
 
         val subjects = listOf(
-            CompatibilitySubject(
+            Subject(
                 "test",
                 "src/main/avro/external/test.avsc",
                 SchemaType.AVRO
@@ -239,7 +240,7 @@ class CompatibilityTaskActionTest {
         )
 
         val subjects = listOf(
-            CompatibilitySubject(
+            Subject(
                 "test",
                 "src/main/avro/local/test.avsc",
                 SchemaType.AVRO
@@ -281,7 +282,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(CompatibilitySubject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
+            arrayListOf(Subject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -316,7 +317,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects = listOf(
-            CompatibilitySubject(
+            Subject(
                 "test",
                 "src/main/avro/external/test.avsc",
                 SchemaType.AVRO

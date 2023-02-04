@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
 import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
+import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
@@ -12,7 +13,7 @@ import java.io.IOException
 class CompatibilityTaskAction(
     private val client: SchemaRegistryClient,
     private val rootDir: File,
-    private val subjects: List<CompatibilitySubject>,
+    private val subjects: List<Subject>,
 ) {
 
     private val logger = Logging.getLogger(CompatibilityTaskAction::class.java)
