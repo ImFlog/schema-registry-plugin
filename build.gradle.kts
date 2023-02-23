@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "com.github.imflog"
 version = "1.9.2-SNAPSHOT"
 
+
 plugins {
     kotlin("jvm") version "1.8.10"
     id("java-gradle-plugin")
@@ -17,7 +18,7 @@ repositories {
 }
 
 // Dependencies versions
-val kotlinVersion = "1.8.0"
+val kotlinVersion = "1.8.10"
 val confluentVersion = "7.3.1"
 dependencies {
     implementation(gradleApi())
