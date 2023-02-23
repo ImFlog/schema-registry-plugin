@@ -5,7 +5,46 @@ The aim of this plugin is to adapt the [Confluent schema registry maven plugin](
 
 ## Usage
 
-The plugin requires external dependencies coming from Confluent and Jitpack repositories.
+The plugin requires external dependencies coming from Confluent repositories. You thus need to add this in your build file:
+<div class="tabbed-code-block">
+  <details>
+    <summary>Groovy</summary>
+    <pre language="groovy">
+      <code>
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url = "https://packages.confluent.io/maven/"
+        }
+    }
+}
+plugins {
+  id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
+}
+      </code>
+    </pre>
+  </details>
+
+  <details>
+    <summary>Kotlin</summary>
+    <pre language="kotlin">
+<code>
+buildscript {
+  repositories {
+    gradlePluginPortal()
+    maven {
+        url = uri("https://packages.confluent.io/maven/")
+    }
+  }
+}
+plugins {
+  id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "X.X.X"
+}
+</code>
+    </pre>
+  </details>
+</div>
 You can follow the instructions on the [gradle plugin portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin).
 
 ## Tasks
