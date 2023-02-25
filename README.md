@@ -300,3 +300,6 @@ buildscript {
 }
 ```
 
+## Thanks to all the sponsors :pray:
+
+<a href="https://github.com/marktros"><img style="border-radius: 50%;" src="https://github.com/marktros.png" width="60px" alt="Mark Ethan Trostler" /></a>
