@@ -59,20 +59,10 @@ abstract class KafkaTestContainersUtils {
                 )
         }
 
-        @JvmStatic
-        @BeforeAll
-        fun startContainers() {
+        init {
             kafkaContainer.start()
             schemaRegistryContainer.start()
             schemaRegistrySslContainer.start()
-        }
-
-        @JvmStatic
-        @AfterAll
-        fun stopContainers() {
-            schemaRegistryContainer.stop()
-            schemaRegistrySslContainer.stop()
-            kafkaContainer.stop()
         }
     }
 
