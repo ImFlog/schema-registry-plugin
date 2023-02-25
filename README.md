@@ -1,3 +1,4 @@
+[![Download](https://img.shields.io/gradle-plugin-portal/v/com.github.imflog.kafka-schema-registry-gradle-plugin)](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin)
 ![Github Actions](https://github.com/ImFlog/schema-registry-plugin/workflows/Master/badge.svg)
 
 # Schema-registry-plugin
@@ -5,8 +6,49 @@ The aim of this plugin is to adapt the [Confluent schema registry maven plugin](
 
 ## Usage
 
-The plugin requires external dependencies coming from Confluent and Jitpack repositories.
-You can follow the instructions on the [gradle plugin portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin).
+As the plugin relies on packages developed by confluent you need to add the `https://packages.confluent.io/maven/` repository
+to your `buildscript`:
+
+<div class="tabbed-code-block">
+  <details>
+    <summary>Groovy</summary>
+
+```groovy
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url = "https://packages.confluent.io/maven/"
+        }
+    }
+}
+plugins {
+  id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
+}
+```
+
+  </details>
+  <details>
+    <summary>Kotlin</summary>
+
+```kotlin
+buildscript {
+  repositories {
+    gradlePluginPortal()
+    maven {
+        url = uri("https://packages.confluent.io/maven/")
+    }
+  }
+}
+plugins {
+  id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "X.X.X"
+}
+```
+
+  </details>
+</div>
+
+Where "X.X.X" is the current version, see [gradle plugin portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin) for details.
 
 ## Tasks
 When you install the plugin, four tasks are added under `registry` group:
@@ -201,7 +243,7 @@ schemaRegistry {
 Valid key values are listed here: [org.apache.kafka.common.config.SslConfigs](https://github.com/confluentinc/kafka/blob/master/clients/src/main/java/org/apache/kafka/common/config/SslConfigs.java)
 
 ### Examples
-See the [examples](examples) directory to see the plugin in action !
+Detailed examples can be found in the [examples directory](examples).
 
 ## Version compatibility
 When using the plugin, a default version of the confluent Schema registry is use.
@@ -220,9 +262,9 @@ take a look at [examples/override-confluent-version](examples/override-confluent
 In order to customize the Kafka version to run in integration tests,
 you can specify the ENV VAR KAFKA_VERSION with the version that you want to test upon.
 The library is tested with the following versions:
-* 5.5.1
 * 6.2.6
-* 7.2.1 (by default if no env_var is passed)
+* 7.2.2
+* 7.3.1 (by default if no env_var is passed)
 
 PS: If you are running an ARM computer (like apple M1),
 you can add the `.arm64` suffix to the version to run ARM container and speed up tests.
@@ -254,3 +296,6 @@ buildscript {
 }
 ```
 
+## Thanks to all the sponsors :pray:
+
+<a href="https://github.com/marktros"><img style="border-radius: 50%;" src="https://github.com/marktros.png" width="60px" alt="Mark Ethan Trostler" /></a>
