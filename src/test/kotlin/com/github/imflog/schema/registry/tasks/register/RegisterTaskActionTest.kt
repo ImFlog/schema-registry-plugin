@@ -1,6 +1,5 @@
 package com.github.imflog.schema.registry.tasks.register
 
-import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.Subject
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
@@ -48,7 +47,7 @@ class RegisterTaskActionTest {
         )
 
         val subjects = listOf(
-            Subject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO)
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO")
         )
 
         // when
@@ -95,7 +94,7 @@ class RegisterTaskActionTest {
             Subject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                SchemaType.AVRO
+                "AVRO"
             )
         )
 
@@ -178,7 +177,7 @@ class RegisterTaskActionTest {
             Subject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                SchemaType.AVRO
+                "AVRO"
             )
                 .addReference("Address", "Address", 1)
                 .addReference("Street", "Street", 1)
@@ -230,8 +229,8 @@ class RegisterTaskActionTest {
             )
 
         val subjects = listOf(
-            Subject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO),
-            Subject("test_2", "src/main/avro/external/test_2.avsc", SchemaType.AVRO),
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+            Subject("test_2", "src/main/avro/external/test_2.avsc", "AVRO"),
         )
 
         // when

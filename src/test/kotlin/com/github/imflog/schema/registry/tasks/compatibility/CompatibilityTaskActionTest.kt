@@ -1,6 +1,5 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
-import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.Subject
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
@@ -53,7 +52,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(Subject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
+            arrayListOf(Subject("test", "src/main/avro/external/test.avsc", "AVRO"))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -145,7 +144,7 @@ class CompatibilityTaskActionTest {
             Subject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                SchemaType.AVRO
+                "AVRO"
             )
                 .addReference("Address", "Address", 1)
                 .addReference("Street", "Street", 1)
@@ -243,7 +242,7 @@ class CompatibilityTaskActionTest {
             Subject(
                 "test",
                 "src/main/avro/local/test.avsc",
-                SchemaType.AVRO
+                "AVRO"
             )
                 .addReference("Street", "Street", 1)
                 .addLocalReference("Country", "src/main/avro/local/country.avsc")
@@ -282,7 +281,7 @@ class CompatibilityTaskActionTest {
         folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
-            arrayListOf(Subject("test", "src/main/avro/external/test.avsc", SchemaType.AVRO))
+            arrayListOf(Subject("test", "src/main/avro/external/test.avsc", "AVRO"))
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
@@ -320,7 +319,7 @@ class CompatibilityTaskActionTest {
             Subject(
                 "test",
                 "src/main/avro/external/test.avsc",
-                SchemaType.AVRO
+                "AVRO"
             )
         )
         File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
