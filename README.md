@@ -323,6 +323,8 @@ buildscript {
         classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X-SNAPSHOT"
     }
 }
+
+apply plugin: "com.github.imflog.kafka-schema-registry-gradle-plugin"
 ```
 
 ## Thanks to all the sponsors :pray:

@@ -20,7 +20,7 @@ open class RegisterSubjectExtension(objects: ObjectFactory) {
         file: String,
         type: String
     ): Subject {
-        val subject = Subject(inputSubject, file, type.toSchemaType())
+        val subject = Subject(inputSubject, file, type)
         subjects.add(subject)
         return subject
     }

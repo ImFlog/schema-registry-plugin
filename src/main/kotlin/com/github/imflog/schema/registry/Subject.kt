@@ -5,10 +5,11 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 data class Subject(
     val inputSubject: String,
     val file: String,
-    val type: SchemaType,
-    val references: MutableList<SchemaReference> = mutableListOf(),
-    val localReferences: MutableList<LocalReference> = mutableListOf()
+    val type: String
 ) {
+    val references: MutableList<SchemaReference> = mutableListOf()
+    val localReferences: MutableList<LocalReference> = mutableListOf()
+
     fun addReference(name: String, subject: String, version: Int): Subject {
         references.add(SchemaReference(name, subject, version))
         return this
@@ -18,4 +19,8 @@ data class Subject(
         localReferences.add(LocalReference(name, path))
         return this
     }
+
+    // Used for data class destructuring
+    operator fun component4() = references
+    operator fun component5() = localReferences
 }

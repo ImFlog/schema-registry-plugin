@@ -3,6 +3,7 @@ package com.github.imflog.schema.registry.tasks.compatibility
 import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
 import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
+import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
@@ -24,7 +25,7 @@ class CompatibilityTaskAction(
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
                 val parsedSchema = SchemaParser
-                    .provide(type, client, rootDir)
+                    .provide(type.toSchemaType(), client, rootDir)
                     .parseSchemaFromFile(
                         subject,
                         path,
