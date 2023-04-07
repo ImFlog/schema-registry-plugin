@@ -20,7 +20,7 @@ open class CompatibilitySubjectExtension(objects: ObjectFactory) {
         file: String,
         type: String
     ): Subject {
-        val compatibilitySubject = Subject(inputSubject, file, type.toSchemaType())
+        val compatibilitySubject = Subject(inputSubject, file, type)
         subjects.add(compatibilitySubject)
         return compatibilitySubject
     }
