@@ -2,6 +2,11 @@ plugins {
     id "com.github.imflog.kafka-schema-registry-gradle-plugin"
 }
 
+import com.github.imflog.schema.registry.Subject
+
+Subject locationAddressSubject = new Subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
+Subject locationCoordSubject = new Subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
+
 schemaRegistry {
     url = 'http://localhost:8081'
     quiet = false
@@ -11,8 +16,8 @@ schemaRegistry {
         subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
             .addReference('company', 'company', 1)
-        subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
-        subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
+        subject(locationAddressSubject)
+        subject(locationCoordSubject)
     }
 
     config {
@@ -32,7 +37,7 @@ schemaRegistry {
         subject('company', 'schemas/protobuf/com/example/company_v2.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
             .addReference('company', 'company', 1)
-        subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
-        subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
+        subject(locationAddressSubject)
+        subject(locationCoordSubject)
     }
 }

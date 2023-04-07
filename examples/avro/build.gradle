@@ -1,6 +1,10 @@
 plugins {
     id "com.github.imflog.kafka-schema-registry-gradle-plugin"
 }
+import com.github.imflog.schema.registry.Subject
+
+Subject locationAddressSubject = new Subject('location-address', 'schemas/avro/location-address.avsc', 'AVRO')
+Subject locationCoordSubject = new Subject('location-latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
 
 schemaRegistry {
     url = 'http://localhost:8081'
@@ -12,8 +16,8 @@ schemaRegistry {
                 .addLocalReference("Address", "schemas/avro/location-address.avsc")
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
                 .addReference('company', 'company', -1)
-        subject('location-address', 'schemas/avro/location-address.avsc', 'AVRO')
-        subject('location-latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
+        subject(locationAddressSubject)
+        subject(locationCoordSubject)
     }
 
     config {
@@ -34,7 +38,7 @@ schemaRegistry {
                 .addLocalReference("Address", "schemas/avro/location-address.avsc")
         subject('user', 'schemas/avro/user.avsc', 'AVRO')
                 .addReference('company', 'company', -1)
-        subject('location-address', 'schemas/avro/location-address.avsc', 'AVRO')
-        subject('location-latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
+        subject(locationAddressSubject)
+        subject(locationCoordSubject)
     }
 }
