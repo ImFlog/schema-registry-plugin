@@ -3,7 +3,9 @@ package com.github.imflog.schema.registry.tasks.register
 import com.github.imflog.schema.registry.LocalReference
 import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
+import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
@@ -13,7 +15,7 @@ import java.io.File
 class RegisterTaskAction(
     private val client: SchemaRegistryClient,
     private val rootDir: File,
-    private val subjects: List<RegisterSubject>,
+    private val subjects: List<Subject>,
     outputDir: String?
 ) {
 
@@ -27,7 +29,7 @@ class RegisterTaskAction(
         writeOutputFileHeader()
         subjects.forEach { (subject, path, type, references, localReferences) ->
             try {
-                val schemaId = registerSchema(subject, path, type, references, localReferences)
+                val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences)
                 writeRegisteredSchemaOutput(subject, path, schemaId)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)

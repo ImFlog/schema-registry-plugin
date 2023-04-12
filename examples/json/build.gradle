@@ -2,6 +2,11 @@ plugins {
     id "com.github.imflog.kafka-schema-registry-gradle-plugin"
 }
 
+import com.github.imflog.schema.registry.Subject
+
+Subject locationAddressSubject = new Subject('location-address', 'schemas/json/location-address.json', 'JSON')
+Subject locationCoordSubject = new Subject('location-latlong', 'schemas/json/location-latlong.json', 'JSON')
+
 schemaRegistry {
     url = 'http://localhost:8081'
     quiet = false
@@ -12,8 +17,8 @@ schemaRegistry {
             .addLocalReference('Address', 'schemas/json/location-address.json')
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
-        subject('location-address', 'schemas/json/location-address.json', 'JSON')
-        subject('location-latlong', 'schemas/json/location-latlong.json', 'JSON')
+        subject(locationAddressSubject)
+        subject(locationCoordSubject)
     }
 
     config {
@@ -34,7 +39,7 @@ schemaRegistry {
             .addLocalReference("address", "schemas/json/location-address.json")
         subject('user', 'schemas/json/user.json', 'JSON')
             .addReference('company', 'company', -1)
-        subject('location-address', 'schemas/json/location-address.json', 'JSON')
-        subject('location-latlong', 'schemas/json/location-latlong.json', 'JSON')
+        subject(locationAddressSubject)
+        subject(locationCoordSubject)
     }
 }

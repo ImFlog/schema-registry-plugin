@@ -132,6 +132,22 @@ you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
 
+Notes:
+* If you want to reuse Subjects with the register task you can define a `Subject` object like so:
+  ```groovy
+  def mySubject = Subject("avroSubject", "/path.avsc", "AVRO")
+  
+  schemaRegistry {
+    url = 'http://registry-url:8081'
+    register {
+      subject(mySubject)
+    }
+    compatibility {
+      subject(mySubject)
+    }
+  }
+  ```
+
 #### Avro
 Mixing local and remote references is perfectly fine for Avro without specific configurations.
 
@@ -163,8 +179,6 @@ schemaRegistry {
     }
 }
 ```
-You have to list all the (subject, avsc file path) pairs that you want to send.
-
 If you have references to other schemas required before the register,
 you can call the `addReference("name", "subject", version)`, this will add a reference to use from the registry.
 The addReference calls can be chained.
@@ -174,8 +188,23 @@ you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
 
-A registered.csv file will be created with the following format `subject, path, id` 
+Notes:
+* A registered.csv file will be created with the following format `subject, path, id` 
 if you need information about the registered id.
+* If you want to reuse Subjects with the compatibility task you can define a `Subject` object like so:
+  ```groovy
+  def mySubject = Subject("avroSubject", "/path.avsc", "AVRO")
+  
+  schemaRegistry {
+    url = 'http://registry-url:8081'
+    register {
+      subject(mySubject)
+    }
+    compatibility {
+      subject(mySubject)
+    }
+  }
+  ```
 
 #### Avro
 Mixing local and remote references is perfectly fine for Avro without specific configurations.
@@ -294,6 +323,8 @@ buildscript {
         classpath "com.github.imflog:kafka-schema-registry-gradle-plugin:X.X.X-SNAPSHOT"
     }
 }
+
+apply plugin: "com.github.imflog.kafka-schema-registry-gradle-plugin"
 ```
 
 ## Thanks to all the sponsors :pray:

@@ -1,15 +1,18 @@
 buildscript {
     repositories {
         gradlePluginPortal()
+        mavenLocal()
         maven {
             url = uri("https://packages.confluent.io/maven/")
         }
     }
+
+    dependencies {
+        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:1.9.2-SNAPSHOT")
+    }
 }
 
 plugins {
-    // Set it to false to let subproject apply the plugin
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "1.9.1" apply false
     id("com.avast.gradle.docker-compose") version "0.16.8" apply true
 }
 
