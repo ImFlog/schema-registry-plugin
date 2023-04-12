@@ -135,7 +135,8 @@ The addLocalReference calls can be chained.
 Notes:
 * If you want to reuse Subjects with the register task you can define a `Subject` object like so:
   ```groovy
-  def mySubject = Subject("avroSubject", "/path.avsc", "AVRO")
+  import com.github.imflog.schema.registry.Subject
+  Subject mySubject = Subject("avroSubject", "/path.avsc", "AVRO")
   
   schemaRegistry {
     url = 'http://registry-url:8081'
@@ -193,7 +194,8 @@ Notes:
 if you need information about the registered id.
 * If you want to reuse Subjects with the compatibility task you can define a `Subject` object like so:
   ```groovy
-  def mySubject = Subject("avroSubject", "/path.avsc", "AVRO")
+  import com.github.imflog.schema.registry.Subject
+  Subject mySubject = Subject("avroSubject", "/path.avsc", "AVRO")
   
   schemaRegistry {
     url = 'http://registry-url:8081'
