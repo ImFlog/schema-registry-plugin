@@ -6,25 +6,14 @@ import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Path
 
 class DownloadTaskActionTest {
-    lateinit var folderRule: TemporaryFolder
-
-    @BeforeEach
-    fun setUp() {
-        folderRule = TemporaryFolder()
-        folderRule.create()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        folderRule.delete()
-    }
+    @TempDir
+    lateinit var folderRule: Path
 
     @Test
     fun `Should download schemas`() {
@@ -63,12 +52,13 @@ class DownloadTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
 
         // when
         val errorCount = DownloadTaskAction(
             registryClient,
-            folderRule.root,
+            folderRoot,
             arrayListOf(
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
@@ -77,11 +67,11 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc")).isNotNull
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc").readText())
             .containsIgnoringCase("foo")
     }
 
@@ -135,12 +125,13 @@ class DownloadTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
 
         // when
         val errorCount = DownloadTaskAction(
             registryClient,
-            folderRule.root,
+            folderRoot,
             arrayListOf(
                 DownloadSubject("te.*", outputDir, null, true)
             ),
@@ -148,13 +139,13 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).exists()
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/tea.avsc")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/tea.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/tea.avsc")).exists()
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/tea.avsc").readText())
             .containsIgnoringCase("tea")
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/foo.avsc")).doesNotExist()
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc")).doesNotExist()
     }
 
     @Test
@@ -183,12 +174,13 @@ class DownloadTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
 
         // when
         val errorCount = DownloadTaskAction(
             registryClient,
-            folderRule.root,
+            folderRoot,
             arrayListOf(DownloadSubject(subject, outputDir)),
         ).run()
 
@@ -214,12 +206,13 @@ class DownloadTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
 
         // when
         val errorCount = DownloadTaskAction(
             registryClient,
-            folderRule.root,
+            folderRoot,
             arrayListOf(
                 DownloadSubject(invalidSubjectPattern, outputDir, null, true),
                 DownloadSubject("test", outputDir)
@@ -228,8 +221,8 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).exists()
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
     }
 
@@ -267,12 +260,13 @@ class DownloadTaskActionTest {
         )
         Assertions.assertThat(v1Id).isNotEqualTo(v2Id)
 
-        folderRule.newFolder("src", "main", "avro", "external")
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
 
         // When
         val errorCount = DownloadTaskAction(
             registryClient,
-            folderRule.root,
+            folderRoot,
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
             ),
@@ -280,10 +274,10 @@ class DownloadTaskActionTest {
 
         // Then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc")).isNotNull
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/external/test.avsc").readText())
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .doesNotContain("desc")
     }
 }

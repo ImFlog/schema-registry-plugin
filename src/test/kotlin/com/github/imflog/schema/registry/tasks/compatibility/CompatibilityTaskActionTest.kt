@@ -10,25 +10,22 @@ import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
 import io.mockk.every
 import io.mockk.spyk
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 class CompatibilityTaskActionTest {
 
-    lateinit var folderRule: TemporaryFolder
+    @TempDir
+    lateinit var folderRule: Path
 
     @BeforeEach
-    fun setUp() {
-        folderRule = TemporaryFolder()
-        folderRule.create()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        folderRule.delete()
+    fun init() {
+        Files.createDirectories(folderRule.resolve("src/main/avro/external/"))
+        Files.createFile(folderRule.resolve("src/main/avro/external/test.avsc"))
     }
 
     @Test
@@ -49,11 +46,10 @@ class CompatibilityTaskActionTest {
                 listOf()
             ).get()
         )
-        folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
             arrayListOf(Subject("test", "src/main/avro/external/test.avsc", "AVRO"))
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -68,7 +64,7 @@ class CompatibilityTaskActionTest {
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
             subjects
         ).run()
 
@@ -127,8 +123,7 @@ class CompatibilityTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -153,7 +148,91 @@ class CompatibilityTaskActionTest {
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
+            subjects
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+    }
+
+    @Test
+    fun `Should verify compatibility when fetching latest version of references`() {
+        // given
+        val registryClient = MockSchemaRegistryClient()
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        // Register dependency
+        registryClient.register(
+            "Street",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Street",
+                    "fields": [
+                        {"name": "street", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            "Address",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Address",
+                    "fields": [
+                        {"name": "city", "type": "string" },
+                        {"name": "street", "type": "Street" }
+                    ]
+                }""",
+                listOf(SchemaReference("Street", "Street", 1))
+            ).get()
+        )
+
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "address", "type": [ "null", "Address" ], "default": null}
+             ]
+            }
+        """
+        )
+
+        val subjects = listOf(
+            Subject(
+                "test",
+                "src/main/avro/external/test.avsc",
+                "AVRO"
+            )
+                .addReference("Address", "Address")
+                .addReference("Street", "Street")
+        )
+
+        // when
+        val errorCount = CompatibilityTaskAction(
+            registryClient,
+            folderRule.toFile(),
             subjects
         ).run()
 
@@ -197,8 +276,11 @@ class CompatibilityTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "local")
-        File(folderRule.root, "src/main/avro/local/country.avsc").writeText(
+        Files.createDirectories(folderRule.resolve("src/main/avro/local"))
+        Files.createFile(folderRule.resolve("src/main/avro/local/country.avsc"))
+        Files.createFile(folderRule.resolve("src/main/avro/local/address.avsc"))
+
+        File(folderRule.toFile(), "src/main/avro/local/country.avsc").writeText(
             """{
                     "type": "enum",
                     "name": "Country",
@@ -214,7 +296,7 @@ class CompatibilityTaskActionTest {
                   "default": "UNKNOWN"
                 }"""
         )
-        File(folderRule.root, "src/main/avro/local/address.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/local/address.avsc").writeText(
             """{
                     "type": "record",
                     "name": "Address",
@@ -226,7 +308,7 @@ class CompatibilityTaskActionTest {
                 }"""
         )
 
-        File(folderRule.root, "src/main/avro/local/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/local/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -252,7 +334,7 @@ class CompatibilityTaskActionTest {
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
             subjects
         ).run()
 
@@ -278,11 +360,10 @@ class CompatibilityTaskActionTest {
                 listOf()
             ).get()
         )
-        folderRule.newFolder("src", "main", "avro", "external")
 
         val subjects =
             arrayListOf(Subject("test", "src/main/avro/external/test.avsc", "AVRO"))
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -296,7 +377,7 @@ class CompatibilityTaskActionTest {
         // when
         val errorCount = CompatibilityTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
             subjects,
         ).run()
 
@@ -313,8 +394,6 @@ class CompatibilityTaskActionTest {
             spySchemaRegistry.testCompatibility(any(), any<ParsedSchema>())
         } throws RestClientException("Subject not found", 404, Errors.SUBJECT_NOT_FOUND_ERROR_CODE)
 
-        folderRule.newFolder("src", "main", "avro", "external")
-
         val subjects = listOf(
             Subject(
                 "test",
@@ -322,7 +401,7 @@ class CompatibilityTaskActionTest {
                 "AVRO"
             )
         )
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -336,7 +415,7 @@ class CompatibilityTaskActionTest {
         // when
         val errorCount = CompatibilityTaskAction(
             spySchemaRegistry,
-            folderRule.root,
+            folderRule.toFile(),
             subjects,
         ).run()
 

@@ -207,6 +207,16 @@ if you need information about the registered id.
     }
   }
   ```
+* For remote references, if no version is specified, the latest version of schema is fetched and used from the schema registry:
+```groovy
+schemaRegistry {
+    url = 'http://registry-url:8081'
+    register {
+        subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
+                .addReference('avroSubject', 'avroSubjectType')
+    }
+}
+```
 
 #### Avro
 Mixing local and remote references is perfectly fine for Avro without specific configurations.

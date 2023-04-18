@@ -3,21 +3,18 @@ package com.github.imflog.schema.registry.parser
 import com.github.imflog.schema.registry.LocalReference
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.json.JSONObject
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.io.TempDir
+import java.nio.file.Path
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JsonSchemaParserTest {
 
     private val schemaRegistryClient = MockSchemaRegistryClient()
-    private val folderRule: TemporaryFolder = TemporaryFolder().apply { create() }
-    private val parser = JsonSchemaParser(
-        schemaRegistryClient,
-        folderRule.root
-    )
+    @TempDir
+    lateinit var folderRule: Path
 
     companion object {
         private const val ADDRESS_REFERENCE_NAME = "Address"
@@ -43,14 +40,10 @@ class JsonSchemaParserTest {
         }"""
     }
 
-    @AfterAll
-    fun tearDown() {
-        folderRule.delete()
-    }
-
     @Test
     fun `Should format local references correctly`() {
         // Given
+        val parser = JsonSchemaParser(schemaRegistryClient, folderRule.toFile())
         val aLocalReference = givenALocalReference()
 
         // When
@@ -65,7 +58,7 @@ class JsonSchemaParserTest {
     }
 
     private fun givenALocalReference(): LocalReference {
-        val addressLocalFile = folderRule.root.resolve("Address.json")
+        val addressLocalFile = folderRule.resolve("Address.json").toFile()
         addressLocalFile.writeText(ADDRESS_SCHEMA)
         return LocalReference(ADDRESS_REFERENCE_NAME, addressLocalFile.path)
     }
