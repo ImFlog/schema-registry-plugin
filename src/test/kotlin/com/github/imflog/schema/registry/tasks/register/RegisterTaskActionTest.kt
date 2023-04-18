@@ -255,7 +255,7 @@ class RegisterTaskActionTest {
                 "AVRO"
             )
                 .addReference("Address", "Address")
-                .addReference("Street", "Street")
+                .addReference("Street", "Street", -1)
         )
 
         // when

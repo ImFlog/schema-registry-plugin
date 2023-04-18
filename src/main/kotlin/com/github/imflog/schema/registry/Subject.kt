@@ -16,7 +16,7 @@ data class Subject(
     }
 
     fun addReference(name: String, subject:String): Subject {
-        references.add(SchemaReference(name, subject, 0))
+        references.add(SchemaReference(name, subject, -1))
         return this
     }
 

@@ -226,7 +226,7 @@ class CompatibilityTaskActionTest {
                 "AVRO"
             )
                 .addReference("Address", "Address")
-                .addReference("Street", "Street")
+                .addReference("Street", "Street", -1)
         )
 
         // when

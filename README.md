@@ -207,13 +207,15 @@ if you need information about the registered id.
     }
   }
   ```
-* For remote references, if no version is specified, the latest version of schema is fetched and used from the schema registry:
+* For remote references, if no version is specified, the latest version of schema is fetched and used from the schema registry.
+  You can also specify `-1` for the same functionality
 ```groovy
 schemaRegistry {
     url = 'http://registry-url:8081'
     register {
         subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addReference('avroSubject', 'avroSubjectType')
+                .addReference('avroSubjectTwo', 'avroSubjectTwoType', -1)
     }
 }
 ```
