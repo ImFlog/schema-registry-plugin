@@ -1,11 +1,15 @@
 package com.github.imflog.schema.registry.tasks.download
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.github.imflog.schema.registry.LoggingUtils.infoIfNotQuiet
 import com.github.imflog.schema.registry.SchemaParsingException
 import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import com.google.common.base.Suppliers
 import io.confluent.kafka.schemaregistry.ParsedSchema
+import io.confluent.kafka.schemaregistry.client.SchemaMetadata
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
@@ -16,17 +20,26 @@ class DownloadTaskAction(
     private val client: SchemaRegistryClient,
     private val rootDir: File,
     private val subjects: List<DownloadSubject>,
+    private val withMetadata: Boolean
 ) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
+    private val objectMapper = ObjectMapper()
+        .configure(SerializationFeature.INDENT_OUTPUT, true)
+        .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
     fun run(): Int {
         var errorCount = 0
         expandSubjectPatterns().forEach { downloadSubject ->
             logger.infoIfNotQuiet("Start loading schemas for ${downloadSubject.subject}")
             try {
-                val downloadedSchema = downloadSchema(downloadSubject)
-                writeSchemaFiles(downloadSubject, downloadedSchema)
+                val metadata = getSchemaMetadata(downloadSubject)
+                val outputDir = File(rootDir.toURI()).resolve(downloadSubject.outputPath)
+                outputDir.mkdirs()
+                if (withMetadata) {
+                    writeSchemaMetadata(downloadSubject, metadata, outputDir)
+                }
+                writeSchemaFile(downloadSubject, metadata, outputDir)
             } catch (e: Exception) {
                 logger.error("Error during schema retrieval for ${downloadSubject.subject}", e)
                 errorCount++
@@ -66,29 +79,35 @@ class DownloadTaskAction(
         }
     }
 
-    private fun downloadSchema(subject: DownloadSubject): ParsedSchema {
-        val schemaMetadata = if (subject.version == null) {
-            client.getLatestSchemaMetadata(subject.subject)
-        } else {
-            client.getSchemaMetadata(subject.subject, subject.version)
-        }
-        return parseSchemaWithRemoteReferences(
-            subject.subject,
+    private fun getSchemaMetadata(subject: DownloadSubject): SchemaMetadata =
+        if (subject.version == null) client.getLatestSchemaMetadata(subject.subject)
+        else client.getSchemaMetadata(subject.subject, subject.version)
+
+    private fun writeSchemaFile(downloadSubject: DownloadSubject, schemaMetadata: SchemaMetadata, outputDir: File) {
+        val parsedSchema = parseSchemaWithRemoteReferences(
+            downloadSubject.subject,
             schemaMetadata.schemaType.toSchemaType(),
             schemaMetadata.schema,
             schemaMetadata.references
         )
-    }
-
-    private fun writeSchemaFiles(downloadSubject: DownloadSubject, schema: ParsedSchema) {
-        val outputDir = File(rootDir.toURI()).resolve(downloadSubject.outputPath)
-        outputDir.mkdirs()
         val fileName = downloadSubject.outputFileName ?: downloadSubject.subject
-        val outputFile = File(outputDir, "${fileName}.${schema.schemaType().toSchemaType().extension}")
+        val outputFile = File(outputDir, "${fileName}.${parsedSchema.schemaType().toSchemaType().extension}")
         outputFile.createNewFile()
         logger.infoIfNotQuiet("Writing file  $outputFile")
         outputFile.printWriter().use { out ->
-            out.println(schema.toString())
+            out.println(parsedSchema.toString())
+        }
+    }
+
+    private fun writeSchemaMetadata(downloadSubject: DownloadSubject, schemaMetadata: SchemaMetadata, outputDir: File) {
+        val fileName = downloadSubject.outputFileName ?: downloadSubject.subject
+        val outputFile = File(outputDir, "${fileName}-metadata.json")
+        outputFile.createNewFile()
+        logger.infoIfNotQuiet("Writing metadata file  $outputFile")
+        outputFile.printWriter().use { out ->
+            out.println(
+                objectMapper.writeValueAsString(schemaMetadata)
+            )
         }
     }
 

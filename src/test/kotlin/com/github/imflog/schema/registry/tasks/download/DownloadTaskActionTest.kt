@@ -63,6 +63,7 @@ class DownloadTaskActionTest {
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
             ),
+            false,
         ).run()
 
         // then
@@ -135,6 +136,7 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("te.*", outputDir, null, true)
             ),
+            false,
         ).run()
 
         // then
@@ -182,6 +184,7 @@ class DownloadTaskActionTest {
             registryClient,
             folderRoot,
             arrayListOf(DownloadSubject(subject, outputDir)),
+            false,
         ).run()
 
         // then
@@ -217,6 +220,7 @@ class DownloadTaskActionTest {
                 DownloadSubject(invalidSubjectPattern, outputDir, null, true),
                 DownloadSubject("test", outputDir)
             ),
+            false,
         ).run()
 
         // then
@@ -270,6 +274,7 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
             ),
+            false,
         ).run()
 
         // Then

@@ -2,11 +2,16 @@ package com.github.imflog.schema.registry.tasks.download
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 
 open class DownloadSubjectExtension(objects: ObjectFactory) {
 
     companion object {
         const val EXTENSION_NAME = "download"
+    }
+
+    val metadata: Property<Boolean> = objects.property(Boolean::class.java).apply {
+        convention(false)
     }
 
     val subjects: ListProperty<DownloadSubject> = objects.listProperty(DownloadSubject::class.java).apply {
