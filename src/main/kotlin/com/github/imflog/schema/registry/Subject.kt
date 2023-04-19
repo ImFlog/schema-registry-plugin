@@ -15,6 +15,11 @@ data class Subject(
         return this
     }
 
+    fun addReference(name: String, subject:String): Subject {
+        references.add(SchemaReference(name, subject, -1))
+        return this
+    }
+
     fun addLocalReference(name: String, path: String): Subject {
         localReferences.add(LocalReference(name, path))
         return this

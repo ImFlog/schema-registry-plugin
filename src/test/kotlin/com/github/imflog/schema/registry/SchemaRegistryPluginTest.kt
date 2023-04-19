@@ -3,32 +3,29 @@ package com.github.imflog.schema.registry
 import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import org.assertj.core.api.Assertions
 import org.gradle.api.Project
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildFailure
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 class SchemaRegistryPluginTest {
     lateinit var project: Project
-    lateinit var folderRule: TemporaryFolder
+    @TempDir
+    lateinit var folderRule: Path
     lateinit var buildFile: File
 
     private val subject = "test-subject"
 
     @BeforeEach
     fun init() {
-        folderRule = TemporaryFolder()
         project = ProjectBuilder.builder().build()
         project.pluginManager.apply(SchemaRegistryPlugin::class.java)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        folderRule.delete()
+        Files.createFile(folderRule.resolve("build.gradle"))
     }
 
     @Test
@@ -41,8 +38,7 @@ class SchemaRegistryPluginTest {
 
     @Test
     fun `plugin should fail with wrong url extension configuration`() {
-        folderRule.create()
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = File(folderRule.toFile(), "build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -61,7 +57,7 @@ class SchemaRegistryPluginTest {
         try {
             GradleRunner.create()
                 .withGradleVersion("6.7.1")
-                .withProjectDir(folderRule.root)
+                .withProjectDir(folderRule.toFile())
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -74,8 +70,7 @@ class SchemaRegistryPluginTest {
 
     @Test
     fun `plugin should fail with wrong credentials extension configuration`() {
-        folderRule.create()
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = File(folderRule.toFile(), "build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -99,7 +94,7 @@ class SchemaRegistryPluginTest {
         try {
             GradleRunner.create()
                 .withGradleVersion("6.7.1")
-                .withProjectDir(folderRule.root)
+                .withProjectDir(folderRule.toFile())
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -112,8 +107,7 @@ class SchemaRegistryPluginTest {
 
     @Test
     fun `plugin should only parse nested extensions`() {
-        folderRule.create()
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = File(folderRule.toFile(), "build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -136,7 +130,7 @@ class SchemaRegistryPluginTest {
         try {
             GradleRunner.create()
                 .withGradleVersion("6.7.1")
-                .withProjectDir(folderRule.root)
+                .withProjectDir(folderRule.toFile())
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)

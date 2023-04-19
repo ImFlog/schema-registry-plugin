@@ -27,7 +27,7 @@ class RegisterTaskAction(
     fun run(): Int {
         var errorCount = 0
         writeOutputFileHeader()
-        subjects.forEach { (subject, path, type, references, localReferences) ->
+        subjects.forEach { (subject, path, type, references: List<SchemaReference>, localReferences) ->
             try {
                 val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences)
                 writeRegisteredSchemaOutput(subject, path, schemaId)

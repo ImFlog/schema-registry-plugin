@@ -116,6 +116,8 @@ schemaRegistry {
                 .addLocalReference("localAvroSubject", "/a/local/path.avsc")
         subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addReference('avroSubject', 'avroSubjectType', 1)
+                .addReference('avroSubjectLatestVersion', 'avroSubjectLatestVersionType')
+                .addReference('avroSubjectLatestVersionExplicit', 'avroSubjectLatestVersionExplicitType', -1)
         subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
@@ -124,7 +126,11 @@ schemaRegistry {
 You have to list all the (subject, avsc file path) pairs that you want to test. 
 
 If you have references with other schemas stored in the registry that are required before the compatibility check,
-you can call the `addReference("name", "subject", version)`, this will add a reference to fetch dynamically from the registry.
+you can call the `addReference("name", "subject", version)`,
+this will add a reference to use from the registry.
+A convenience method, `addReference("name", "subject")`,
+uses the latest version of the schema in the registry.
+You can also specify `-1` explicitly to use the latest version.
 The addReference calls can be chained.
 
 If you have local references to add before calling the compatibility in the registry,
@@ -175,13 +181,19 @@ schemaRegistry {
                 .addLocalReference("localAvroSubject", "/a/local/path.avsc")
         subject('avroWithRemoteReferences', '/absolutPath/dependent/path.avsc', "AVRO")
                 .addReference('avroSubject', 'avroSubjectType', 1)
+                .addReference('avroSubjectLatestVersion', 'avroSubjectLatestVersionType')
+                .addReference('avroSubjectLatestVersionExplicit', 'avroSubjectLatestVersionExplicitType', -1)
         subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
     }
 }
 ```
 If you have references to other schemas required before the register,
-you can call the `addReference("name", "subject", version)`, this will add a reference to use from the registry.
+you can call the `addReference("name", "subject", version)`,
+this will add a reference to use from the registry.
+A convenience method, `addReference("name", "subject")`,
+uses the latest version of the schema in the registry.
+You can also specify `-1` explicitly to use the latest version.
 The addReference calls can be chained.
 
 If you have local references to add before calling the register,

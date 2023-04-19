@@ -8,24 +8,21 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 
 class RegisterTaskActionTest {
-    lateinit var folderRule: TemporaryFolder
+    @TempDir
+    lateinit var folderRule: Path
 
     @BeforeEach
-    fun setUp() {
-        folderRule = TemporaryFolder()
-        folderRule.create()
-    }
-
-    @AfterEach
-    fun tearDown() {
-        folderRule.delete()
+    fun init() {
+        Files.createDirectories(folderRule.resolve("src/main/avro/external/"))
+        Files.createFile(folderRule.resolve("src/main/avro/external/test.avsc"))
     }
 
     @Test
@@ -33,8 +30,7 @@ class RegisterTaskActionTest {
         // given
         val registryClient =
             MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
-        folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -53,7 +49,7 @@ class RegisterTaskActionTest {
         // when
         val errorCount = RegisterTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
             subjects,
             null
         ).run()
@@ -77,8 +73,7 @@ class RegisterTaskActionTest {
             ).get()
         )
 
-        folderRule.newFolder("src", "main", "avro", "external")
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -101,7 +96,7 @@ class RegisterTaskActionTest {
         // when
         val errorCount = RegisterTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
             subjects,
             null
         ).run()
@@ -125,8 +120,6 @@ class RegisterTaskActionTest {
                 listOf()
             ).get()
         )
-
-        folderRule.newFolder("src", "main", "avro", "external")
 
         // Register dependency
         registryClient.register(
@@ -160,7 +153,7 @@ class RegisterTaskActionTest {
             ).get()
         )
 
-        File(folderRule.root, "src/main/avro/external/test.avsc").writeText(
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
             """
             {"type": "record",
              "name": "test",
@@ -186,7 +179,89 @@ class RegisterTaskActionTest {
         // when
         val errorCount = RegisterTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
+            subjects,
+            null
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(registryClient.getLatestSchemaMetadata("test")).isNotNull
+    }
+
+    @Test
+    fun `Should register schema with latest remote version of references`() {
+        // given
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{"type": "record", "name": "test", "fields": [{ "name": "name", "type": "string" }]}""",
+                listOf()
+            ).get()
+        )
+
+        // Register dependency
+        registryClient.register(
+            "Street",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Street",
+                    "fields": [
+                        {"name": "street", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            "Address",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "Address",
+                    "fields": [
+                        {"name": "city", "type": "string" },
+                        {"name": "street", "type": "Street" }
+                    ]
+                }""",
+                listOf(SchemaReference("Street", "Street", 1))
+            ).get()
+        )
+
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "address", "type": "Address"}
+             ]
+            }
+        """.trimIndent()
+        )
+
+
+        val subjects = listOf(
+            Subject(
+                "test",
+                "src/main/avro/external/test.avsc",
+                "AVRO"
+            )
+                .addReference("Address", "Address")
+                .addReference("Street", "Street", -1)
+        )
+
+        // when
+        val errorCount = RegisterTaskAction(
+            registryClient,
+            folderRule.toFile(),
             subjects,
             null
         ).run()
@@ -201,9 +276,8 @@ class RegisterTaskActionTest {
         // given
         val registryClient =
             MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
-        folderRule.newFolder("src", "main", "avro", "external")
-        val resultFolder = folderRule.newFolder("results", "avro")
-        File(folderRule.root, "src/main/avro/external/test.avsc")
+        val resultFolder = Files.createDirectories(folderRule.resolve("results/avro")).toFile()
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc")
             .writeText(
                 """
                 {"type": "record",
@@ -215,7 +289,7 @@ class RegisterTaskActionTest {
                 }
             """
             )
-        File(folderRule.root, "src/main/avro/external/test_2.avsc")
+        File(folderRule.toFile(), "src/main/avro/external/test_2.avsc")
             .writeText(
                 """
                 {"type": "record",
@@ -236,7 +310,7 @@ class RegisterTaskActionTest {
         // when
         RegisterTaskAction(
             registryClient,
-            folderRule.root,
+            folderRule.toFile(),
             subjects,
             resultFolder.path
         ).run()
