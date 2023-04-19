@@ -29,6 +29,8 @@ schemaRegistry {
     }
 
     download {
+        metadata = true
+
         subject('company', 'schemas/json/downloaded')
         subject('user', 'schemas/json/downloaded')
         subjectPattern('location.*', 'schemas/json/downloaded/location')

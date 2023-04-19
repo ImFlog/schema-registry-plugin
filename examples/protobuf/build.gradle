@@ -15,7 +15,7 @@ schemaRegistry {
     register {
         subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
-            .addReference('company', 'company', 1)
+                .addReference('company', 'company', 1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
     }
@@ -28,6 +28,8 @@ schemaRegistry {
     }
 
     download {
+        metadata = true
+
         subject('company', 'schemas/protobuf/downloaded')
         subject('user', 'schemas/protobuf/downloaded')
         subjectPattern('location.*', 'schemas/protobuf/downloaded/location')
@@ -36,7 +38,7 @@ schemaRegistry {
     compatibility {
         subject('company', 'schemas/protobuf/com/example/company_v2.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
-            .addReference('company', 'company', 1)
+                .addReference('company', 'company', 1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
     }

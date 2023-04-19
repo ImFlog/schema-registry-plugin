@@ -24,6 +24,7 @@ schemaRegistry {
     }
 
     download {
+        metadata.set(true)
         subject("company", "schemas/avro/downloaded")
         subject("user", "schemas/avro/downloaded")
         subjectPattern("location.*", "schemas/avro/downloaded/location")
