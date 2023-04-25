@@ -20,7 +20,7 @@ class DownloadTaskAction(
     private val client: SchemaRegistryClient,
     private val rootDir: File,
     private val subjects: List<DownloadSubject>,
-    private val withMetadata: Boolean
+    private val metadataConfiguration: MetadataExtension
 ) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
@@ -36,8 +36,12 @@ class DownloadTaskAction(
                 val metadata = getSchemaMetadata(downloadSubject)
                 val outputDir = File(rootDir.toURI()).resolve(downloadSubject.outputPath)
                 outputDir.mkdirs()
-                if (withMetadata) {
-                    writeSchemaMetadata(downloadSubject, metadata, outputDir)
+                if (metadataConfiguration.enabled) {
+                    val metadataDirectory = metadataConfiguration.outputPath?.run {
+                        File(rootDir.toURI()).resolve(this)
+                    } ?: outputDir
+                    metadataDirectory.mkdirs()
+                    writeSchemaMetadata(downloadSubject, metadata, metadataDirectory)
                 }
                 writeSchemaFile(downloadSubject, metadata, outputDir)
             } catch (e: Exception) {

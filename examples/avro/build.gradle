@@ -2,6 +2,7 @@ plugins {
     id "com.github.imflog.kafka-schema-registry-gradle-plugin"
 }
 import com.github.imflog.schema.registry.Subject
+import com.github.imflog.schema.registry.tasks.download.MetadataExtension
 
 Subject locationAddressSubject = new Subject('location-address', 'schemas/avro/location-address.avsc', 'AVRO')
 Subject locationCoordSubject = new Subject('location-latlong', 'schemas/avro/location-latlong.avsc', 'AVRO')
@@ -28,7 +29,7 @@ schemaRegistry {
     }
 
     download {
-        metadata = true
+        metadata = new MetadataExtension(true)
         subject('company', 'schemas/avro/downloaded')
         subject('user', 'schemas/avro/downloaded')
         subjectPattern('location.*', 'schemas/avro/downloaded/location')

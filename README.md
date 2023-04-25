@@ -79,10 +79,16 @@ Like the name of the task imply, this task is responsible for retrieving schemas
 
 A DSL is available to configure the task:
 ```groovy
+
+// Optional
+import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+
 schemaRegistry {
     url = 'http://registry-url:8081/'
     download {
-        metadata = true
+        // Optional
+        metadata = new MetadataExtension(true, "path/to/metadata/")
+      
         // extension of the output file depends on the the schema type
         subject('avroSubject', '/absolutPath/src/main/avro')
         subject('protoSubject', 'src/main/proto')
@@ -100,8 +106,9 @@ Here is the list of all the signatures for the `subject` extension:
 * `subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String)`
 * `subjectPattern(inputPattern: String, outputPath: String)`
 
-You can set the flag `metadata = true` in order to download the schema metadata in a json file.
-It will be saved in a file named like the schema file but suffixed by `-metadata.json`.
+You can configure the metadata extension in order to download the schemas metadata in json files.
+It will be saved in files named like the schema file but suffixed by `-metadata.json` in the outputPath you specify
+and defaults to the same output directory as your schemas.  
 
 NB:
 * If not provided, the outputFileName is equal to the inputSubject.

@@ -58,7 +58,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     downloadTask.basicAuth.set(basicAuthExtension.basicAuth)
                     downloadTask.ssl.set(sslExtension.configs)
                     downloadTask.subjects.set(downloadExtension.subjects)
-                    downloadTask.withMetadata.set(downloadExtension.metadata)
+                    downloadTask.metadataConfig.set(downloadExtension.metadata)
                 }
 
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)

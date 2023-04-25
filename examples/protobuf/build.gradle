@@ -3,6 +3,7 @@ plugins {
 }
 
 import com.github.imflog.schema.registry.Subject
+import com.github.imflog.schema.registry.tasks.download.MetadataExtension
 
 Subject locationAddressSubject = new Subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
 Subject locationCoordSubject = new Subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
@@ -28,7 +29,7 @@ schemaRegistry {
     }
 
     download {
-        metadata = true
+        metadata = new MetadataExtension(true)
 
         subject('company', 'schemas/protobuf/downloaded')
         subject('user', 'schemas/protobuf/downloaded')
