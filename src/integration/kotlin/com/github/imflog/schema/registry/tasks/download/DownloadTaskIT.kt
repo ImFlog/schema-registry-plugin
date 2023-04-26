@@ -220,6 +220,115 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
+    @Test
+    fun `Should download schema metadata in default directory`() {
+        // Given
+        val subjectName = "test"
+
+        client.register(
+            subjectName,
+            AvroSchema(
+                """{
+                    "type": "record",
+                    "name": "User",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }"""
+            )
+        )
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    metadata = new MetadataExtension(true)
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaFile = "$subjectName.avsc"
+        val metadataFile = "$subjectName-metadata.json"
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$metadataFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `Should download schema metadata in specific directory`() {
+        // Given
+        val subjectName = "test"
+
+        client.register(
+            subjectName,
+            AvroSchema(
+                """{
+                    "type": "record",
+                    "name": "User",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }"""
+            )
+        )
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    metadata = new MetadataExtension(true, '${folderRule.root.absolutePath}/src/main/avro/metadata')
+
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaFile = "$subjectName.avsc"
+        val metadataFile = "$subjectName-metadata.json"
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$metadataFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
     private class SchemaArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
             Stream.of(

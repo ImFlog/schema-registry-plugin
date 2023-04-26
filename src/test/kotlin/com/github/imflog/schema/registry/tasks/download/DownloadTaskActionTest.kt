@@ -63,6 +63,7 @@ class DownloadTaskActionTest {
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
             ),
+            MetadataExtension(),
         ).run()
 
         // then
@@ -135,6 +136,7 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("te.*", outputDir, null, true)
             ),
+            MetadataExtension(),
         ).run()
 
         // then
@@ -182,6 +184,7 @@ class DownloadTaskActionTest {
             registryClient,
             folderRoot,
             arrayListOf(DownloadSubject(subject, outputDir)),
+            MetadataExtension(),
         ).run()
 
         // then
@@ -217,6 +220,7 @@ class DownloadTaskActionTest {
                 DownloadSubject(invalidSubjectPattern, outputDir, null, true),
                 DownloadSubject("test", outputDir)
             ),
+            MetadataExtension(),
         ).run()
 
         // then
@@ -270,6 +274,7 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
             ),
+            MetadataExtension(),
         ).run()
 
         // Then
@@ -279,5 +284,100 @@ class DownloadTaskActionTest {
             .containsIgnoringCase("test")
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .doesNotContain("desc")
+    }
+
+    @Test
+    fun `Should download schemas with metadata in the same output dir by default`() {
+        // given
+        val testSubject = "test"
+        val outputDir = "src/main/avro/external"
+
+        val registryClient = MockSchemaRegistryClient(listOf(AvroSchemaProvider()))
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(DownloadSubject(testSubject, outputDir)),
+            MetadataExtension(true),
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test-metadata.json")).isNotNull
+        // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test-metadata.json").readText())
+            .containsIgnoringCase("\"id\" :")
+            .containsIgnoringCase("\"version\" :")
+            .containsIgnoringCase("\"schema_type\" :")
+            .containsIgnoringCase("\"schema\" :")
+            .containsIgnoringCase("\"references\" :")
+    }
+
+    @Test
+    fun `Should download schemas with metadata in the specified output dir`() {
+        // given
+        val testSubject = "test"
+        val outputDir = "src/main/avro/external"
+        val metadataDir = "src/main/avro/metadata"
+
+        val registryClient = MockSchemaRegistryClient(listOf(AvroSchemaProvider()))
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(DownloadSubject(testSubject, outputDir)),
+            MetadataExtension(true, metadataDir),
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json")).isNotNull
+        // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json").readText())
+            .containsIgnoringCase("\"id\" :")
+            .containsIgnoringCase("\"version\" :")
+            .containsIgnoringCase("\"schema_type\" :")
+            .containsIgnoringCase("\"schema\" :")
+            .containsIgnoringCase("\"references\" :")
     }
 }

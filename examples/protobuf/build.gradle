@@ -3,6 +3,7 @@ plugins {
 }
 
 import com.github.imflog.schema.registry.Subject
+import com.github.imflog.schema.registry.tasks.download.MetadataExtension
 
 Subject locationAddressSubject = new Subject('location-address', 'schemas/protobuf/com/example/location-address.proto', 'PROTOBUF')
 Subject locationCoordSubject = new Subject('location-latlong', 'schemas/protobuf/com/example/location-latlong.proto', 'PROTOBUF')
@@ -15,7 +16,7 @@ schemaRegistry {
     register {
         subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
-            .addReference('company', 'company', 1)
+                .addReference('company', 'company', 1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
     }
@@ -28,6 +29,8 @@ schemaRegistry {
     }
 
     download {
+        metadata = new MetadataExtension(true)
+
         subject('company', 'schemas/protobuf/downloaded')
         subject('user', 'schemas/protobuf/downloaded')
         subjectPattern('location.*', 'schemas/protobuf/downloaded/location')
@@ -36,7 +39,7 @@ schemaRegistry {
     compatibility {
         subject('company', 'schemas/protobuf/com/example/company_v2.proto', 'PROTOBUF')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
-            .addReference('company', 'company', 1)
+                .addReference('company', 'company', 1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
     }

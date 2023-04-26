@@ -24,6 +24,9 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     }
 
     @Input
+    val metadataConfig: Property<MetadataExtension> = objects.property(MetadataExtension::class.java)
+
+    @Input
     val url: Property<String> = objects.property(String::class.java)
 
     @Input
@@ -41,6 +44,7 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
             project.rootDir,
             subjects.get(),
+            metadataConfig.get()
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not downloaded, see logs for details", Throwable())

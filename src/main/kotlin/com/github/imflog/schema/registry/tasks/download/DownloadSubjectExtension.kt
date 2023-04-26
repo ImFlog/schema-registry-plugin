@@ -2,11 +2,16 @@ package com.github.imflog.schema.registry.tasks.download
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 
 open class DownloadSubjectExtension(objects: ObjectFactory) {
 
     companion object {
         const val EXTENSION_NAME = "download"
+    }
+
+    val metadata: Property<MetadataExtension> = objects.property(MetadataExtension::class.java).apply {
+        convention(MetadataExtension(false, null))
     }
 
     val subjects: ListProperty<DownloadSubject> = objects.listProperty(DownloadSubject::class.java).apply {
@@ -41,3 +46,10 @@ data class DownloadSubject(
     val regex: Boolean = false,
     val outputFileName: String? = null
 )
+
+data class MetadataExtension(
+    val enabled: Boolean = false,
+    val outputPath: String? = null
+) {
+    constructor(enabled: Boolean) : this(enabled, null)
+}

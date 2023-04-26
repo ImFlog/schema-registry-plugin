@@ -1,3 +1,5 @@
+import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+
 plugins {
     id("com.github.imflog.kafka-schema-registry-gradle-plugin")
 }
@@ -24,6 +26,7 @@ schemaRegistry {
     }
 
     download {
+        metadata.set(MetadataExtension(true))
         subject("company", "schemas/avro/downloaded")
         subject("user", "schemas/avro/downloaded")
         subjectPattern("location.*", "schemas/avro/downloaded/location")

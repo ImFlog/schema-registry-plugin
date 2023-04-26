@@ -29,7 +29,7 @@ class AvroSchemaParser(
         schemaContent: String,
         localReferences: List<LocalReference>
     ): String {
-        return replaceType(JSONObject(schemaContent),localReferences).toString()
+        return replaceType(JSONObject(schemaContent), localReferences).toString()
     }
 
     private fun replaceType(type: Any, localReferences: List<LocalReference>): Any {
@@ -47,6 +47,7 @@ class AvroSchemaParser(
                     .forEach { type.put(it, replaceType(type.get(it), localReferences)) }
                 return type
             }
+
             else -> type
         }
     }
