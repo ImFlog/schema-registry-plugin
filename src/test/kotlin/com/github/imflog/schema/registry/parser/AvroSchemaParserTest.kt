@@ -80,14 +80,12 @@ class AvroSchemaParserTest {
             .isEqualTo(JSONObject(ADDRESS_SCHEMA))
     }
 
-    // The following test should fail, because the produced schema is invalid
-    // The two references to B lead to duplicated type definitions
     @Test
-    fun `Does resolve duplicated references incorrectly`() {
+    fun `Should resolve duplicated references with same namespace correctly`() {
         // Given
         val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
         val testFilesPath = "$projectDirAbsolutePath/src/test/resources/"
-        val parser = AvroSchemaParser(schemaRegistryClient, Path.of(testFilesPath).toFile())
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
         val reference = LocalReference("B", "${testFilesPath}B.avsc")
         val schema = File("${testFilesPath}A.avsc").readText()
         // When
@@ -101,63 +99,74 @@ class AvroSchemaParserTest {
         Assertions.assertThat(resolved).isEqualTo(
             JSONObject(
                 """
+                {
+                  "name": "A",
+                  "namespace": "com.mycompany",
+                  "type": "record",
+                  "fields": [
                     {
-                      "name": "A",
-                      "namespace": "com.mycompany",
-                      "type": "record",
-                      "fields":
-                        [
-                          {
-                            "name": "nested",
-                            "type":
-                              {
-                                "name": "B",
-                                "namespace": "com.mycompany",
-                                "type": "enum",
-                                "symbols": ["X1", "X2"],
-                              },
-                          },
-                          {
-                            "name": "nested1",
-                            "type":
-                              {
-                                "name": "B",
-                                "namespace": "com.mycompany",
-                                "type": "enum",
-                                "symbols": ["X1", "X2"],
-                              },
-                          },
-                        ],
+                      "name": "nested",
+                      "type": {
+                        "name":"B",
+                        "type": "enum",
+                        "symbols": ["X1", "X2"]
+                      }
+                    },
+                    {
+                      "name": "nested1",
+                      "type": "B"
                     }
+                  ]
+                }
                 """
             ).toString()
         )
     }
 
-    // The following test should succeed but fails with
-    // org.apache.avro.SchemaParseException: Can't redefine: com.mycompany.B
-    // because the type was defined twice instead of being referenced
     @Test
-    fun `Should register schema with duplicated local references`() {
-        // given
-        val registryClient =
-            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+    fun `Should resolve duplicated references with different namespace correctly`() {
+        // Given
         val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
-        val schemaPath = "$projectDirAbsolutePath/src/test/resources/"
-        val subjects = listOf(
-            Subject("test", "${schemaPath}A.avsc", "AVRO")
-                .addLocalReference("B", "${schemaPath}B.avsc")
+        val testFilesPath = "$projectDirAbsolutePath/src/test/resources/"
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}B.avsc")
+        val schema = File("${testFilesPath}A.avsc")
+            .readText()
+            .replace("com.mycompany", "com.mycompany.namespaced")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema,
+            listOf(reference)
         )
-
-        // when
-        val errorCount = RegisterTaskAction(
-            registryClient,
-            folderRule.root.toFile(),
-            subjects,
-            null
-        ).run()
-
-        // then
-        Assertions.assertThat(errorCount).isEqualTo(0)
+        // Then
+        val resolved = JSONObject(resolvedSchema).toString()
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(
+                """
+                {
+                  "name": "A",
+                  "namespace": "com.mycompany.namespaced",
+                  "type": "record",
+                  "fields": [
+                    {
+                      "name": "nested",
+                      "type": {
+                        "name":"B",
+                        "namespace": "com.mycompany",
+                        "type": "enum",
+                        "symbols": ["X1", "X2"]
+                      }
+                    },
+                    {
+                      "name": "nested1",
+                      "type": "com.mycompany.B"
+                    }
+                  ]
+                }
+                """
+            ).toString()
+        )
     }
+
 }

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 
 class RegisterTaskActionTest {
     @TempDir
@@ -324,5 +325,29 @@ class RegisterTaskActionTest {
                |test_2, src/main/avro/external/test_2.avsc, 2
                |""".trimMargin()
             )
+    }
+
+    @Test
+    fun `Should register schema with duplicated local references`() {
+        // Given
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
+        val schemaPath = "$projectDirAbsolutePath/src/test/resources/"
+        val subjects = listOf(
+            Subject("test", "${schemaPath}A.avsc", "AVRO")
+                .addLocalReference("B", "${schemaPath}B.avsc")
+        )
+
+        // When
+        val errorCount = RegisterTaskAction(
+            registryClient,
+            folderRule.root.toFile(),
+            subjects,
+            null
+        ).run()
+
+        // Then
+        Assertions.assertThat(errorCount).isEqualTo(0)
     }
 }
