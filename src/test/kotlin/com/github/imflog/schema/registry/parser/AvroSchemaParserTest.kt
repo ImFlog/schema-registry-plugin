@@ -123,7 +123,52 @@ class AvroSchemaParserTest {
     }
 
     @Test
-    fun `Should resolve array references correctly`() {
+    fun `Should resolve duplicated references with different namespace correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubject.avsc")
+            .readText()
+            .replace("com.mycompany", "com.mycompany.namespaced")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONObject(resolvedSchema).toString()
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(
+                """
+                {
+                  "name": "A",
+                  "namespace": "com.mycompany.namespaced",
+                  "type": "record",
+                  "fields": [
+                    {
+                      "name": "nested",
+                      "type": {
+                        "name":"B",
+                        "namespace": "com.mycompany",
+                        "type": "enum",
+                        "symbols": ["X1", "X2"]
+                      }
+                    },
+                    {
+                      "name": "nested1",
+                      "type": "com.mycompany.B"
+                    }
+                  ]
+                }
+                """
+            ).toString()
+        )
+    }
+
+
+    @Test
+    fun `Should resolve duplicated array references correctly`() {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
         val reference = LocalReference("B", "${testFilesPath}testType.avsc")
@@ -140,38 +185,24 @@ class AvroSchemaParserTest {
         Assertions.assertThat(resolved).isEqualTo(
             JSONObject(
                 """
-            {
-              "name": "A",
-              "namespace": "com.mycompany",
-              "type": "record",
-              "fields": [
-                {
-                  "name": "nested",
-                  "type": {
-                    "type": "array",
-                    "items": { 
-                        "name": "B",
-                        "type": "enum", 
-                        "symbols": ["X1", "X2"] 
-                    }
+              {
+               "name": "A",
+               "namespace": "com.mycompany",
+               "type": "record",
+               "fields": [
+                 {
+                   "name": "nested",
+                   "type": "array",
+                   "items": {
+                     "type": "enum",
+                     "name": "B",
+                     "symbols" : ["X1", "X2"]
                   }
                 },
-                { 
-                    "name": "nested1", 
-                    "type": { 
-                        "type": "array", 
-                        "items": "B" 
-                        } 
-                    },
                 {
-                  "name": "nested2",
-                  "type": {
-                    "type": "array",
-                    "items": { 
-                        "type": "string", 
-                        "avro.java.string": "String" 
-                    }
-                  }
+                   "name": "nested1",
+                   "type": "array",
+                   "items": "B"
                 }
               ]
             }

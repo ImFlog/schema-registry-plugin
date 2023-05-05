@@ -5,11 +5,11 @@
   "fields": [
     {
       "name": "nested",
-      "type": "com.mycompany.B"
+      "type": "B"
     },
     {
       "name": "nested1",
-      "type": "com.mycompany.B"
+      "type": "B"
     }
   ]
 }

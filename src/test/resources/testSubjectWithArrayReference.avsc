@@ -16,16 +16,6 @@
         "type": "array",
         "items": "com.mycompany.B"
       }
-    },
-    {
-      "name": "nested2",
-      "type": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "avro.java.string": "String"
-        }
-      }
     }
   ]
 }
