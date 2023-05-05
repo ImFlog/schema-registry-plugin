@@ -61,7 +61,6 @@ class AvroSchemaParser(
                 type.keySet()
                     .filter { keysToUpdate.contains(it) }
                     .forEach { typeName ->
-                        val name = type.getString(NAME)
                         if (referenceUsageCount.getOrDefault(type.get(typeName), 0) > 0) {
                             type.put(
                                 typeName,
