@@ -335,8 +335,8 @@ class RegisterTaskActionTest {
         val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
         val schemaPath = "$projectDirAbsolutePath/src/test/resources/"
         val subjects = listOf(
-            Subject("test", "${schemaPath}A.avsc", "AVRO")
-                .addLocalReference("B", "${schemaPath}B.avsc")
+            Subject("test", "${schemaPath}testSubject.avsc", "AVRO")
+                .addLocalReference("B", "${schemaPath}testType.avsc")
         )
 
         // When
