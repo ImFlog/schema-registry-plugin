@@ -20,6 +20,7 @@ import java.nio.file.Paths
 class AvroSchemaParserTest {
 
     private val schemaRegistryClient = MockSchemaRegistryClient()
+    val testFilesPath = "${Paths.get("").toAbsolutePath()}/src/test/resources/"
 
     @TempDir
     lateinit var folderRule: Path
@@ -83,11 +84,9 @@ class AvroSchemaParserTest {
     @Test
     fun `Should resolve duplicated references with same namespace correctly`() {
         // Given
-        val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
-        val testFilesPath = "$projectDirAbsolutePath/src/test/resources/"
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
-        val reference = LocalReference("B", "${testFilesPath}B.avsc")
-        val schema = File("${testFilesPath}A.avsc").readText()
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubject.avsc").readText()
         // When
         val resolvedSchema = parser.resolveLocalReferences(
             "test",
@@ -126,11 +125,9 @@ class AvroSchemaParserTest {
     @Test
     fun `Should resolve duplicated references with different namespace correctly`() {
         // Given
-        val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
-        val testFilesPath = "$projectDirAbsolutePath/src/test/resources/"
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
-        val reference = LocalReference("B", "${testFilesPath}B.avsc")
-        val schema = File("${testFilesPath}A.avsc")
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubject.avsc")
             .readText()
             .replace("com.mycompany", "com.mycompany.namespaced")
         // When
@@ -165,6 +162,51 @@ class AvroSchemaParserTest {
                   ]
                 }
                 """
+            ).toString()
+        )
+    }
+
+
+    @Test
+    fun `Should resolve duplicated array references correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectWithArrayReference.avsc")
+            .readText()
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONObject(resolvedSchema).toString()
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(
+                """
+              {
+               "name": "A",
+               "namespace": "com.mycompany",
+               "type": "record",
+               "fields": [
+                 {
+                   "name": "nested",
+                   "type": "array",
+                   "items": {
+                     "type": "enum",
+                     "name": "B",
+                     "symbols" : ["X1", "X2"]
+                  }
+                },
+                {
+                   "name": "nested1",
+                   "type": "array",
+                   "items": "B"
+                }
+              ]
+            }
+            """
             ).toString()
         )
     }

@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "A",
+  "namespace": "com.mycompany",
+  "fields": [
+    {
+      "name": "nested",
+      "type": {
+        "type": "array",
+        "items": "com.mycompany.B"
+      }
+    },
+    {
+      "name": "nested1",
+      "type": {
+        "type": "array",
+        "items": "com.mycompany.B"
+      }
+    }
+  ]
+}
