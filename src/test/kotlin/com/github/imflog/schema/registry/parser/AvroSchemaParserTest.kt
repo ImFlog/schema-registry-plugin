@@ -1,13 +1,9 @@
 package com.github.imflog.schema.registry.parser
 
 import com.github.imflog.schema.registry.LocalReference
-import com.github.imflog.schema.registry.Subject
-import com.github.imflog.schema.registry.tasks.register.RegisterTaskAction
-import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
-import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
-import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.assertj.core.api.Assertions
+import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -20,7 +16,7 @@ import java.nio.file.Paths
 class AvroSchemaParserTest {
 
     private val schemaRegistryClient = MockSchemaRegistryClient()
-    val testFilesPath = "${Paths.get("").toAbsolutePath()}/src/test/resources/"
+    private val testFilesPath = "${Paths.get("").toAbsolutePath()}/src/test/resources/"
 
     @TempDir
     lateinit var folderRule: Path
@@ -95,77 +91,32 @@ class AvroSchemaParserTest {
         )
         // Then
         val resolved = JSONObject(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """{
+          "name": "A",
+          "namespace": "com.mycompany",
+          "type": "record",
+          "fields": [
+            {
+              "name": "nested",
+              "type": {
+                "name":"B",
+                "type": "enum",
+                "symbols": ["X1", "X2"]
+              }
+            },
+            {
+              "name": "nested1",
+              "type": "B"
+            }
+          ]
+        }"""
+
         Assertions.assertThat(resolved).isEqualTo(
-            JSONObject(
-                """
-                {
-                  "name": "A",
-                  "namespace": "com.mycompany",
-                  "type": "record",
-                  "fields": [
-                    {
-                      "name": "nested",
-                      "type": {
-                        "name":"B",
-                        "type": "enum",
-                        "symbols": ["X1", "X2"]
-                      }
-                    },
-                    {
-                      "name": "nested1",
-                      "type": "B"
-                    }
-                  ]
-                }
-                """
-            ).toString()
+            JSONObject(expected).toString()
         )
     }
-
-    @Test
-    fun `Should resolve duplicated references with different namespace correctly`() {
-        // Given
-        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
-        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
-        val schema = File("${testFilesPath}testSubject.avsc")
-            .readText()
-            .replace("com.mycompany", "com.mycompany.namespaced")
-        // When
-        val resolvedSchema = parser.resolveLocalReferences(
-            "test",
-            schema,
-            listOf(reference)
-        )
-        // Then
-        val resolved = JSONObject(resolvedSchema).toString()
-        Assertions.assertThat(resolved).isEqualTo(
-            JSONObject(
-                """
-                {
-                  "name": "A",
-                  "namespace": "com.mycompany.namespaced",
-                  "type": "record",
-                  "fields": [
-                    {
-                      "name": "nested",
-                      "type": {
-                        "name":"B",
-                        "namespace": "com.mycompany",
-                        "type": "enum",
-                        "symbols": ["X1", "X2"]
-                      }
-                    },
-                    {
-                      "name": "nested1",
-                      "type": "com.mycompany.B"
-                    }
-                  ]
-                }
-                """
-            ).toString()
-        )
-    }
-
 
     @Test
     fun `Should resolve duplicated array references correctly`() {
@@ -182,33 +133,73 @@ class AvroSchemaParserTest {
         )
         // Then
         val resolved = JSONObject(resolvedSchema).toString()
-        Assertions.assertThat(resolved).isEqualTo(
-            JSONObject(
-                """
-              {
-               "name": "A",
-               "namespace": "com.mycompany",
-               "type": "record",
-               "fields": [
-                 {
-                   "name": "nested",
-                   "type": "array",
-                   "items": {
-                     "type": "enum",
-                     "name": "B",
-                     "symbols" : ["X1", "X2"]
-                  }
-                },
-                {
-                   "name": "nested1",
-                   "type": "array",
-                   "items": "B"
+
+        @Language("JSON")
+        val expected = """{
+           "name": "A",
+           "namespace": "com.mycompany",
+           "type": "record",
+           "fields": [
+             {
+               "name": "nested",
+               "type": {
+                "type": "array",
+                "items": {
+                        "name":"B",
+                        "type":"enum",
+                        "symbols": ["X1","X2"]
+                    }
                 }
-              ]
+            },
+            {
+                "name":"nested1",
+                "type":{
+                    "type":"array",
+                    "items":"B"
+                }
             }
-            """
-            ).toString()
+          ]
+        }"""
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
         )
     }
 
+    @Test
+    fun `Should parse with unknown remote references correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val schema = File("${testFilesPath}testSubject.avsc")
+            .readText()
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema,
+            listOf()
+        )
+        // Then
+        val resolved = JSONObject(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """{
+          "type": "record",
+          "name": "A",
+          "namespace": "com.mycompany",
+          "fields": [
+            {
+              "name": "nested",
+              "type": "B"
+            },
+            {
+              "name": "nested1",
+              "type": "B"
+            }
+          ]
+        }"""
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
+        )
+    }
 }

@@ -312,6 +312,15 @@ take a look at [examples/override-confluent-version](examples/override-confluent
 
 ## Developing
 
+### Fetching avro dependency
+In order to fetch the dependency for the custom Avro library,
+you will need to authenticate to the GitHub package registry.
+You can do so by updating your gradle.properties with:
+```properties
+gpr.user=USERNAME
+gpr.key=TOKEN
+```
+Or by passing the credentials as ENV VAR (USERNAME and TOKEN).
 ### Running tests
 In order to customize the Kafka version to run in integration tests,
 you can specify the ENV VAR KAFKA_VERSION with the version that you want to test upon.
