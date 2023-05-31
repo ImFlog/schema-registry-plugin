@@ -14,19 +14,14 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven {
-        url = uri("https://maven.pkg.github.com/imflog/avro")
-        credentials {
-            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
-        }
-    }
+    maven ("https://maven.pkg.github.com/imflog/avro")
+    maven("https://jitpack.io")
 }
 
 // Dependencies versions
 val kotlinVersion = "1.8.20"
 val confluentVersion = "7.3.3"
-val avroVersion = "1.12.0-ImFlog"
+val avroVersion = "ada83eb661"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib", kotlinVersion))
@@ -38,7 +33,7 @@ dependencies {
     implementation("io.confluent", "kafka-json-schema-provider")
     implementation("io.confluent", "kafka-protobuf-provider")
     // Our custom avro version. See https://github.com/ImFlog/avro
-    implementation("org.apache.avro", "avro", avroVersion)
+    implementation("com.github.ImFlog", "avro", avroVersion)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
