@@ -7,6 +7,7 @@ import org.intellij.lang.annotations.Language
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
@@ -116,6 +117,48 @@ class AvroSchemaParserTest {
         Assertions.assertThat(resolved).isEqualTo(
             JSONObject(expected).toString()
         )
+    }
+
+    @Test
+    fun `Should resolve complex nested array example correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+
+        val schema = File("${testFilesPath}ParentSubject.avsc")
+            .readText()
+
+        // com.github.imflog.avro.SchemaParseException: Undefined name: "NestedNestedType"
+        assertDoesNotThrow {
+            val resolvedSchema = parser.resolveLocalReferences(
+                "test",
+                schema,
+                listOf(
+                    LocalReference("NestedArrayType", "${testFilesPath}NestedArrayType.avsc"),
+                    LocalReference("NestedNestedType", "${testFilesPath}NestedNestedType.avsc"),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Should resolve complex nested record example correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+
+        val schema = File("${testFilesPath}ParentSubject.avsc")
+            .readText()
+
+        // com.github.imflog.avro.SchemaParseException: Can't redefine: com.test.company.NestedNestedType
+        assertDoesNotThrow {
+            val resolvedSchema = parser.resolveLocalReferences(
+                "test",
+                schema,
+                listOf(
+                    LocalReference("NestedType", "${testFilesPath}NestedType.avsc"),
+                    LocalReference("NestedNestedType", "${testFilesPath}NestedNestedType.avsc"),
+                )
+            )
+        }
     }
 
     @Test

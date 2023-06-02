@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "A",
+  "namespace": "com.mycompany",
+  "fields": [
+    {
+      "name": "element",
+      "type": [
+        "B",
+        "C"
+      ]
+    }
+  ]
+}
