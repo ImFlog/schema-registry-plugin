@@ -23,6 +23,7 @@ class AvroSchemaParser(
             .setValidateDefaults(false)
             .setValidateUnknownTypes(false)
         localReferences
+            .reversed()
             .map { reference -> reference.content(rootDir) }
             .forEach { parser.parse(it) }
         return parser.parse(schemaContent).toString()

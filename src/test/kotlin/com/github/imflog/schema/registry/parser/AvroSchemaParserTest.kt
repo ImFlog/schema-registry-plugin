@@ -124,7 +124,7 @@ class AvroSchemaParserTest {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
 
-        val schema = File("${testFilesPath}ParentSubject.avsc")
+        val schema = File("${testFilesPath}ParentArraySubject.avsc")
             .readText()
 
         // com.github.imflog.avro.SchemaParseException: Undefined name: "NestedNestedType"
