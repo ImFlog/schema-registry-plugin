@@ -127,9 +127,8 @@ class AvroSchemaParserTest {
         val schema = File("${testFilesPath}ParentArraySubject.avsc")
             .readText()
 
-        // com.github.imflog.avro.SchemaParseException: Undefined name: "NestedNestedType"
         assertDoesNotThrow {
-            val resolvedSchema = parser.resolveLocalReferences(
+            parser.resolveLocalReferences(
                 "test",
                 schema,
                 listOf(
@@ -148,9 +147,8 @@ class AvroSchemaParserTest {
         val schema = File("${testFilesPath}ParentSubject.avsc")
             .readText()
 
-        // com.github.imflog.avro.SchemaParseException: Can't redefine: com.test.company.NestedNestedType
         assertDoesNotThrow {
-            val resolvedSchema = parser.resolveLocalReferences(
+            parser.resolveLocalReferences(
                 "test",
                 schema,
                 listOf(

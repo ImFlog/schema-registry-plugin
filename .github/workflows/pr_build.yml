@@ -16,6 +16,3 @@ jobs:
           cache: "gradle"
       - name: "Build with Gradle"
         run: "./gradlew integrationTest --stacktrace"
-        env:
-          USERNAME: ${{ github.actor }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}

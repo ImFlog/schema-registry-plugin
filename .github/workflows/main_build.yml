@@ -27,6 +27,4 @@ jobs:
       - name: "Build with Gradle"
         env:
           KAFKA_VERSION: ${{ matrix.kafka_version }}
-          USERNAME: ${{ github.actor }}
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: "./gradlew integrationTest"
