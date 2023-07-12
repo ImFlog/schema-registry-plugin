@@ -24,6 +24,9 @@ buildscript {
         maven {
             url = "https://packages.confluent.io/maven/"
         }
+        maven {
+            url = "https://jitpack.io"
+        }
     }
 }
 plugins {
@@ -39,9 +42,8 @@ plugins {
 buildscript {
     repositories {
         gradlePluginPortal()
-        maven {
-            url = uri("https://packages.confluent.io/maven/")
-        }
+        maven("https://packages.confluent.io/maven/")
+        maven("https://jitpack.io")
     }
 }
 plugins {
