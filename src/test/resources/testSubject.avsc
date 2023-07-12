@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "A",
+  "namespace": "com.mycompany",
+  "fields": [
+    {
+      "name": "nested",
+      "type": "B"
+    },
+    {
+      "name": "nested1",
+      "type": "B"
+    }
+  ]
+}

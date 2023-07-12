@@ -1,0 +1,6 @@
+{
+  "type": "enum",
+  "name": "B",
+  "namespace": "com.mycompany",
+  "symbols" : ["X1", "X2"]
+}

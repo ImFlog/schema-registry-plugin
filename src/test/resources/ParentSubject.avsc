@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "ParentSubject",
+  "namespace": "com.test.company",
+  "fields": [
+    {
+      "name": "element",
+      "type": "NestedType"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "NestedNestedType",
+  "namespace": "com.test.company",
+  "fields": [
+    {
+      "name": "name",
+      "type": {
+        "type": "string",
+        "avro.java.string": "String"
+      }
+    },
+    {
+      "name": "number",
+      "type": "int"
+    }
+  ]
+}

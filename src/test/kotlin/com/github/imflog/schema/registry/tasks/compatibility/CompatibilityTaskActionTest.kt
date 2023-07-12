@@ -326,9 +326,10 @@ class CompatibilityTaskActionTest {
                 "src/main/avro/local/test.avsc",
                 "AVRO"
             )
-                .addReference("Street", "Street", 1)
-                .addLocalReference("Country", "src/main/avro/local/country.avsc")
                 .addLocalReference("Address", "src/main/avro/local/address.avsc")
+                .addLocalReference("Country", "src/main/avro/local/country.avsc")
+                .addReference("Street", "Street", 1)
+
         )
 
         // when

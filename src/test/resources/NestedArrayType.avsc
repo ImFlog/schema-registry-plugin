@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "NestedArrayType",
+  "namespace": "com.test.company",
+  "fields": [
+    {
+      "name": "someNestedArray",
+      "type": {
+        "type": "array",
+        "items": "NestedNestedType"
+      }
+    }
+  ]
+}
