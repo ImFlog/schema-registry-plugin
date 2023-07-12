@@ -14,14 +14,13 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven ("https://maven.pkg.github.com/imflog/avro")
     maven("https://jitpack.io")
 }
 
 // Dependencies versions
 val kotlinVersion = "1.8.20"
 val confluentVersion = "7.3.3"
-val avroVersion = "ada83eb661"
+val avroVersion = "1.11.2"
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("stdlib", kotlinVersion))
@@ -33,7 +32,7 @@ dependencies {
     implementation("io.confluent", "kafka-json-schema-provider")
     implementation("io.confluent", "kafka-protobuf-provider")
     // Our custom avro version. See https://github.com/ImFlog/avro
-    implementation("com.github.ImFlog", "avro", avroVersion)
+    implementation("com.github.ImFlog.avro", "avro", avroVersion)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
