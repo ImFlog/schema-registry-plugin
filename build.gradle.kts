@@ -5,7 +5,7 @@ version = "1.11.2-SNAPSHOT"
 
 
 plugins {
-    kotlin("jvm") version "1.8.20"
+    kotlin("jvm") version "1.9.0"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "1.2.0"
     id("maven-publish")
@@ -18,8 +18,8 @@ repositories {
 }
 
 // Dependencies versions
-val kotlinVersion = "1.8.20"
-val confluentVersion = "7.3.3"
+val kotlinVersion = "1.9.0"
+val confluentVersion = "7.4.1"
 val avroVersion = "1.11.2"
 dependencies {
     implementation(gradleApi())
