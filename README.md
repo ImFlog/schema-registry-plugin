@@ -14,7 +14,7 @@ repository
 to your `buildscript`:
 
 <div class="tabbed-code-block">
-  <details>
+  <details open>
     <summary>Groovy</summary>
 
 ```groovy
