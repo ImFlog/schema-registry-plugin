@@ -2,12 +2,10 @@ buildscript {
     repositories {
         gradlePluginPortal()
         mavenLocal()
-        maven("https://packages.confluent.io/maven/")
-        maven("https://jitpack.io")
     }
 
     dependencies {
-        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:1.11.2-SNAPSHOT")
+        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:1.11.2")
     }
 }
 

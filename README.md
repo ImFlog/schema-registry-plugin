@@ -9,54 +9,7 @@ for Gradle builds.
 
 ## Usage
 
-As the plugin relies on packages developed by confluent you need to add the `https://packages.confluent.io/maven/`
-repository
-to your `buildscript`:
-
-<div class="tabbed-code-block">
-  <details open>
-    <summary>Groovy</summary>
-
-```groovy
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        maven {
-            url = "https://packages.confluent.io/maven/"
-        }
-        maven {
-            url = "https://jitpack.io"
-        }
-    }
-}
-plugins {
-    id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
-}
-```
-
-  </details>
-  <details>
-    <summary>Kotlin</summary>
-
-```kotlin
-buildscript {
-    repositories {
-        gradlePluginPortal()
-        maven("https://packages.confluent.io/maven/")
-        maven("https://jitpack.io")
-    }
-}
-plugins {
-    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "X.X.X"
-}
-```
-
-  </details>
-</div>
-
-Where "X.X.X" is the current version,
-see [gradle plugin portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin) for
-details.
+Follow the [gradle plugin portal instructions](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin).
 
 ## Tasks
 
@@ -353,9 +306,6 @@ users:
 
 * plugin versions above 1.X.X support the confluent version > 5.5.X (Avro / Json / Protobuf)
 * plugin versions should support anything below 5.4.X
-
-We are not strictly following confluent version so if you need to change the confluent version for some reason,
-take a look at [examples/override-confluent-version](examples/override-confluent-version).
 
 ## Developing
 
