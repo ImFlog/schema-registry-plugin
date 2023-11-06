@@ -18,7 +18,7 @@ repositories {
 }
 
 // Dependencies versions
-val kotlinVersion = "1.9.0"
+val kotlinVersion = "1.9.20"
 val confluentVersion = "7.4.1"
 val avroVersion = "1.11.2"
 dependencies {
