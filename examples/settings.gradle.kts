@@ -4,6 +4,5 @@ include(
     "avro-kts",
     "protobuf",
     "json",
-    "override-confluent-version",
     "ssl"
 )
