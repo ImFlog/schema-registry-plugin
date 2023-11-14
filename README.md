@@ -11,6 +11,27 @@ for Gradle builds.
 
 Follow the [gradle plugin portal instructions](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin).
 
+<details>
+<summary>For plugin version < 1.12.0</summary>
+
+```groovy
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url = "https://packages.confluent.io/maven/"
+        }
+        maven {
+            url = "https://jitpack.io"
+        }
+    }
+}
+plugins {
+    id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
+}
+```
+</details>
+
 ## Tasks
 
 When you install the plugin, four tasks are added under `registry` group:
@@ -305,7 +326,7 @@ It was easier to introduce all the changes in one shot instead of supporting bot
 users:
 
 * plugin versions above 1.X.X support the confluent version > 5.5.X (Avro / Json / Protobuf)
-* plugin versions should support anything below 5.4.X
+* older plugin versions should support anything below 5.4.X
 
 ## Developing
 
