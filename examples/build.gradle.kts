@@ -2,8 +2,6 @@ buildscript {
     repositories {
         gradlePluginPortal()
         mavenLocal()
-        maven("https://packages.confluent.io/maven/")
-        maven("https://jitpack.io")
     }
 
     dependencies {

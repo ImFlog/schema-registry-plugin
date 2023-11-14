@@ -5,10 +5,9 @@ version = "1.11.2-SNAPSHOT"
 
 
 plugins {
-    kotlin("jvm") version "1.9.0"
-    id("java-gradle-plugin")
+    kotlin("jvm") version "1.9.20"
     id("com.gradle.plugin-publish") version "1.2.1"
-    id("maven-publish")
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 repositories {
@@ -18,13 +17,10 @@ repositories {
 }
 
 // Dependencies versions
-val kotlinVersion = "1.9.0"
 val confluentVersion = "7.4.1"
 val avroVersion = "1.11.2"
 dependencies {
-    implementation(gradleApi())
-    implementation(kotlin("stdlib", kotlinVersion))
-    implementation(kotlin("reflect", kotlinVersion))
+    shadow(gradleApi())
     implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
     implementation("io.confluent", "kafka-schema-registry") {
         exclude("org.slf4j", "slf4j-log4j12")
@@ -42,10 +38,6 @@ tasks.withType<KotlinCompile>().configureEach {
             "-Xself-upper-bound-inference"
         )
     }
-}
-
-java {
-    withSourcesJar()
 }
 
 // Unit tests
@@ -98,8 +90,19 @@ task<Test>("integrationTest") {
 }
 
 // Publish plugin
+tasks {
+    shadowJar {
+        archiveClassifier.set("")
+        from(sourceSets.main.get().output)
+        from(project.configurations.runtimeClasspath)
+    }
+}
+
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
+@Suppress("UnstableApiUsage")
 gradlePlugin {
+    website.set("https://github.com/ImFlog/schema-registry-plugin")
+    vcsUrl.set("https://github.com/ImFlog/schema-registry-plugin.git")
     testSourceSets(
         sourceSets["test"],
         integrationSource
@@ -110,14 +113,9 @@ gradlePlugin {
             description = "A plugin to download, register and test schemas from a Kafka Schema Registry"
             displayName = "Kafka schema registry gradle plugin"
             version = version
+            tags.set(listOf("schema", "registry", "schema-registry", "kafka"))
 
             implementationClass = "com.github.imflog.schema.registry.SchemaRegistryPlugin"
         }
     }
-}
-
-pluginBundle {
-    website = "https://github.com/ImFlog/schema-registry-plugin"
-    vcsUrl = "https://github.com/ImFlog/schema-registry-plugin.git"
-    tags = listOf("schema", "registry", "schema-registry", "kafka")
 }
