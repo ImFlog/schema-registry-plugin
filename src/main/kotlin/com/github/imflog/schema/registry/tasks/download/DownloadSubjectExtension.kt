@@ -44,7 +44,8 @@ data class DownloadSubject(
     val outputPath: String,
     val version: Int? = null,
     val regex: Boolean = false,
-    val outputFileName: String? = null
+    val outputFileName: String? = null,
+    val downloadReferences: Boolean = false
 )
 
 data class MetadataExtension(
