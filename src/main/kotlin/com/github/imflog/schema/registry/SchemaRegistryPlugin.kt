@@ -59,6 +59,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     downloadTask.ssl.set(sslExtension.configs)
                     downloadTask.subjects.set(downloadExtension.subjects)
                     downloadTask.metadataConfig.set(downloadExtension.metadata)
+                    downloadTask.pretty.set(globalExtension.pretty)
                 }
 
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)

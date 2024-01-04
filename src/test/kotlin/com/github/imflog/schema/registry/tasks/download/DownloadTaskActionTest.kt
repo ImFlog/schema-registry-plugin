@@ -380,4 +380,84 @@ class DownloadTaskActionTest {
             .containsIgnoringCase("\"schema\" :")
             .containsIgnoringCase("\"references\" :")
     }
+
+    @Test
+    fun `Should format supported schema types when pretty is specified`() {
+        // given
+        val testSubject = "test"
+        val fooSubject = "foo"
+        val outputDir = "src/main/avro/external"
+
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+        registryClient.register(
+            fooSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "foo",
+                    "fields": [{ "name": "name", "type": "string" }]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(
+                DownloadSubject(testSubject, outputDir),
+                DownloadSubject(fooSubject, outputDir)
+            ),
+            MetadataExtension(),
+            true
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
+            .isEqualTo("""
+                {
+                  "type" : "record",
+                  "name" : "test",
+                  "fields" : [ {
+                    "name" : "name",
+                    "type" : "string"
+                  } ]
+                }
+            """.trimIndent() + "\n") // trimIndent removes trailing newline
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc").readText())
+            .isEqualTo("""
+                {
+                  "type" : "record",
+                  "name" : "foo",
+                  "fields" : [ {
+                    "name" : "name",
+                    "type" : "string"
+                  } ]
+                }
+            """.trimIndent() + "\n") // trimIndent removes trailing newline
+    }
 }
