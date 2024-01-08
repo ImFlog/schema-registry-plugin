@@ -93,10 +93,15 @@ schemaRegistry {
 Here is the list of all the signatures for the `subject` extension:
 
 * `subject(inputSubject: String, outputPath: String)`
+* `subject(inputSubject: String, outputPath: String, downloadReferences: Boolean)`
 * `subject(inputSubject: String, outputPath: String, outputFileName: String)`
+* `subject(inputSubject: String, outputPath: String, outputFileName: String, downloadReferences: Boolean)`
 * `subject(inputSubject: String, outputPath: String, version: Int)`
+* `subject(inputSubject: String, outputPath: String, version: Int, downloadReferences: Boolean)`
 * `subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String)`
+* `subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String, downloadReferences: Boolean)`
 * `subjectPattern(inputPattern: String, outputPath: String)`
+* `subjectPattern(inputPattern: String, outputPath: String, downloadReferences: Boolean)`
 
 You can configure the metadata extension in order to download the schemas metadata in json files.
 It will be saved in files named like the schema file but suffixed by `-metadata.json` in the outputPath you specify

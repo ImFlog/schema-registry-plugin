@@ -8,8 +8,10 @@ import com.github.imflog.schema.registry.toSchemaType
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
+import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -394,6 +396,88 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         val metadataFile = "$subjectName-metadata.json"
         Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
         Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$metadataFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `Should download schema with references in specific directory`() {
+        // Given
+        val subjectName = "reference_test"
+        val recordName = "UserReference"
+        val subjectNameLib = "reference_test_lib"
+        val recordNameLib = "UserReferenceLib"
+
+        client.register(
+            subjectNameLib,
+            AvroSchema(
+                """{
+                    "type": "record",
+                    "name": "${recordNameLib}",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }"""
+            )
+        )
+
+        client.register(
+            subjectName,
+            AvroSchema(
+                """{
+                    "type": "record",
+                    "name": "${recordName}",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf(
+                    SchemaReference(recordNameLib, subjectNameLib, 1)
+                ),
+                mapOf(),
+                null
+            )
+        )
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    metadata = new MetadataExtension(true, '${folderRule.root.absolutePath}/src/main/avro/metadata')
+
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test', true)
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaFile = "$subjectName.avsc"
+        val metadataFile = "$subjectName-metadata.json"
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$metadataFile")).exists()
+
+        val libSchemaFile = "$subjectNameLib.avsc"
+        val libMetadataFile = "$subjectNameLib-metadata.json"
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$libSchemaFile")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$libMetadataFile")).exists()
+
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
