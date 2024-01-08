@@ -22,20 +22,40 @@ open class DownloadSubjectExtension(objects: ObjectFactory) {
         subjects.add(DownloadSubject(inputSubject, outputPath))
     }
 
+    fun subject(inputSubject: String, outputPath: String, downloadReferences: Boolean) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, downloadReferences = downloadReferences))
+    }
+
     fun subject(inputSubject: String, outputPath: String, outputFileName: String) {
         subjects.add(DownloadSubject(inputSubject, outputPath, outputFileName = outputFileName))
+    }
+
+    fun subject(inputSubject: String, outputPath: String, outputFileName: String, downloadReferences: Boolean) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, outputFileName = outputFileName, downloadReferences = downloadReferences))
     }
 
     fun subject(inputSubject: String, outputPath: String, version: Int) {
         subjects.add(DownloadSubject(inputSubject, outputPath, version))
     }
 
+    fun subject(inputSubject: String, outputPath: String, version: Int, downloadReferences: Boolean) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, version, downloadReferences = downloadReferences))
+    }
+
     fun subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String) {
         subjects.add(DownloadSubject(inputSubject, outputPath, version, outputFileName = outputFileName))
     }
 
+    fun subject(inputSubject: String, outputPath: String, version: Int, outputFileName: String, downloadReferences: Boolean) {
+        subjects.add(DownloadSubject(inputSubject, outputPath, version, outputFileName = outputFileName, downloadReferences = downloadReferences))
+    }
+
     fun subjectPattern(inputPattern: String, outputPath: String) {
         subjects.add(DownloadSubject(inputPattern, outputPath, null, true))
+    }
+
+    fun subjectPattern(inputPattern: String, outputPath: String, downloadReferences: Boolean) {
+        subjects.add(DownloadSubject(inputPattern, outputPath, null, true, downloadReferences = downloadReferences))
     }
 }
 
@@ -44,7 +64,8 @@ data class DownloadSubject(
     val outputPath: String,
     val version: Int? = null,
     val regex: Boolean = false,
-    val outputFileName: String? = null
+    val outputFileName: String? = null,
+    val downloadReferences: Boolean = false
 )
 
 data class MetadataExtension(

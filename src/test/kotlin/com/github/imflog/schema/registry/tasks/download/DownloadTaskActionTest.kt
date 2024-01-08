@@ -3,6 +3,7 @@ package com.github.imflog.schema.registry.tasks.download
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.assertj.core.api.Assertions
@@ -63,7 +64,7 @@ class DownloadTaskActionTest {
                 DownloadSubject(testSubject, outputDir),
                 DownloadSubject(fooSubject, outputDir)
             ),
-            MetadataExtension(),
+            MetadataExtension()
         ).run()
 
         // then
@@ -136,7 +137,7 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("te.*", outputDir, null, true)
             ),
-            MetadataExtension(),
+            MetadataExtension()
         ).run()
 
         // then
@@ -184,7 +185,7 @@ class DownloadTaskActionTest {
             registryClient,
             folderRoot,
             arrayListOf(DownloadSubject(subject, outputDir)),
-            MetadataExtension(),
+            MetadataExtension()
         ).run()
 
         // then
@@ -220,7 +221,7 @@ class DownloadTaskActionTest {
                 DownloadSubject(invalidSubjectPattern, outputDir, null, true),
                 DownloadSubject("test", outputDir)
             ),
-            MetadataExtension(),
+            MetadataExtension()
         ).run()
 
         // then
@@ -274,7 +275,7 @@ class DownloadTaskActionTest {
             arrayListOf(
                 DownloadSubject("test", outputDir, v1Id)
             ),
-            MetadataExtension(),
+            MetadataExtension()
         ).run()
 
         // Then
@@ -317,7 +318,7 @@ class DownloadTaskActionTest {
             registryClient,
             folderRoot,
             arrayListOf(DownloadSubject(testSubject, outputDir)),
-            MetadataExtension(true),
+            MetadataExtension(true)
         ).run()
 
         // then
@@ -365,7 +366,7 @@ class DownloadTaskActionTest {
             registryClient,
             folderRoot,
             arrayListOf(DownloadSubject(testSubject, outputDir)),
-            MetadataExtension(true, metadataDir),
+            MetadataExtension(true, metadataDir)
         ).run()
 
         // then
@@ -379,5 +380,150 @@ class DownloadTaskActionTest {
             .containsIgnoringCase("\"schema_type\" :")
             .containsIgnoringCase("\"schema\" :")
             .containsIgnoringCase("\"references\" :")
+    }
+
+    @Test
+    fun `Should download referenced schemas with metadata in the specified output dir`() {
+        // given
+        val testSubject = "test"
+        val testLibSubject = "test_lib"
+        val outputDir = "src/main/avro/external"
+        val metadataDir = "src/main/avro/metadata"
+
+        val registryClient = MockSchemaRegistryClient(listOf(AvroSchemaProvider()))
+
+        registryClient.register(
+            testLibSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test_lib",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "test_lib" }
+                    ]
+                }""",
+                listOf(
+                    SchemaReference(
+                        "name",
+                        testLibSubject,
+                        1
+                    )
+                )
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(DownloadSubject(testSubject, outputDir, downloadReferences = true)),
+            MetadataExtension(true, metadataDir)
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json")).isNotNull
+        // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json").readText())
+            .containsIgnoringCase("\"id\" :")
+            .containsIgnoringCase("\"version\" :")
+            .containsIgnoringCase("\"schema_type\" :")
+            .containsIgnoringCase("\"schema\" :")
+            .containsIgnoringCase("\"references\" :")
+
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test_lib-metadata.json")).isNotNull
+        // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test_lib-metadata.json").readText())
+            .containsIgnoringCase("\"id\" :")
+            .containsIgnoringCase("\"version\" :")
+            .containsIgnoringCase("\"schema_type\" :")
+            .containsIgnoringCase("\"schema\" :")
+            .containsIgnoringCase("\"references\" :")
+    }
+
+    @Test
+    fun `Should download referenced schemas in the specified output dir`() {
+        // given
+        val testSubject = "test"
+        val testLibSubject = "test_lib"
+        val outputDir = "src/main/avro/external"
+        val metadataDir = "src/main/avro/metadata"
+
+        val registryClient = MockSchemaRegistryClient(listOf(AvroSchemaProvider()))
+
+        registryClient.register(
+            testLibSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test_lib",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "test_lib" }
+                    ]
+                }""",
+                listOf(
+                    SchemaReference(
+                        "name",
+                        testLibSubject,
+                        1
+                    )
+                )
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(DownloadSubject(testSubject, outputDir, downloadReferences = true)),
+            MetadataExtension()
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc")).isNotNull
+        // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
     }
 }

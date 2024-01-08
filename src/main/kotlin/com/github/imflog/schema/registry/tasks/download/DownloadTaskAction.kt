@@ -36,14 +36,37 @@ class DownloadTaskAction(
                 val metadata = getSchemaMetadata(downloadSubject)
                 val outputDir = File(rootDir.toURI()).resolve(downloadSubject.outputPath)
                 outputDir.mkdirs()
-                if (metadataConfiguration.enabled) {
+                val metadataDirectory = if (metadataConfiguration.enabled) {
                     val metadataDirectory = metadataConfiguration.outputPath?.run {
                         File(rootDir.toURI()).resolve(this)
                     } ?: outputDir
                     metadataDirectory.mkdirs()
+                    metadataDirectory
+                } else {
+                    outputDir
+                }
+
+                if (metadataConfiguration.enabled) {
                     writeSchemaMetadata(downloadSubject, metadata, metadataDirectory)
                 }
                 writeSchemaFile(downloadSubject, metadata, outputDir)
+
+                if (downloadSubject.downloadReferences) {
+                    metadata.references.forEach {
+                        logger.infoIfNotQuiet("Start downloading referenced schema ${it.subject}/${it.version} for ${downloadSubject.subject}")
+                        val referenceSubject = DownloadSubject(
+                            subject = it.subject,
+                            outputPath = downloadSubject.outputPath,
+                            version = it.version
+                        )
+                        val referenceMetadata = getSchemaMetadata(referenceSubject)
+
+                        if (metadataConfiguration.enabled) {
+                            writeSchemaMetadata(referenceSubject, referenceMetadata, metadataDirectory)
+                        }
+                        writeSchemaFile(referenceSubject, referenceMetadata, outputDir)
+                    }
+                }
             } catch (e: Exception) {
                 logger.error("Error during schema retrieval for ${downloadSubject.subject}", e)
                 errorCount++
