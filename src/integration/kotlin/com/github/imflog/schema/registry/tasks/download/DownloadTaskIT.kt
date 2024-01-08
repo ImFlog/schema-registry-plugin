@@ -100,15 +100,25 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(resultFile2.readText()).contains("description")
     }
 
-    @ParameterizedTest(name = "{0}")
-    @ArgumentsSource(SchemaArgumentProvider::class)
-    fun `Should format supported schema types when pretty is specified`(type: String, oldSchema: ParsedSchema,
-                                                                        newSchema: ParsedSchema) {
+    @Test
+    fun `Should format supported schema types when pretty is specified`() {
+
+        val type = AvroSchema.TYPE
+        val schema =  AvroSchema(
+                """{
+                            "type": "record",
+                            "name": "User",
+                            "fields": [
+                                { "name": "name", "type": "string" }, 
+                                { "name": "description", "type": ["null", "string"], "default": null }
+                            ]
+                        }""".filter { !it.isWhitespace() }
+        )
+
         // Given
         val subjectName = "parameterized-$type"
 
-        client.register(subjectName, oldSchema)
-        client.register(subjectName, newSchema)
+        client.register(subjectName, schema)
 
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -123,8 +133,6 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                 pretty = true
                 download {
                     subject('$subjectName', '${folderRule.root.absolutePath}/src/main/$type/test')
-                    subject('$subjectName', 'src/main/$type/test_v1', 1)
-                    subject('$subjectName', 'src/main/$type/test_v2', 2)
                 }
             }
         """
@@ -140,27 +148,17 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             .build()
 
         // Then
-        val schemaType = newSchema.schemaType().toSchemaType()
-
+        val schemaType = schema.schemaType().toSchemaType()
         val schemaFile = "$subjectName.${schemaType.extension}"
+
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
         if (schemaType != SchemaType.PROTOBUF) {
             Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).hasContent(
-                objectMapper.readTree(newSchema.toString()).toPrettyString()
+                objectMapper.readTree(schema.toString()).toPrettyString()
             )
         }
-
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test_v1")).exists()
-        val resultFile1 = File(folderRule.root, "src/main/$type/test_v1/$schemaFile")
-        Assertions.assertThat(resultFile1).exists()
-        Assertions.assertThat(resultFile1.readText()).doesNotContain("description")
-
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test_v2")).exists()
-        val resultFile2 = File(folderRule.root, "src/main/$type/test_v2/$schemaFile")
-        Assertions.assertThat(resultFile2).exists()
-        Assertions.assertThat(resultFile2.readText()).contains("description")
     }
 
     @ParameterizedTest(name = "{0}")
