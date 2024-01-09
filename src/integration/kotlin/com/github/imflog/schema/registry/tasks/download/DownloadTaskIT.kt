@@ -118,7 +118,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         )
 
         // Given
-        val subjectName = "parameterized-$type"
+        val subjectName = "prettyprinted-$type"
 
         client.register(subjectName, schema)
 
@@ -156,11 +156,9 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
         Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        if (schemaType != SchemaType.PROTOBUF) {
-            Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).hasContent(
-                objectMapper.readTree(schema.toString()).toPrettyString()
-            )
-        }
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).hasContent(
+            objectMapper.readTree(schema.toString()).toPrettyString()
+        )
     }
 
     @ParameterizedTest(name = "{0}")
