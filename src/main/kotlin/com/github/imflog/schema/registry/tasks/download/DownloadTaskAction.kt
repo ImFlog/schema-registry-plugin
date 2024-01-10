@@ -9,9 +9,11 @@ import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import com.google.common.base.Suppliers
 import io.confluent.kafka.schemaregistry.ParsedSchema
+import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.SchemaMetadata
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+import io.confluent.kafka.schemaregistry.json.JsonSchema
 import org.gradle.api.logging.Logging
 import java.io.File
 import java.util.regex.PatternSyntaxException
@@ -20,7 +22,8 @@ class DownloadTaskAction(
     private val client: SchemaRegistryClient,
     private val rootDir: File,
     private val subjects: List<DownloadSubject>,
-    private val metadataConfiguration: MetadataExtension
+    private val metadataConfiguration: MetadataExtension,
+    private val pretty: Boolean = false
 ) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
@@ -49,7 +52,7 @@ class DownloadTaskAction(
                 if (metadataConfiguration.enabled) {
                     writeSchemaMetadata(downloadSubject, metadata, metadataDirectory)
                 }
-                writeSchemaFile(downloadSubject, metadata, outputDir)
+                writeSchemaFile(downloadSubject, metadata, pretty, outputDir)
 
                 if (downloadSubject.downloadReferences) {
                     metadata.references.forEach {
@@ -64,7 +67,7 @@ class DownloadTaskAction(
                         if (metadataConfiguration.enabled) {
                             writeSchemaMetadata(referenceSubject, referenceMetadata, metadataDirectory)
                         }
-                        writeSchemaFile(referenceSubject, referenceMetadata, outputDir)
+                        writeSchemaFile(referenceSubject, referenceMetadata, pretty, outputDir)
                     }
                 }
             } catch (e: Exception) {
@@ -110,7 +113,7 @@ class DownloadTaskAction(
         if (subject.version == null) client.getLatestSchemaMetadata(subject.subject)
         else client.getSchemaMetadata(subject.subject, subject.version)
 
-    private fun writeSchemaFile(downloadSubject: DownloadSubject, schemaMetadata: SchemaMetadata, outputDir: File) {
+    private fun writeSchemaFile(downloadSubject: DownloadSubject, schemaMetadata: SchemaMetadata, pretty: Boolean, outputDir: File) {
         val parsedSchema = parseSchemaWithRemoteReferences(
             downloadSubject.subject,
             schemaMetadata.schemaType.toSchemaType(),
@@ -120,17 +123,29 @@ class DownloadTaskAction(
         val fileName = downloadSubject.outputFileName ?: downloadSubject.subject
         val outputFile = File(outputDir, "${fileName}.${parsedSchema.schemaType().toSchemaType().extension}")
         outputFile.createNewFile()
-        logger.infoIfNotQuiet("Writing file  $outputFile")
+        logger.infoIfNotQuiet("Writing file $outputFile")
         outputFile.printWriter().use { out ->
-            out.println(parsedSchema.toString())
+            out.println(getSchemaString(parsedSchema, pretty))
         }
+    }
+
+    private fun getSchemaString(parsedSchema: ParsedSchema, pretty: Boolean): String {
+        return if (pretty && isSupportedPrettyType(parsedSchema)) objectMapper.readTree(parsedSchema.toString()).toPrettyString() else parsedSchema.toString()
+    }
+
+    /**
+     * Checks whether the current schema type should be pretty-printed.
+     * Avro and Json are considered eligible for pretty formatting, Protobuf is not.
+     */
+    private fun isSupportedPrettyType(parsedSchema: ParsedSchema): Boolean {
+        return parsedSchema.schemaType() == AvroSchema.TYPE || parsedSchema.schemaType() == JsonSchema.TYPE
     }
 
     private fun writeSchemaMetadata(downloadSubject: DownloadSubject, schemaMetadata: SchemaMetadata, outputDir: File) {
         val fileName = downloadSubject.outputFileName ?: downloadSubject.subject
         val outputFile = File(outputDir, "${fileName}-metadata.json")
         outputFile.createNewFile()
-        logger.infoIfNotQuiet("Writing metadata file  $outputFile")
+        logger.infoIfNotQuiet("Writing metadata file $outputFile")
         outputFile.printWriter().use { out ->
             out.println(
                 objectMapper.writeValueAsString(schemaMetadata)

@@ -50,6 +50,7 @@ schemaRegistry {
     url = 'http://registry-url:8081/'
     quiet = true
     outputDirectory = "/home/kafka/results"
+    pretty = true
 }
 ```
 
@@ -59,7 +60,8 @@ schemaRegistry {
   Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
 * `outputDirectory` is the directory where action result will be stored as files (only register for now).
   This is an optional parameter.
-
+* `pretty` is whether the downloaded Avro or json schemas should be formatted ("pretty-printed") or minified. 
+  This is an optional parameter.
 ### Download schemas
 
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.

@@ -1,5 +1,9 @@
 package com.github.imflog.schema.registry.tasks.download
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
@@ -28,6 +32,9 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
+    private val objectMapper = ObjectMapper()
+        .configure(SerializationFeature.INDENT_OUTPUT, true)
+        .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
 
     @BeforeEach
     fun init() {
@@ -93,6 +100,65 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         val resultFile2 = File(folderRule.root, "src/main/$type/test_v2/$schemaFile")
         Assertions.assertThat(resultFile2).exists()
         Assertions.assertThat(resultFile2.readText()).contains("description")
+    }
+
+    @Test
+    fun `Should format supported schema types when pretty is specified`() {
+
+        val type = AvroSchema.TYPE
+        val schema =  AvroSchema(
+                """{
+                            "type": "record",
+                            "name": "User",
+                            "fields": [
+                                { "name": "name", "type": "string" }, 
+                                { "name": "description", "type": ["null", "string"], "default": null }
+                            ]
+                        }""".filter { !it.isWhitespace() }
+        )
+
+        // Given
+        val subjectName = "prettyprinted-$type"
+
+        client.register(subjectName, schema)
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                pretty = true
+                download {
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/$type/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("7.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaType = schema.schemaType().toSchemaType()
+        val schemaFile = "$subjectName.${schemaType.extension}"
+
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).hasContent(
+            objectMapper.readTree(schema.toString()).toPrettyString()
+        )
     }
 
     @ParameterizedTest(name = "{0}")

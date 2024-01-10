@@ -20,4 +20,8 @@ open class SchemaRegistryExtension(objects: ObjectFactory) {
     }
 
     val outputDirectory: Property<String> = objects.property(String::class.java)
+
+    val pretty: Property<Boolean> = objects.property(Boolean::class.java).apply {
+        convention(false)
+    }
 }
