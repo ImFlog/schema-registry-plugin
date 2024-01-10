@@ -17,7 +17,7 @@ repositories {
 }
 
 // Dependencies versions
-val confluentVersion = "7.5.2"
+val confluentVersion = "7.5.3"
 val avroVersion = "1.11.2"
 dependencies {
     shadow(gradleApi())
