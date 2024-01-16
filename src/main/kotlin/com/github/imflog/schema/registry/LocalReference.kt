@@ -4,7 +4,7 @@ import java.io.File
 
 data class LocalReference(
     val name: String,
-    private val path: String
+    val path: String
 ) {
     fun content(rootDir: File) = rootDir.resolve(path).readText()
 }
