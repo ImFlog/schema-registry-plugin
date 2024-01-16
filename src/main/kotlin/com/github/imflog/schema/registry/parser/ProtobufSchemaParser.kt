@@ -14,7 +14,7 @@ class ProtobufSchemaParser(
 
     override fun resolveLocalReferences(
         subject: String,
-        schemaContent: String,
+        schemaPath: String,
         localReferences: List<LocalReference>
     ): String {
         throw NotImplementedError("Local reference is not available for Protobuf yet")

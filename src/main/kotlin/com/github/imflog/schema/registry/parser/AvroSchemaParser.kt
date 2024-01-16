@@ -15,7 +15,7 @@ class AvroSchemaParser(
 
     override fun resolveLocalReferences(
         subject: String,
-        schemaContent: String,
+        schemaPath: String,
         localReferences: List<LocalReference>
     ): String {
         val parser = Parser()
@@ -26,6 +26,7 @@ class AvroSchemaParser(
             .reversed()
             .map { reference -> reference.content(rootDir) }
             .forEach { parser.parse(it) }
-        return parser.parse(schemaContent).toString()
+        val content = loadContent(schemaPath)
+        return parser.parse(content).toString()
     }
 }

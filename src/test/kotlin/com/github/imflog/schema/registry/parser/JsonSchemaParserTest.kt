@@ -7,6 +7,7 @@ import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import java.nio.file.Path
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -45,11 +46,12 @@ class JsonSchemaParserTest {
         // Given
         val parser = JsonSchemaParser(schemaRegistryClient, folderRule.toFile())
         val aLocalReference = givenALocalReference()
+        val aUserSchemaFile = givenASchemaFile()
 
         // When
         val resolvedSchema = parser.resolveLocalReferences(
             USER_REFERENCE_NAME,
-            USER_SCHEMA,
+            aUserSchemaFile.path,
             listOf(aLocalReference)
         )
 
@@ -61,6 +63,12 @@ class JsonSchemaParserTest {
         val addressLocalFile = folderRule.resolve("Address.json").toFile()
         addressLocalFile.writeText(ADDRESS_SCHEMA)
         return LocalReference(ADDRESS_REFERENCE_NAME, addressLocalFile.path)
+    }
+
+    private fun givenASchemaFile(): File {
+        val userLocalFile = folderRule.resolve("User.json").toFile()
+        userLocalFile.writeText(USER_SCHEMA)
+        return userLocalFile
     }
 
     private fun localSchemaShouldBeAppended(resolvedSchema: String) {
