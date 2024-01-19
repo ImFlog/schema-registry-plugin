@@ -9,6 +9,7 @@ import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD) // Separate TempDir per test
 class ProtobufSchemaParserTest {
@@ -31,7 +32,7 @@ class ProtobufSchemaParserTest {
             package test;
             
             message Address {
-                string street = 1;
+              string street = 1;
             }
         """
         )
@@ -91,7 +92,7 @@ class ProtobufSchemaParserTest {
             package test;
             
             message Address {
-                string street = 1;
+              string street = 1;
             }
         """
         )
@@ -107,6 +108,7 @@ class ProtobufSchemaParserTest {
             message User {
               string name = 1;
               .test.Address address = 2;
+              Address relativeAddress = 3;
             }
         """
         )
@@ -132,6 +134,7 @@ class ProtobufSchemaParserTest {
                 |message User {
                 |  string name = 1;
                 |  Address address = 2;
+                |  Address relativeAddress = 3;
                 |}
     
                 |message Address {
@@ -154,7 +157,7 @@ class ProtobufSchemaParserTest {
             package test;
             
             message Address {
-                string street = 1;
+              string street = 1;
             }
         """
         )
@@ -171,6 +174,7 @@ class ProtobufSchemaParserTest {
             message User {
               string name = 1;
               repeated .test.Address address = 2;
+              repeated Address relativeAddress = 3;
             }
         """
         )
@@ -196,6 +200,7 @@ class ProtobufSchemaParserTest {
                 |message User {
                 |  string name = 1;
                 |  repeated Address address = 2;
+                |  repeated Address relativeAddress = 3;
                 |}
     
                 |message Address {
@@ -218,7 +223,7 @@ class ProtobufSchemaParserTest {
             package test;
             
             message Address {
-                string street = 1;
+              string street = 1;
             }
         """
         )
@@ -235,6 +240,7 @@ class ProtobufSchemaParserTest {
             message User {
               string name = 1;
               optional .test.Address address = 2;
+              optional Address relativeAddress = 3;
             }
         """
         )
@@ -260,6 +266,7 @@ class ProtobufSchemaParserTest {
                 |message User {
                 |  string name = 1;
                 |  optional Address address = 2;
+                |  optional Address relativeAddress = 3;
                 |}
     
                 |message Address {
@@ -282,7 +289,7 @@ class ProtobufSchemaParserTest {
             package test;
             
             message Address {
-                string street = 1;
+              string street = 1;
             }
         """
         )
@@ -299,6 +306,7 @@ class ProtobufSchemaParserTest {
             message User {
               string name = 1;
               map<string, .test.Address> address = 2;
+              map<string, Address> relativeAddress = 3;
             }
         """
         )
@@ -324,6 +332,7 @@ class ProtobufSchemaParserTest {
                 |message User {
                 |  string name = 1;
                 |  map<string, Address> address = 2;
+                |  map<string, Address> relativeAddress = 3;
                 |}
     
                 |message Address {
@@ -334,16 +343,390 @@ class ProtobufSchemaParserTest {
         )
     }
 
+    @Test
+    fun `Should format local reference correctly - transitive dependencies`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "Street.proto", "Street.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Street {
+              string name = 1;
+            }
+        """
+        )
+        val aTransitiveLocalReference = givenALocalReference(
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "Street.proto";
+            
+            message Address {
+              .test.Street street = 1;
+              Street relativeStreet = 2;
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.Address address = 2;
+              Address relativeAddress = 3;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference, aTransitiveLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+    
+                |syntax = "proto3";
+    
+                |package test;
+    
+                |message User {
+                |  string name = 1;
+                |  Address address = 2;
+                |  Address relativeAddress = 3;
+                |}
+                |
+                |message Address {
+                |  Street street = 1;
+                |  Street relativeStreet = 2;
+                |}
+                |
+                |message Street {
+                |  string name = 1;
+                |}
+                |
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    fun `Should format local reference correctly - multiple target types in the same file`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Address {
+              string street = 1;
+            }
+            
+            enum AddressType {
+              Local = 0;
+              Overseas = 1;
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.Address address = 2;
+              .test.AddressType addressType = 3;
+              AddressType relativeAddressType = 4;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+                |
+                |syntax = "proto3";
+                |
+                |package test;
+                |
+                |message User {
+                |  string name = 1;
+                |  Address address = 2;
+                |  AddressType addressType = 3;
+                |  AddressType relativeAddressType = 4;
+                |}
+                |
+                |message Address {
+                |  string street = 1;
+                |}
+                |
+                |enum AddressType {
+                |  Local = 0;
+                |  Overseas = 1;
+                |}
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    fun `Should format local reference correctly - different packages`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test.address;
+            
+            message Address {
+              string street = 1;
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.address.Address address = 2;
+              address.Address relativeAddress = 3;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+                |
+                |syntax = "proto3";
+                |
+                |package test;
+                |
+                |message User {
+                |  string name = 1;
+                |  Address address = 2;
+                |  Address relativeAddress = 3;
+                |}
+                |
+                |message Address {
+                |  string street = 1;
+                |}
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    fun `Should format local reference correctly - transitive imports, different folders`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "address/Address.proto", "address/Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "street/Street.proto";
+            
+            message Address {
+              Street street = 1;
+            }
+        """
+        )
+        val aTransitiveLocalReference = givenALocalReference(
+            "street/Street.proto", "street/Street.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Street {
+              string name = 1;
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "address/Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.Address address = 2;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference, aTransitiveLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+                |
+                |syntax = "proto3";
+                |
+                |package test;
+                |
+                |message User {
+                |  string name = 1;
+                |  Address address = 2;
+                |}
+                |
+                |message Address {
+                |  Street street = 1;
+                |}
+                |
+                |message Street {
+                |  string name = 1;
+                |}
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    fun `Should format local reference correctly - target schema not in import root`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "address/Address.proto", "address/Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Address {
+              string street = 1;
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "users/User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "address/Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.Address address = 2;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "users/User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: users/User.proto
+                |
+                |syntax = "proto3";
+                |
+                |package test;
+                |
+                |message User {
+                |  string name = 1;
+                |  Address address = 2;
+                |}
+                |
+                |message Address {
+                |  string street = 1;
+                |}
+                """.trimMargin()
+        )
+    }
+
     private fun givenALocalReference(referenceName: String, fileName: String, fileContent: String): LocalReference {
-        val addressLocalFile = folderRule.resolve(fileName).toFile()
-        addressLocalFile.writeText(fileContent)
-        return LocalReference(referenceName, addressLocalFile.path)
+        val localReferenceFile = folderRule.resolve(fileName).toFile()
+        localReferenceFile.toPath().parent.createDirectories()
+        localReferenceFile.writeText(fileContent)
+        return LocalReference(referenceName, localReferenceFile.path)
     }
 
     private fun givenASchemaFile(fileName: String, schemaContent: String): File {
-        val userLocalFile = folderRule.resolve(fileName).toFile()
-        userLocalFile.writeText(schemaContent)
-        return userLocalFile
+        val schemaFile = folderRule.resolve(fileName).toFile()
+        schemaFile.toPath().parent.createDirectories()
+        schemaFile.writeText(schemaContent)
+        return schemaFile
     }
 
     private fun localSchemaShouldLookLike(resolvedSchema: String, expectedSchema: String) {

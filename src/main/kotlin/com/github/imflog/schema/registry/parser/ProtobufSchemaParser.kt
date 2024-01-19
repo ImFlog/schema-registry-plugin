@@ -22,10 +22,9 @@ class ProtobufSchemaParser(
         schemaPath: String,
         localReferences: List<LocalReference>
     ): String {
-        val directory = File(schemaPath).parentFile
-        val schema = schemaFor(directory)
+        val schema = schemaFor(rootDir)
 
-        val source = schema.protoFile(File(schemaPath).relativeTo(directory).path)!!
+        val source = schema.protoFile(File(schemaPath).relativeTo(rootDir).path)!!
         // Keeping track of what types we've already found in order to fail-fast
         // duplicate definitions before they reach the Registry.
         val flattenedTypes = source.types.associateBy {
@@ -73,13 +72,13 @@ class ProtobufSchemaParser(
             //
             // Always resolving imports from the Subject's file, to make sure we catch
             // different relative imports of the same file.
-            val normalizedPath = ref.relativeTo(directory).normalize().path
+            val normalizedPath = ref.relativeTo(rootDir).normalize().path
             if (!importsProcessed.add(normalizedPath)) {
                 continue
             }
 
             // No more excuses, we're processing this dependency.
-            val dependency = schema.protoFile(ref.relativeTo(directory).path)
+            val dependency = schema.protoFile(ref.relativeTo(rootDir).path)
                 ?: throw RuntimeException("Dependency not found for local reference $import at ${ref.absolutePath}")
 
             importsToProcess.addAll(dependency.imports)
