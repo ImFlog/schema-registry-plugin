@@ -8,6 +8,7 @@ schemaRegistry {
     url.set("http://localhost:8081")
     quiet.set(false)
     outputDirectory.set("schemas/avro/results/")
+    pretty.set(true)
 
     register {
         subject("company", "schemas/avro/company.avsc", "AVRO")
@@ -27,8 +28,8 @@ schemaRegistry {
 
     download {
         metadata.set(MetadataExtension(true))
-        subject("company", "schemas/avro/downloaded")
-        subject("user", "schemas/avro/downloaded")
+//        subject("company", "schemas/avro/downloaded") // Retrieved via reference from the user subject
+        subject("user", "schemas/avro/downloaded", true)
         subjectPattern("location.*", "schemas/avro/downloaded/location")
     }
 

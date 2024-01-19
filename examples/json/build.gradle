@@ -12,6 +12,7 @@ schemaRegistry {
     url = 'http://localhost:8081'
     quiet = false
     outputDirectory = 'schemas/json/results/'
+    pretty = true
 
     register {
         subject('company', 'schemas/json/company.json', 'JSON')
@@ -31,8 +32,8 @@ schemaRegistry {
 
     download {
         metadata = new MetadataExtension(true)
-        subject('company', 'schemas/json/downloaded')
-        subject('user', 'schemas/json/downloaded')
+//        subject('company', 'schemas/json/downloaded') // Retrieved via reference from the user subject
+        subject('user', 'schemas/json/downloaded', true)
         subjectPattern('location.*', 'schemas/json/downloaded/location')
     }
 
