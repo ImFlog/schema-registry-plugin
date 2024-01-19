@@ -189,9 +189,6 @@ class ProtobufSchemaParser(
     }
 
     private fun standardizeNames(extend: Extend): Extend {
-        // This one is tricky: on one hand, extensions might be coming from external libraries,
-        // so we'd want to keep them. On other hand, they might be defined in the same structure
-        // in some edge cases.
         // We're not supporting them for now, until we have a clear use case.
         return extend
     }

@@ -24,18 +24,6 @@ class ProtobufSchemaParserTest {
     fun `Should keep the original file intact when not provided with references`() {
         // Given
         val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
-        val anIgnoredLocalReference = givenALocalReference(
-            "Address.proto", "Address.proto", """
-                
-            syntax = "proto3";
-            
-            package test;
-            
-            message Address {
-              string street = 1;
-            }
-        """
-        )
         val aUserSchemaFile = givenASchemaFile(
             "User.proto", """
                 
@@ -710,6 +698,180 @@ class ProtobufSchemaParserTest {
                 |
                 |message Address {
                 |  string street = 1;
+                |}
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    // It doesn't work at the moment. It needs support for definition look up by type,
+    // just like the preserve-local-references @Disabled test above
+    @Disabled
+    fun `Should format local reference correctly - nested target type`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Address {
+              string street = 1;
+              
+              enum AddressType {
+                Local = 0;
+                Overseas = 1;
+              }
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.Address address = 2;
+              .test.Address.AddressType addressType = 3;
+              Address.AddressType relativeAddressType = 4;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+                |
+                |syntax = "proto3";
+                |
+                |package test;
+                |
+                |message User {
+                |  string name = 1;
+                |  Address address = 2;
+                |  Address.AddressType addressType = 3;
+                |  Address.AddressType relativeAddressType = 4;
+                |}
+                |
+                |message Address {
+                |  string street = 1;
+                |  
+                |  enum AddressType {
+                |    Local = 0;
+                |    Overseas = 1;
+                |  }
+                |}
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    fun `Should format local reference correctly - oneOf`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Address {
+              string street = 1;
+            }
+        """
+        )
+        val anotherLocalReference = givenALocalReference(
+            "email/Email.proto", "email/Email.proto", """
+                
+            syntax = "proto3";
+            
+            package test.email;
+            
+            message Email {
+              string address = 1;
+            }
+        """
+        )
+        // A map can only be keyed by a scalar, so we only need to test the value.
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            import "Address.proto";
+            import "email/Email.proto";
+            
+            message User {
+              string name = 1;
+              oneof addressOrEmail {
+                .test.Address address = 2;
+                .test.email.Email email = 3;
+              }
+              oneof relativeAddressOrEmail {
+                Address relativeAddress = 4;
+                email.Email relativeEmail = 5;
+              }
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference, anotherLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+                |
+                |syntax = "proto3";
+                |
+                |package test;
+                |
+                |message User {
+                |  string name = 1;
+                |  oneof addressOrEmail {
+                |    Address address = 2;
+                |    Email email = 3;
+                |  }
+                |  oneof relativeAddressOrEmail {
+                |    Address relativeAddress = 4;
+                |    Email relativeEmail = 5;
+                |  }
+                |}
+                |
+                |message Address {
+                |  string street = 1;
+                |}
+                |
+                |message Email {
+                |  string address = 1;
                 |}
                 """.trimMargin()
         )
