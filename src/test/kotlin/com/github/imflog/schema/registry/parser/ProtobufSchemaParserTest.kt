@@ -20,10 +20,21 @@ class ProtobufSchemaParserTest {
     lateinit var folderRule: Path
 
     @Test
-    @Disabled // It doesn't work at the moment
     fun `Should keep the original file intact when not provided with references`() {
         // Given
         val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        givenALocalReference( // Creates the file that then gets ignored
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test;
+            
+            message Address {
+              string street = 1;
+            }
+        """
+        )
         val aUserSchemaFile = givenASchemaFile(
             "User.proto", """
                 
@@ -36,6 +47,7 @@ class ProtobufSchemaParserTest {
             message User {
               string name = 1;
               .test.Address address = 2;
+              test.Address relativeAddress = 3;
             }
         """
         )
@@ -63,6 +75,7 @@ class ProtobufSchemaParserTest {
                 |message User {
                 |  string name = 1;
                 |  .test.Address address = 2;
+                |  test.Address relativeAddress = 3;
                 |}
                 """.trimMargin()
         )
@@ -123,6 +136,75 @@ class ProtobufSchemaParserTest {
                 |  string name = 1;
                 |  Address address = 2;
                 |  Address relativeAddress = 3;
+                |}
+    
+                |message Address {
+                |  string street = 1;
+                |}
+                |
+                """.trimMargin()
+        )
+    }
+
+    @Test
+    fun `Should format local reference correctly - resolving relative packages`() {
+        // Given
+        val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())
+        val aLocalReference = givenALocalReference(
+            "Address.proto", "Address.proto", """
+                
+            syntax = "proto3";
+            
+            package test.pkg.address;
+            
+            message Address {
+              string street = 1;
+            }
+        """
+        )
+        val aUserSchemaFile = givenASchemaFile(
+            "User.proto", """
+                
+            syntax = "proto3";
+            
+            package test.pkg;
+            
+            import "Address.proto";
+            
+            message User {
+              string name = 1;
+              .test.pkg.address.Address fullyQualifiedAddress = 2;
+              test.pkg.address.Address fullAddress = 3;
+              pkg.address.Address pkgAddress = 4;
+              address.Address relativeAddress = 5;
+            }
+        """
+        )
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User.proto",
+            aUserSchemaFile.path,
+            listOf(aLocalReference)
+        )
+
+        // Then
+        localSchemaShouldLookLike(
+            resolvedSchema,
+            """
+                |// Proto schema formatted by Wire, do not edit.
+                |// Source: User.proto
+    
+                |syntax = "proto3";
+    
+                |package test.pkg;
+    
+                |message User {
+                |  string name = 1;
+                |  Address fullyQualifiedAddress = 2;
+                |  Address fullAddress = 3;
+                |  Address pkgAddress = 4;
+                |  Address relativeAddress = 5;
                 |}
     
                 |message Address {

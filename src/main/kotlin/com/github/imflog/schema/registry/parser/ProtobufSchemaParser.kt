@@ -2,7 +2,6 @@ package com.github.imflog.schema.registry.parser
 
 import com.github.imflog.schema.registry.LocalReference
 import com.github.imflog.schema.registry.SchemaType
-import com.google.common.collect.Iterables
 import com.squareup.wire.schema.*
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import okio.FileSystem
@@ -89,7 +88,9 @@ class ProtobufSchemaParser(
                 } else {
                     file
                 }
-                dependency.types.map { standardizeNames(it, dependency) }
+                dependency.types.map {
+                    standardizeNames(it, dependency)
+                }
             }
 
             val result = source.copy(
@@ -153,7 +154,14 @@ class ProtobufSchemaParser(
         }
 
         private fun standardizeNames(field: Field, file: ProtoFile): Field {
-            val newType = standardizeNames(field.type!!, file)
+            // This is a somewhat unfortunate hack. We had problems with our Schema Registry when mixing outer-scope
+            // package references (.some.package.Message) and standard package imports (some.package.Message).
+            // `Field.elementType` contains the actual parsed type, and, unlike `Field.type`, it preserves
+            // the leading dot. Unfortunately, it's private within `Field`, so the only option for accessing it is
+            // by converting it first into its corresponding Element.
+            val fieldElement = Field.toElements(listOf(field)).first()
+            val fieldType = ProtoType.get(fieldElement.type)
+            val newType = standardizeNames(fieldType, file)
             return field.copy(elementType = newType.toString())
         }
 
@@ -181,12 +189,50 @@ class ProtobufSchemaParser(
         }
 
         private fun findSourceImport(type: ProtoType, root: ProtoFile): String? {
+            val typeVariants = toTypeVariants(type, root)
+                // Wire loses the leading . on linking, making `Field.type="package.Type"` not equal
+                // `".package.Type"`.
+                .map { ProtoType.get(it.toString().removePrefix(".")) }
+                .toSet()
             val containingFile = DependencyHierarchy(root, schema).find { file ->
-                file.typesAndNestedTypes()
+                val allTypes = file.typesAndNestedTypes()
                     .map { it.type }
-                    .contains(type)
+                    .toSet()
+                allTypes.intersect(typeVariants).isNotEmpty()
             }
             return containingFile?.location?.path
+        }
+
+        private fun toTypeVariants(type: ProtoType, source: ProtoFile): List<ProtoType> {
+            val packageName = source.packageName
+            return when {
+                type.toString().startsWith(".") -> {
+                    // Absolute import
+                    listOf(type)
+                }
+
+                packageName != null -> {
+                    // for type T and package segments "a", "b" it would produce "T", "b.T", "a.b.T"
+
+                    val prefixes = packageName.split('.')
+                        .runningFold("") { acc, segment ->
+                            when (acc) {
+                                "" -> segment
+                                else -> "${acc}.${segment}"
+                            }
+                        }
+
+                    prefixes
+                        .map { ProtoType.get("${it}.${type}") }
+                        .toList()
+                }
+
+                else -> {
+                    // Top level package already
+                    listOf(type)
+
+                }
+            }
         }
     }
 
@@ -225,7 +271,8 @@ class ProtobufSchemaParser(
         override fun next(): ProtoFile {
             val current = imports.removeFirstOrNull() ?: throw NoSuchElementException("No more imports")
             val result =
-                schema.protoFile(current) ?: throw IllegalStateException("Import '$current' is not in the schema path")
+                schema.protoFile(current)
+                    ?: throw IllegalStateException("Import '$current' is not in the schema path")
             addAll(result.imports)
             addAll(result.publicImports)
             return result
