@@ -786,9 +786,6 @@ class ProtobufSchemaParserTest {
     }
 
     @Test
-    // It doesn't work at the moment. It needs support for definition look up by type,
-    // just like the preserve-local-references @Disabled test above
-    @Disabled
     fun `Should format local reference correctly - nested target type`() {
         // Given
         val parser = ProtobufSchemaParser(schemaRegistryClient, folderRule.toFile())

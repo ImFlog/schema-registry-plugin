@@ -128,7 +128,7 @@ class ProtobufSchemaParser(
                     )
                 }
 
-                isLocalReference(protoType, file) -> ProtoType.get(protoType.simpleName)
+                isLocalReference(protoType, file) -> trimToLocalName(protoType, findSource(protoType, file))
                 else -> protoType // Not in a local reference, keep as is
             }
         }
@@ -184,11 +184,11 @@ class ProtobufSchemaParser(
         }
 
         private fun isLocalReference(type: ProtoType, file: ProtoFile): Boolean {
-            val import = findSourceImport(type, file)
+            val import = findSource(type, file)?.location?.path
             return refs.contains(import)
         }
 
-        private fun findSourceImport(type: ProtoType, root: ProtoFile): String? {
+        private fun findSource(type: ProtoType, root: ProtoFile): ProtoFile? {
             val typeVariants = toTypeVariants(type, root)
                 // Wire loses the leading . on linking, making `Field.type="package.Type"` not equal
                 // `".package.Type"`.
@@ -200,7 +200,7 @@ class ProtobufSchemaParser(
                     .toSet()
                 allTypes.intersect(typeVariants).isNotEmpty()
             }
-            return containingFile?.location?.path
+            return containingFile
         }
 
         private fun toTypeVariants(type: ProtoType, source: ProtoFile): List<ProtoType> {
@@ -233,6 +233,22 @@ class ProtobufSchemaParser(
 
                 }
             }
+        }
+
+        private fun trimToLocalName(type: ProtoType, source: ProtoFile?): ProtoType {
+            if (source == null) {
+                return type
+            }
+            val withoutDot = type.toString()
+                // Handle absolute package names (the post-linkage `Field.type` doesn't have those,
+                // so it'll never match unless we strip the dot).
+                .removePrefix(".")
+            val fullType = source.typesAndNestedTypes().find { it.type.toString().endsWith(withoutDot) }
+                ?: throw RuntimeException("Type $type could not be found in ${source.location.path}")
+            val relativePackageString = fullType.type.toString()
+                // Strip the package -> make it a "local" reference.
+                .removePrefix((source.packageName ?: "") + ".")
+            return ProtoType.get(relativePackageString)
         }
     }
 
