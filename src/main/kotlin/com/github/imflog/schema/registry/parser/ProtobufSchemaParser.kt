@@ -2,6 +2,7 @@ package com.github.imflog.schema.registry.parser
 
 import com.github.imflog.schema.registry.LocalReference
 import com.github.imflog.schema.registry.SchemaType
+import com.google.common.collect.Iterables
 import com.squareup.wire.schema.*
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import okio.FileSystem
@@ -12,9 +13,6 @@ class ProtobufSchemaParser(
     client: SchemaRegistryClient,
     rootDir: File
 ) : SchemaParser(client, rootDir) {
-    private val log = LoggerFactory.getLogger(ProtobufSchemaParser::class.java)
-    private val maxRefs = 100_000
-
     override val schemaType: SchemaType = SchemaType.PROTOBUF
 
     override fun resolveLocalReferences(
@@ -23,94 +21,10 @@ class ProtobufSchemaParser(
         localReferences: List<LocalReference>
     ): String {
         val schema = schemaFor(rootDir)
-
         val source = schema.protoFile(File(schemaPath).relativeTo(rootDir).path)!!
-        // Keeping track of what types we've already found in order to fail-fast
-        // duplicate definitions before they reach the Registry.
-        val flattenedTypes = source.types.associateBy {
-            it.name
-        }.toMutableMap()
-        val importsProcessed = mutableSetOf<String>()
-
-        val typesToRetain = source.types.map(this::standardizeNames).toMutableList()
-        val importsToRetain = mutableSetOf<String>()
-
-        // Their publicity doesn't matter for the purposes of ref unpacking
-        val importsToProcess = ArrayDeque<String>()
-        importsToProcess.addAll(source.imports)
-        importsToProcess.addAll(source.publicImports)
-
         val refs: Map<String, File> = parseRefs(localReferences)
 
-        // To make sure it won't infinite-loop our CI into oblivion
-        for (i in 0..maxRefs) {
-            if (i == maxRefs - 1) {
-                throw RuntimeException("Timed out processing imports. Is there a dependency loop?")
-            }
-
-            val import = importsToProcess.removeFirstOrNull()
-                ?: break
-
-            // Built-ins
-            if (isBuiltInImport(import)) {
-                importsToRetain.add(import)
-                continue
-            }
-
-            // Unknown local reference
-            val ref = refs[import]
-            if (ref == null) {
-                log.warn(
-                    "Unknown reference '{}' encountered while processing local references, it will be retained as is. Known references: {}",
-                    import, refs
-                )
-                importsToRetain.add(import)
-                continue
-            }
-
-            // Duplicate imports are ignored
-            //
-            // Always resolving imports from the Subject's file, to make sure we catch
-            // different relative imports of the same file.
-            val normalizedPath = ref.relativeTo(rootDir).normalize().path
-            if (!importsProcessed.add(normalizedPath)) {
-                continue
-            }
-
-            // No more excuses, we're processing this dependency.
-            val dependency = schema.protoFile(ref.relativeTo(rootDir).path)
-                ?: throw RuntimeException("Dependency not found for local reference $import at ${ref.absolutePath}")
-
-            importsToProcess.addAll(dependency.imports)
-            importsToProcess.addAll(dependency.publicImports)
-
-            for (type in dependency.types) {
-                val existingType = flattenedTypes.putIfAbsent(type.name, type)
-                if (existingType != null) {
-                    log.error(
-                        "Duplicate imports found for the same type {}: {} -> {}",
-                        type.name,
-                        existingType.location.path,
-                        type.location.path
-                    )
-                    throw RuntimeException("Duplicate imports in local references are not supported")
-                }
-
-                typesToRetain.add(standardizeNames(type))
-            }
-        }
-
-        val result = source.copy(
-            imports = importsToRetain.toList(),
-            publicImports = emptyList(),
-            types = typesToRetain.toList(),
-            extendList = source.extendList.map(this::standardizeNames),
-            services = source.services.map(this::standardizeNames),
-        ).toSchema()
-
-        log.info("Local reference schema conversion for {}:\n{}\nto:\n{}", subject, source.toSchema(), result)
-
-        return result
+        return LocalReferenceTransformer(rootDir, schema, refs).transform(source)
     }
 
     private fun schemaFor(schemaDirectory: File): Schema {
@@ -133,69 +47,192 @@ class ProtobufSchemaParser(
         }
     }
 
-    private fun isBuiltInImport(import: String): Boolean {
-        return import.startsWith("google/protobuf")
-    }
+    class LocalReferenceTransformer(
+        private val rootDir: File,
+        private val schema: Schema,
+        private val refs: Map<String, File>
+    ) {
+        private val log = LoggerFactory.getLogger(LocalReferenceTransformer::class.java)
 
-    private fun isBuiltInPackage(type: ProtoType): Boolean {
-        return type.enclosingTypeOrPackage?.startsWith("google.protobuf") ?: false
-    }
+        fun transform(source: ProtoFile): String {
+            val hierarchy = DependencyHierarchy(source, schema)
 
-    private fun standardizeNames(protoType: ProtoType): ProtoType {
-        return when {
-            protoType.isScalar -> protoType
-            protoType.isMap -> {
-                val newKey = standardizeNames(protoType.keyType!!)
-                val newValue = standardizeNames(protoType.valueType!!)
-                ProtoType.get(
-                    keyType = newKey,
-                    valueType = newValue,
-                    name = "map<$newKey, $newValue>"
-                )
+            val (filesToFlatten, filesToRetain) = hierarchy.partition {
+                val import = it.location.path
+
+                // Unknown local reference
+                val ref = refs[import]
+                if (ref == null && it != source) { // Source ends up in the filesToFlatten even if it was in the local references
+                    if (!isBuiltInImport(import)) {
+                        // It's normal to ignore built-ins, so no warning in that case.
+                        log.warn(
+                            "Unknown reference '{}' encountered while processing local references, it will be retained as is. Known references: {}",
+                            import, refs
+                        )
+                    }
+                    false
+                } else {
+                    true
+                }
             }
 
-            isBuiltInPackage(protoType) -> protoType
-            else /* It's a custom message/enum, it must be overwritten */ -> ProtoType.get(protoType.simpleName) // Removing package prefix
-        }
-    }
+            val typesToRetain = filesToFlatten.flatMap { file ->
+                val import = file.location.path
+                val ref = refs[import]
 
-    private fun standardizeNames(type: Type): Type {
-        return when (type) {
-            is EnclosingType -> type.copy(nestedTypes = type.nestedTypes.map(this::standardizeNames))
-            is MessageType -> type.copy(
-                declaredFields = type.declaredFields.map(this::standardizeNames),
-                extensionFields = type.extensionFields.map(this::standardizeNames).toMutableList(),
-                oneOfs = type.oneOfs.map(this::standardizeNames),
-                nestedTypes = type.nestedTypes.map(this::standardizeNames),
-                nestedExtendList = type.nestedExtendList.map(this::standardizeNames),
-                extensionsList = type.extensionsList.map(this::standardizeNames)
+                // This would normally resolve into the same exact file as the reference itself,
+                // but the way LocalReference is constructed implies it could be elsewhere, so we'll have to
+                // follow through with the API.
+                val dependency = if (ref != null) {
+                    schema.protoFile(ref.relativeTo(rootDir).path)
+                        ?: throw RuntimeException("Dependency not found for local reference $import at ${ref.absolutePath}")
+                } else {
+                    file
+                }
+                dependency.types.map { standardizeNames(it, dependency) }
+            }
+
+            val result = source.copy(
+                imports = filesToRetain.map { it.location.path }.toList(),
+                publicImports = emptyList(),
+                types = typesToRetain.toList(),
+                extendList = source.extendList.map { standardizeNames(it, source) },
+                services = source.services.map { standardizeNames(it, source) },
+            ).toSchema()
+
+            log.info(
+                "Local reference schema conversion for {}:\n{}\nto:\n{}",
+                source.location.path,
+                source.toSchema(),
+                result
             )
 
-            is EnumType -> type // Keep it as is
+            return result
+        }
+
+        private fun isBuiltInImport(import: String): Boolean {
+            return import.startsWith("google/protobuf")
+        }
+
+        private fun standardizeNames(protoType: ProtoType, file: ProtoFile): ProtoType {
+            return when {
+                protoType.isScalar -> protoType
+                protoType.isMap -> {
+                    val newKey = standardizeNames(protoType.keyType!!, file)
+                    val newValue = standardizeNames(protoType.valueType!!, file)
+                    ProtoType.get(
+                        keyType = newKey,
+                        valueType = newValue,
+                        name = "map<$newKey, $newValue>"
+                    )
+                }
+
+                isLocalReference(protoType, file) -> ProtoType.get(protoType.simpleName)
+                else -> protoType // Not in a local reference, keep as is
+            }
+        }
+
+        private fun standardizeNames(type: Type, file: ProtoFile): Type {
+            return when (type) {
+                is EnclosingType -> type.copy(nestedTypes = type.nestedTypes.map { standardizeNames(it, file) })
+                is MessageType -> type.copy(
+                    declaredFields = type.declaredFields.map { standardizeNames(it, file) },
+                    extensionFields = type.extensionFields.map { standardizeNames(it, file) }.toMutableList(),
+                    oneOfs = type.oneOfs.map { standardizeNames(it, file) },
+                    nestedTypes = type.nestedTypes.map { standardizeNames(it, file) },
+                    nestedExtendList = type.nestedExtendList.map { standardizeNames(it, file) },
+                    extensionsList = type.extensionsList.map { standardizeNames(it, file) }
+                )
+
+                is EnumType -> type // Keep it as is
+            }
+        }
+
+        private fun standardizeNames(oneOf: OneOf, file: ProtoFile): OneOf {
+            return oneOf.copy(fields = oneOf.fields.map { standardizeNames(it, file) })
+        }
+
+        private fun standardizeNames(field: Field, file: ProtoFile): Field {
+            val newType = standardizeNames(field.type!!, file)
+            return field.copy(elementType = newType.toString())
+        }
+
+        @Suppress("UNUSED_PARAMETER")
+        private fun standardizeNames(extensions: Extensions, file: ProtoFile): Extensions {
+            return extensions // Extension overwrite is not supported
+        }
+
+        @Suppress("UNUSED_PARAMETER")
+        private fun standardizeNames(extend: Extend, file: ProtoFile): Extend {
+            // We're not supporting them for now, until we have a clear use case.
+            return extend
+        }
+
+        @Suppress("UNUSED_PARAMETER")
+        private fun standardizeNames(service: Service, file: ProtoFile): Service {
+            // RPC rewriting is not supported. RPCs are not fully parsed by Wire, so getting them
+            // supported would be a lot of work.
+            return service
+        }
+
+        private fun isLocalReference(type: ProtoType, file: ProtoFile): Boolean {
+            val import = findSourceImport(type, file)
+            return refs.contains(import)
+        }
+
+        private fun findSourceImport(type: ProtoType, root: ProtoFile): String? {
+            val containingFile = DependencyHierarchy(root, schema).find { file ->
+                file.typesAndNestedTypes()
+                    .map { it.type }
+                    .contains(type)
+            }
+            return containingFile?.location?.path
         }
     }
 
-    private fun standardizeNames(oneOf: OneOf): OneOf {
-        return oneOf.copy(fields = oneOf.fields.map(this::standardizeNames))
+    class DependencyHierarchy(private val root: ProtoFile, private val schema: Schema) : Iterable<ProtoFile> {
+        override fun iterator(): Iterator<ProtoFile> {
+            return DependencyHierarchyIterator(root, schema)
+        }
     }
 
-    private fun standardizeNames(field: Field): Field {
-        val newType = standardizeNames(field.type!!)
-        return field.copy(elementType = newType.toString())
+    class DependencyHierarchyIterator(private val root: ProtoFile, schema: Schema) : Iterator<ProtoFile> {
+        private var rootReturned = false
+        private val delegate = ImportsIterator(schema, root.imports + root.publicImports)
+        override fun hasNext(): Boolean {
+            return !rootReturned || delegate.hasNext()
+        }
+
+        override fun next(): ProtoFile {
+            return if (!rootReturned) {
+                rootReturned = true
+                root
+            } else {
+                delegate.next()
+            }
+        }
     }
 
-    private fun standardizeNames(extensions: Extensions): Extensions {
-        return extensions // Extension overwrite is not supported
-    }
+    class ImportsIterator(private val schema: Schema, imports: Collection<String>) : Iterator<ProtoFile> {
 
-    private fun standardizeNames(extend: Extend): Extend {
-        // We're not supporting them for now, until we have a clear use case.
-        return extend
-    }
+        private val imports = ArrayDeque(imports)
+        private val processedImports = mutableSetOf<String>()
 
-    private fun standardizeNames(service: Service): Service {
-        // RPC rewriting is not supported. RPCs are not fully parsed by Wire, so getting them
-        // supported would be a lot of work.
-        return service
+        override fun hasNext(): Boolean {
+            return imports.isNotEmpty()
+        }
+
+        override fun next(): ProtoFile {
+            val current = imports.removeFirstOrNull() ?: throw NoSuchElementException("No more imports")
+            val result =
+                schema.protoFile(current) ?: throw IllegalStateException("Import '$current' is not in the schema path")
+            addAll(result.imports)
+            addAll(result.publicImports)
+            return result
+        }
+
+        private fun addAll(newImports: Iterable<String>) {
+            newImports.filter(processedImports::add).forEach(imports::addLast)
+        }
     }
 }
