@@ -21,7 +21,7 @@ class CompatibilityTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        for ((subject, path, type, remoteReferences, localReferences) in subjects) {
+        for ((subject, path, type, remoteReferences, localReferences, metadata, ruleSet) in subjects) {
             logger.debug("Loading schema for subject($subject) from $path.")
             val isCompatible = try {
                 val parsedSchema = SchemaParser
@@ -30,7 +30,7 @@ class CompatibilityTaskAction(
                         subject,
                         path,
                         remoteReferences,
-                        localReferences
+                        localReferences, metadata , ruleSet
                     )
                 val isCompatible = client.testCompatibility(subject, parsedSchema)
                 if (!isCompatible) {

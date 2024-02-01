@@ -468,7 +468,6 @@ class DownloadTaskActionTest {
         val testSubject = "test"
         val testLibSubject = "test_lib"
         val outputDir = "src/main/avro/external"
-        val metadataDir = "src/main/avro/metadata"
 
         val registryClient = MockSchemaRegistryClient(listOf(AvroSchemaProvider()))
 

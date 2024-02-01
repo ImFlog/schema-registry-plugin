@@ -7,6 +7,8 @@ import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
 import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.Metadata
+import io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
 import java.io.File
@@ -27,9 +29,9 @@ class RegisterTaskAction(
     fun run(): Int {
         var errorCount = 0
         writeOutputFileHeader()
-        subjects.forEach { (subject, path, type, references: List<SchemaReference>, localReferences) ->
+        subjects.forEach { (subject, path, type, references: List<SchemaReference>, localReferences, metaData, ruleSet) ->
             try {
-                val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences)
+                val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences, metaData, ruleSet)
                 writeRegisteredSchemaOutput(subject, path, schemaId)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)
@@ -44,11 +46,13 @@ class RegisterTaskAction(
         path: String,
         type: SchemaType,
         references: List<SchemaReference>,
-        localReferences: List<LocalReference>
+        localReferences: List<LocalReference>,
+        metadata: Metadata,
+        ruleSet: RuleSet
     ): Int {
         val parsedSchema = SchemaParser
             .provide(type, client, rootDir)
-            .parseSchemaFromFile(subject, path, references, localReferences)
+            .parseSchemaFromFile(subject, path, references, localReferences, metadata, ruleSet)
         logger.infoIfNotQuiet("Registering $subject (from $path)")
         val schemaId = client.register(subject, parsedSchema)
         logger.infoIfNotQuiet("$subject (from $path) has been registered with id $schemaId")

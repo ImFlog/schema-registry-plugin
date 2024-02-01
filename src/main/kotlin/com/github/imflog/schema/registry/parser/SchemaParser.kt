@@ -5,6 +5,8 @@ import com.github.imflog.schema.registry.SchemaParsingException
 import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.Metadata
+import io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import java.io.File
 
@@ -33,6 +35,8 @@ abstract class SchemaParser(
         schemaPath: String,
         remoteReferences: List<SchemaReference>,
         localReferences: List<LocalReference>,
+        metadata: Metadata,
+        ruleSet: RuleSet
     ): ParsedSchema {
         val schemaContent = rootDir.resolve(schemaPath).readText()
         val parsedLocalSchemaString = if (localReferences.isNotEmpty()) {
@@ -40,7 +44,7 @@ abstract class SchemaParser(
         } else schemaContent
 
         return client
-            .parseSchema(schemaType.registryType, parsedLocalSchemaString, remoteReferences)
+            .parseSchema(schemaType.registryType, parsedLocalSchemaString, remoteReferences, metadata,ruleSet)
             .orElseThrow { SchemaParsingException(subject, schemaType) }
     }
 

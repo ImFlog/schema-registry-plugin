@@ -19,6 +19,7 @@ repositories {
 // Dependencies versions
 val confluentVersion = "7.5.3"
 val avroVersion = "1.11.2"
+val jsonVersion = "2.8.9"
 dependencies {
     shadow(gradleApi())
     implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
@@ -29,6 +30,7 @@ dependencies {
     implementation("io.confluent", "kafka-protobuf-provider")
     // Our custom avro version. See https://github.com/ImFlog/avro
     implementation("com.github.ImFlog.avro", "avro", avroVersion)
+    implementation("com.google.code.gson","gson",jsonVersion)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
