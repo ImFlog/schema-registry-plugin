@@ -29,9 +29,9 @@ class RegisterTaskAction(
     fun run(): Int {
         var errorCount = 0
         writeOutputFileHeader()
-        subjects.forEach { (subject, path, type, references: List<SchemaReference>, localReferences, metaData, ruleSet) ->
+        subjects.forEach { (subject, path, type, references: List<SchemaReference>, localReferences, metaData, ruleSet, normalize) ->
             try {
-                val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences, metaData, ruleSet)
+                val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences, metaData, ruleSet, normalize)
                 writeRegisteredSchemaOutput(subject, path, schemaId)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)
@@ -48,13 +48,14 @@ class RegisterTaskAction(
         references: List<SchemaReference>,
         localReferences: List<LocalReference>,
         metadata: Metadata,
-        ruleSet: RuleSet
+        ruleSet: RuleSet,
+        normalize: Boolean
     ): Int {
         val parsedSchema = SchemaParser
             .provide(type, client, rootDir)
             .parseSchemaFromFile(subject, path, references, localReferences, metadata, ruleSet)
         logger.infoIfNotQuiet("Registering $subject (from $path)")
-        val schemaId = client.register(subject, parsedSchema)
+        val schemaId = client.register(subject, parsedSchema, normalize)
         logger.infoIfNotQuiet("$subject (from $path) has been registered with id $schemaId")
         return schemaId
     }

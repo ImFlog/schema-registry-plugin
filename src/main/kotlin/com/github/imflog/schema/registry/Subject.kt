@@ -14,7 +14,8 @@ data class Subject(
     val references: MutableList<SchemaReference> = mutableListOf()
     val localReferences: MutableList<LocalReference> = mutableListOf()
     var metadata: Metadata = Metadata(mutableMapOf(), mutableMapOf(), mutableSetOf())
-    var ruleSet: RuleSet = RuleSet(mutableListOf(), mutableListOf());
+    var ruleSet: RuleSet = RuleSet(mutableListOf(), mutableListOf())
+    var normalize: Boolean = false
 
 
     fun addReference(name: String, subject: String, version: Int): Subject {
@@ -44,9 +45,15 @@ data class Subject(
         return this
     }
 
+    fun setNormalized(normalize: Boolean): Subject {
+        this.normalize = normalize
+        return this
+    }
+
     // Used for data class destructuring
     operator fun component4() = references
     operator fun component5() = localReferences
     operator fun component6() = metadata
     operator fun component7() = ruleSet
+    operator fun component8() = normalize
 }
