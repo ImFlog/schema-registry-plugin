@@ -260,9 +260,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$playerSubject', '${playerFile.absolutePath}', '${type.name}')
+                    subject('${playerSubject.inputSubject}', '${playerFile.absolutePath}', '${type.name}')
                         .addLocalReference('$userSubject', '$userPath')
-                        .addReference('$addressReferenceName', '$addressSubject', 1)
+                        .addReference('$addressReferenceName', '${addressSubject.inputSubject}', 1)
                 }
             }
         """
