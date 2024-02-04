@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "1.13.1-SNAPSHOT"
+version = "1.13.4-SNAPSHOT"
 
 
 plugins {
@@ -19,7 +19,6 @@ repositories {
 // Dependencies versions
 val confluentVersion = "7.5.3"
 val avroVersion = "1.11.2"
-val jsonVersion = "2.8.9"
 dependencies {
     shadow(gradleApi())
     implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
@@ -30,7 +29,6 @@ dependencies {
     implementation("io.confluent", "kafka-protobuf-provider")
     // Our custom avro version. See https://github.com/ImFlog/avro
     implementation("com.github.ImFlog.avro", "avro", avroVersion)
-    implementation("com.google.code.gson","gson",jsonVersion)
 }
 
 tasks.withType<KotlinCompile>().configureEach {

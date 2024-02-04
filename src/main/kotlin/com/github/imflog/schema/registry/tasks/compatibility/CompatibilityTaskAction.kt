@@ -21,21 +21,16 @@ class CompatibilityTaskAction(
 
     fun run(): Int {
         var errorCount = 0
-        for ((subject, path, type, remoteReferences, localReferences, metadata, ruleSet) in subjects) {
-            logger.debug("Loading schema for subject($subject) from $path.")
+        subjects.forEach { subject ->
+            logger.debug("Loading schema for subject(${subject.inputSubject}) from ${subject.file}.")
             val isCompatible = try {
                 val parsedSchema = SchemaParser
-                    .provide(type.toSchemaType(), client, rootDir)
-                    .parseSchemaFromFile(
-                        subject,
-                        path,
-                        remoteReferences,
-                        localReferences, metadata , ruleSet
-                    )
-                val isCompatible = client.testCompatibility(subject, parsedSchema)
+                    .provide(subject.type.toSchemaType(), client, rootDir)
+                    .parseSchemaFromFile(subject)
+                val isCompatible = client.testCompatibility(subject.inputSubject, parsedSchema)
                 if (!isCompatible) {
                     try {
-                        client.testCompatibilityVerbose(subject, parsedSchema).forEach {
+                        client.testCompatibilityVerbose(subject.inputSubject, parsedSchema).forEach {
                             logger.error("Returned errors : $it")
                         }
                     } catch (_: Exception) {
@@ -56,9 +51,9 @@ class CompatibilityTaskAction(
                 }
             }
             if (isCompatible) {
-                logger.infoIfNotQuiet("Schema $path is compatible with subject: $subject")
+                logger.infoIfNotQuiet("Schema ${subject.file} is compatible with subject: ${subject.inputSubject}")
             } else {
-                logger.error("Schema $path is not compatible with subject: $subject")
+                logger.error("Schema ${subject.file} is not compatible with subject: ${subject.inputSubject}")
                 errorCount++
             }
         }

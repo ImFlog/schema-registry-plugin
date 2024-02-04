@@ -351,4 +351,104 @@ class RegisterTaskActionTest {
         // Then
         Assertions.assertThat(errorCount).isEqualTo(0)
     }
+
+    @Test
+    fun `Should register schema with ruleSet`() {
+        // Given
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
+        val schemaPath = "$projectDirAbsolutePath/src/test/resources/"
+        val subjects = listOf(
+            Subject("test", "${schemaPath}testSubjectWithTag.avsc", "AVRO")
+                .setRuleSet("${schemaPath}testRuleSet.json")
+        )
+
+        // When
+        val errorCount = RegisterTaskAction(
+            registryClient,
+            folderRule.root.toFile(),
+            subjects,
+            null
+        ).run()
+
+        // Then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(registryClient.getLatestSchemaMetadata("test").ruleSet).isNotNull
+    }
+
+    @Test
+    fun `Should register schema with metadata`() {
+        // Given
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        val projectDirAbsolutePath = Paths.get("").toAbsolutePath().toString()
+        val schemaPath = "$projectDirAbsolutePath/src/test/resources/"
+        val subjects = listOf(
+            Subject("test", "${schemaPath}testSimpleSubject.avsc", "AVRO")
+                .setMetadata("${schemaPath}testMetadata.json")
+        )
+
+        // When
+        val errorCount = RegisterTaskAction(
+            registryClient,
+            folderRule.root.toFile(),
+            subjects,
+            null
+        ).run()
+
+        // Then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(registryClient.getLatestSchemaMetadata("test").metadata).isNotNull
+    }
+
+    @Test
+    fun `Should register normalized schema`() {
+        // Given
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        val resultFolder = Files.createDirectories(folderRule.resolve("results/protobuf")).toFile()
+        File(folderRule.toFile(), "src/main/avro/external/test.proto")
+            .writeText(
+                """
+            syntax = "proto3";
+            
+            option java_package = "com.example.proto.v1";
+            package foo.v1;
+               
+            option java_outer_classname = "FooProto";
+            option java_multiple_files = true;
+            
+            message Foo {
+              string bar = 1;
+            }
+            """
+            )
+
+        val subjects = listOf(
+            Subject("test", "src/main/avro/external/test.proto", "PROTOBUF").setNormalized(true),
+        )
+
+        // when
+        RegisterTaskAction(
+            registryClient,
+            folderRule.toFile(),
+            subjects,
+            resultFolder.path
+        ).run()
+
+        // then
+        Assertions.assertThat(registryClient.getLatestSchemaMetadata("test").schema)
+            .isEqualTo("syntax = \"proto3\";\n" +
+                    "package foo.v1;\n" +
+                    "\n" +
+                    "option java_multiple_files = true;\n" +
+                    "option java_outer_classname = \"FooProto\";\n" +
+                    "option java_package = \"com.example.proto.v1\";\n" +
+                    "\n" +
+                    "message Foo {\n" +
+                    "  string bar = 1;\n" +
+                    "}\n"
+        )
+    }
 }

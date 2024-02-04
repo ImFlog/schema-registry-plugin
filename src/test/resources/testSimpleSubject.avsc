@@ -4,12 +4,8 @@
   "namespace": "com.mycompany",
   "fields": [
     {
-      "name": "nested",
-      "type": "B"
-    },
-    {
-      "name": "nested1",
-      "type": "B"
+      "name": "foo",
+      "type": "string"
     }
   ]
 }
