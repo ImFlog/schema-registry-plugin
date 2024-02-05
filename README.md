@@ -106,6 +106,7 @@ Here is the list of all the signatures for the `subject` extension:
 You can configure the metadata extension in order to download the schemas metadata in json files.
 It will be saved in files named like the schema file but suffixed by `-metadata.json` in the outputPath you specify
 and defaults to the same output directory as your schemas.
+The metadata extension will also download optional `metadata` and `rulesets` if your schema-registry supports this.  
 
 NB:
 
@@ -204,6 +205,8 @@ schemaRegistry {
                 .addReference('avroSubjectLatestVersionExplicit', 'avroSubjectLatestVersionExplicitType', -1)
         subject('protoWithReferences', 'dependent/path.proto', "PROTOBUF").addReference('protoSubject', 'protoSubjectType', 1)
         subject('jsonWithReferences', 'dependent/path.json', "JSON").addReference('jsonSubject', 'jsonSubjectType', 1)
+                .setMetadata('/absolutPath/dependent/metadata.json').setRuleSet('/absolutPath/dependent/ruleset.json')
+                .setNormalized(true)
     }
 }
 ```
@@ -220,6 +223,13 @@ If you have local references to add before calling the register,
 you can call the `addLocalReference("name", "/a/path")`,
 this will add a reference from a local file and inline it in the schema registry call.
 The addLocalReference calls can be chained.
+
+You can also provide `setNormalized(true)` to normalize the schema. Here is a link for more information: [Schema Normalization](https://docs.confluent.io/platform/current/schema-registry/fundamentals/serdes-develop/index.html#schema-normalization)
+
+For some schema registries like the one offered by `conluend-cloud`, you can add `metadata` and `rulesets` to a subject.
+Here are some links for more information: 
+* [Schema Registry Rules](https://docs.confluent.io/platform/7.5/schema-registry/fundamentals/data-contracts.html#rules)
+* [Schema Registry Metadata](https://docs.confluent.io/platform/7.5/schema-registry/fundamentals/data-contracts.html#metadata-properties)
 
 Notes:
 

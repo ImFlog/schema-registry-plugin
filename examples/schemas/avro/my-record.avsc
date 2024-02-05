@@ -1,0 +1,10 @@
+{
+  "namespace": "com.github.imflog",
+  "type": "record",
+  "name": "MyRecord",
+  "fields":[{
+    "name":"ssn",
+    "type":"string",
+    "confluent:tags": [ "PII" ]
+  }]
+}

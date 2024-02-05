@@ -20,6 +20,10 @@ schemaRegistry {
                 .addReference('company', 'company', -1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
+        subject("my-record","schemas/avro/my-record.avsc", "AVRO")
+                .setMetadata("examples/extra/metadata.json")
+                .setRuleSet("examples/extra/ruleSet.json")
+                .setNormalized(true)
     }
 
     config {
