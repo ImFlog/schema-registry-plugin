@@ -258,9 +258,14 @@ class ProtobufSchemaParser(
         }
     }
 
+    /**
+     * It's the [ImportsIterator] that includes the file where the imports are taken from, i.e. the root.
+     *
+     * It'll first return the root, and then the imports, looking somewhat like: `[root, *ImportsIterator(root)]`
+     */
     class DependencyHierarchyIterator(private val root: ProtoFile, schema: Schema) : Iterator<ProtoFile> {
         private var rootReturned = false
-        private val delegate = ImportsIterator(schema, root.imports + root.publicImports)
+        private val delegate = ImportsIterator(schema, root)
         override fun hasNext(): Boolean {
             return !rootReturned || delegate.hasNext()
         }
@@ -275,10 +280,20 @@ class ProtobufSchemaParser(
         }
     }
 
-    class ImportsIterator(private val schema: Schema, imports: Collection<String>) : Iterator<ProtoFile> {
+    /**
+     * Recursively resolves [ProtoFile] instances for the file, recursively.
+     *
+     * It will iterate over all the imports and public imports of the supplied file, as well as any transitive
+     * dependencies. It won't return the same import twice, even if they belong to different files in the hierarchy.
+     */
+    class ImportsIterator(private val schema: Schema, root: ProtoFile) : Iterator<ProtoFile> {
 
-        private val imports = ArrayDeque(imports)
-        private val processedImports = mutableSetOf<String>()
+        private val imports = ArrayDeque(root.imports + root.publicImports)
+        private val knownImports = mutableSetOf<String>()
+
+        init {
+            knownImports.addAll(imports)
+        }
 
         override fun hasNext(): Boolean {
             return imports.isNotEmpty()
@@ -295,7 +310,7 @@ class ProtobufSchemaParser(
         }
 
         private fun addAll(newImports: Iterable<String>) {
-            newImports.filter(processedImports::add).forEach(imports::addLast)
+            newImports.filter(knownImports::add).forEach(imports::addLast)
         }
     }
 }
