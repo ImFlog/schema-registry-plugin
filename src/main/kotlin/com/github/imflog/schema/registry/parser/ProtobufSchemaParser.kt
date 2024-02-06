@@ -21,7 +21,12 @@ class ProtobufSchemaParser(
         localReferences: List<LocalReference>
     ): String {
         val schema = schemaFor(rootDir)
-        val source = schema.protoFile(File(schemaPath).relativeTo(rootDir).path)!!
+        val source = schema.protoFile(File(schemaPath).relativeTo(rootDir).path)
+            ?: throw SchemaParsingException(
+                subject,
+                schemaType,
+                "File not found at schema path $schemaPath in ${rootDir.path}"
+            )
         val refs: Map<String, File> = parseRefs(localReferences)
 
         return LocalReferenceTransformer(subject, rootDir, schema, refs).transform(source)
@@ -249,7 +254,11 @@ class ProtobufSchemaParser(
                 // so it'll never match unless we strip the dot).
                 .removePrefix(".")
             val fullType = source.typesAndNestedTypes().find { it.type.toString().endsWith(withoutDot) }
-                ?: throw SchemaParsingException(subject, schemaType, "Type $type could not be found in ${source.location.path}")
+                ?: throw SchemaParsingException(
+                    subject,
+                    schemaType,
+                    "Type $type could not be found in ${source.location.path}"
+                )
             val relativePackageString = fullType.type.toString()
                 // Strip the package -> make it a "local" reference.
                 .removePrefix((source.packageName ?: "") + ".")
