@@ -1,6 +1,7 @@
 // [START declaration]
 syntax = "proto3";
 package proto;
+import "schemas/protobuf/com/example/location-address.proto";
 // [END declaration]
 
 // [START java_declaration]
@@ -20,4 +21,5 @@ message Company {
   string thumbnail_url = 3;
   CompanyTypeEnum company_type = 4;
   repeated string sectors = 5;
+  Address address = 6;
 }

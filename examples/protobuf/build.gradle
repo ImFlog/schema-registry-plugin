@@ -16,8 +16,9 @@ schemaRegistry {
 
     register {
         subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
+                .addLocalReference('schemas/protobuf/com/example/location-address.proto', 'schemas/protobuf/com/example/location-address.proto')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
-                .addReference('company', 'company', 1)
+                .addReference('company.proto', 'company', -1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
         subject('my-record','schemas/protobuf/com/example/my-record.proto','PROTOBUF')
@@ -43,8 +44,9 @@ schemaRegistry {
 
     compatibility {
         subject('company', 'schemas/protobuf/com/example/company_v2.proto', 'PROTOBUF')
+                .addLocalReference('schemas/protobuf/com/example/location-address.proto', 'schemas/protobuf/com/example/location-address.proto')
         subject('user', 'schemas/protobuf/com/example/user.proto', 'PROTOBUF')
-                .addReference('company', 'company', 1)
+                .addReference('company.proto', 'company', -1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
     }
