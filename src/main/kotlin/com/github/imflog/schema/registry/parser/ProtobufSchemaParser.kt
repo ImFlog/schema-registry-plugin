@@ -171,21 +171,19 @@ class ProtobufSchemaParser(
             return field.copy(elementType = newType.toString())
         }
 
-        @Suppress("UNUSED_PARAMETER")
         private fun standardizeNames(extensions: Extensions, file: ProtoFile): Extensions {
-            return extensions // Extension overwrite is not supported
+            log.warn("Extension overwrite is not supported, but one was found at ${file.location.path} for $subject")
+            return extensions
         }
 
-        @Suppress("UNUSED_PARAMETER")
         private fun standardizeNames(extend: Extend, file: ProtoFile): Extend {
-            // We're not supporting them for now, until we have a clear use case.
+            log.warn("Extend clause overwrite is not supported, but one was found at ${file.location.path} for $subject")
             return extend
         }
 
-        @Suppress("UNUSED_PARAMETER")
         private fun standardizeNames(service: Service, file: ProtoFile): Service {
-            // RPC rewriting is not supported. RPCs are not fully parsed by Wire, so getting them
-            // supported would be a lot of work.
+            // RPCs are not fully parsed by Wire, so getting them supported would be a lot of work.
+            log.warn("Service definition overwrite is not supported, but one was found at ${file.location.path} for $subject")
             return service
         }
 
