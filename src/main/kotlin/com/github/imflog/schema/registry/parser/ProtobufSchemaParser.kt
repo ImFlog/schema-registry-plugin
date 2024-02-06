@@ -125,6 +125,7 @@ class ProtobufSchemaParser(
             return when {
                 protoType.isScalar -> protoType
                 protoType.isMap -> {
+                    // keyType and valueType are always present for `isMap=true`, hence the non-null assertion operator.
                     val newKey = standardizeNames(protoType.keyType!!, file)
                     val newValue = standardizeNames(protoType.valueType!!, file)
                     ProtoType.get(
