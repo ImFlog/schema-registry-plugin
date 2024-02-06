@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.parser
 
 import com.github.imflog.schema.registry.LocalReference
+import com.github.imflog.schema.registry.SchemaParsingException
 import com.github.imflog.schema.registry.SchemaType
 import com.squareup.wire.schema.*
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
@@ -23,7 +24,7 @@ class ProtobufSchemaParser(
         val source = schema.protoFile(File(schemaPath).relativeTo(rootDir).path)!!
         val refs: Map<String, File> = parseRefs(localReferences)
 
-        return LocalReferenceTransformer(rootDir, schema, refs).transform(source)
+        return LocalReferenceTransformer(subject, rootDir, schema, refs).transform(source)
     }
 
     private fun schemaFor(schemaDirectory: File): Schema {
@@ -46,7 +47,8 @@ class ProtobufSchemaParser(
         }
     }
 
-    class LocalReferenceTransformer(
+    inner class LocalReferenceTransformer(
+        private val subject: String,
         private val rootDir: File,
         private val schema: Schema,
         private val refs: Map<String, File>
@@ -84,7 +86,11 @@ class ProtobufSchemaParser(
                 // follow through with the API.
                 val dependency = if (ref != null) {
                     schema.protoFile(ref.relativeTo(rootDir).path)
-                        ?: throw RuntimeException("Dependency not found for local reference $import at ${ref.absolutePath}")
+                        ?: throw SchemaParsingException(
+                            subject,
+                            schemaType,
+                            "Dependency not found for local reference $import at ${ref.absolutePath}"
+                        )
                 } else {
                     file
                 }
@@ -244,7 +250,7 @@ class ProtobufSchemaParser(
                 // so it'll never match unless we strip the dot).
                 .removePrefix(".")
             val fullType = source.typesAndNestedTypes().find { it.type.toString().endsWith(withoutDot) }
-                ?: throw RuntimeException("Type $type could not be found in ${source.location.path}")
+                ?: throw SchemaParsingException(subject, schemaType, "Type $type could not be found in ${source.location.path}")
             val relativePackageString = fullType.type.toString()
                 // Strip the package -> make it a "local" reference.
                 .removePrefix((source.packageName ?: "") + ".")
