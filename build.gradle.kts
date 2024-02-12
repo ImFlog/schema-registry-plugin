@@ -7,7 +7,6 @@ version = "1.13.1-SNAPSHOT"
 plugins {
     kotlin("jvm") version "1.9.22"
     id("com.gradle.plugin-publish") version "1.2.1"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 repositories {
@@ -20,13 +19,10 @@ repositories {
 val confluentVersion = "7.6.0"
 val avroVersion = "1.11.2"
 dependencies {
-    shadow(gradleApi())
-    implementation(platform("io.confluent:kafka-schema-registry-parent:$confluentVersion"))
-    implementation("io.confluent", "kafka-schema-registry") {
+    implementation(gradleApi())
+    implementation("io.confluent", "kafka-schema-registry", confluentVersion) {
         exclude("org.slf4j", "slf4j-log4j12")
     }
-    implementation("io.confluent", "kafka-json-schema-provider")
-    implementation("io.confluent", "kafka-protobuf-provider")
     // Our custom avro version. See https://github.com/ImFlog/avro
     implementation("com.github.ImFlog.avro", "avro", avroVersion)
 }
@@ -38,6 +34,10 @@ tasks.withType<KotlinCompile>().configureEach {
             "-Xself-upper-bound-inference"
         )
     }
+}
+
+java {
+    withSourcesJar()
 }
 
 // Unit tests
@@ -90,14 +90,6 @@ task<Test>("integrationTest") {
 }
 
 // Publish plugin
-tasks {
-    shadowJar {
-        archiveClassifier.set("")
-        from(sourceSets.main.get().output)
-        from(project.configurations.runtimeClasspath)
-    }
-}
-
 val registryPluginName = "com.github.imflog.kafka-schema-registry-gradle-plugin"
 @Suppress("UnstableApiUsage")
 gradlePlugin {

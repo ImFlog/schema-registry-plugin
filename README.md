@@ -9,10 +9,15 @@ for Gradle builds.
 
 ## Usage
 
-Follow the [gradle plugin portal instructions](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin).
+The plugin relies on two libraries that are not available on common repositories, you will have to add them to
+your `buildscript`:
 
-<details>
-<summary>For plugin version < 1.12.0</summary>
+* one developed by confluent for which you need to add the `https://packages.confluent.io/maven/`
+* one developed by myself to add new capability to Avro for which you need to add the `https://jitpack.io`
+
+<div class="tabbed-code-block">
+  <details open>
+    <summary>Groovy</summary>
 
 ```groovy
 buildscript {
@@ -30,7 +35,30 @@ plugins {
     id "com.github.imflog.kafka-schema-registry-gradle-plugin" version "X.X.X"
 }
 ```
-</details>
+
+  </details>
+  <details>
+    <summary>Kotlin</summary>
+
+```kotlin
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven("https://packages.confluent.io/maven/")
+        maven("https://jitpack.io")
+    }
+}
+plugins {
+    id("com.github.imflog.kafka-schema-registry-gradle-plugin") version "X.X.X"
+}
+```
+
+  </details>
+</div>
+
+Where "X.X.X" is the current version,
+see [gradle plugin portal](https://plugins.gradle.org/plugin/com.github.imflog.kafka-schema-registry-gradle-plugin) for
+details.
 
 ## Tasks
 
@@ -60,8 +88,9 @@ schemaRegistry {
   Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
 * `outputDirectory` is the directory where action result will be stored as files (only register for now).
   This is an optional parameter.
-* `pretty` is whether the downloaded Avro or json schemas should be formatted ("pretty-printed") or minified. 
+* `pretty` is whether the downloaded Avro or json schemas should be formatted ("pretty-printed") or minified.
   This is an optional parameter.
+
 ### Download schemas
 
 Like the name of the task imply, this task is responsible for retrieving schemas from a schema registry.
@@ -322,7 +351,7 @@ here: [org.apache.kafka.common.config.SslConfigs](https://github.com/confluentin
 
 ### Examples
 
-Detailed examples can be found in the [examples directory](examples).
+Detailed examples can be found in the [examples' directory](examples).
 
 ## Version compatibility
 
@@ -333,7 +362,7 @@ It was easier to introduce all the changes in one shot instead of supporting bot
 users:
 
 * plugin versions above 1.X.X support the confluent version > 5.5.X (Avro / Json / Protobuf)
-* older plugin versions should support anything below 5.4.X
+* plugin versions should support anything below 5.4.X
 
 ## Developing
 
@@ -372,7 +401,10 @@ buildscript {
         // The new repository to import, you may not want this in your final gradle configuration.
         mavenLocal()
         maven {
-            url "http://packages.confluent.io/maven/"
+            url "https://packages.confluent.io/maven/"
+        }
+        maven {
+          url = "https://jitpack.io"
         }
     }
     dependencies {
