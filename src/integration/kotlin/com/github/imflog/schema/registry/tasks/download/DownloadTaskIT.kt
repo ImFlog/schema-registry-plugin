@@ -487,7 +487,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `Should download schema that has been normalized`() {
         // Given
-        val subjectName = "test"
+        val subjectName = "test-proto"
 
         client.register(
             subjectName,
@@ -552,8 +552,6 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
           string name = 1;
           string description = 2;
         }""".trimIndent().trim())
-
-        println("test")
     }
 
     private class SchemaArgumentProvider : ArgumentsProvider {
