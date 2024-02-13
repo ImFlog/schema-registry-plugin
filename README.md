@@ -226,7 +226,7 @@ The addLocalReference calls can be chained.
 
 You can also provide `setNormalized(true)` to normalize the schema. Here is a link for more information: [Schema Normalization](https://docs.confluent.io/platform/current/schema-registry/fundamentals/serdes-develop/index.html#schema-normalization)
 
-For some schema registries like the one offered by `conluend-cloud`, you can add `metadata` and `rulesets` to a subject.
+For some schema registries like the one offered by `confluent-cloud`, you can add `metadata` and `rulesets` to a subject.
 Here are some links for more information: 
 * [Schema Registry Rules](https://docs.confluent.io/platform/7.5/schema-registry/fundamentals/data-contracts.html#rules)
 * [Schema Registry Metadata](https://docs.confluent.io/platform/7.5/schema-registry/fundamentals/data-contracts.html#metadata-properties)

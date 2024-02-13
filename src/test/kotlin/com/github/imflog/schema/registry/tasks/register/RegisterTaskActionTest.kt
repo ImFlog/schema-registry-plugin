@@ -337,7 +337,6 @@ class RegisterTaskActionTest {
         val subjects = listOf(
             Subject("test", "${schemaPath}testSubject.avsc", "AVRO")
                 .addLocalReference("B", "${schemaPath}testType.avsc")
-                .setRuleSet("${schemaPath}testRuleSet.json")
         )
 
         // When
