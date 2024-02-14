@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "MyRecord",
+  "type": "object",
+  "properties": {
+    "ssn": {
+      "type": "string",
+      "confluent:tags": [ "PII" ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,9 @@
+{
+  "tags": {
+    "**.ssn": [ "PII" ]
+  },
+  "properties": {
+    "owner": "Bob Jones",
+    "email": "bob@acme.com"
+  }
+}

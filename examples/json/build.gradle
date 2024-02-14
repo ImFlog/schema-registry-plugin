@@ -21,6 +21,10 @@ schemaRegistry {
             .addReference('company', 'company', -1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
+        subject('my-record','schemas/json/my-record.json','JSON')
+                .setMetadata('extra/metadata.json')
+                .setRuleSet('extra/ruleSet.json')
+                .setNormalized(true)
     }
 
     config {

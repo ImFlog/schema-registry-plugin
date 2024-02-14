@@ -3,15 +3,13 @@ package com.github.imflog.schema.registry.tasks.download
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.toSchemaType
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
+import io.confluent.kafka.schemaregistry.client.rest.entities.*
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
-import org.apache.avro.Schema
 import org.assertj.core.api.Assertions
 import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
@@ -107,7 +105,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         val type = AvroSchema.TYPE
         val schema =  AvroSchema(
-                """{
+            """{
                             "type": "record",
                             "name": "User",
                             "fields": [
@@ -354,10 +352,17 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                     "type": "record",
                     "name": "User",
                     "fields": [
-                        { "name": "name", "type": "string" }
+                        { "name": "name", "type": "string", "confluent:tags": [ "PII" ] }
                     ]
-                }"""
-            )
+                }""", emptyList(), emptyMap(),
+                Metadata(mapOf(Pair("**.ssn", setOf("PII"))), mapOf(Pair("owner", "Bob Jones"),
+                    Pair("email", "bob@acme.com")),null),
+                RuleSet(null, listOf(
+                    Rule("encryptPII",null,RuleKind.TRANSFORM,RuleMode.WRITEREAD,"ENCRYPT",
+                        setOf("PII"), mapOf(Pair("encrypt.kek.name", "kafka-csfle"),
+                            Pair("encrypt.kms.key.id", "projects/gcp-project/locations/europe-west6/keyRings/gcp-keyring/cryptoKeys/kafka-csfle"),
+                            Pair("encrypt.kms.type", "gcp-kms")),null,null,"ERROR,NONE",false))),
+                null,true),true
         )
 
         buildFile = folderRule.newFile("build.gradle")
@@ -477,6 +482,76 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$libMetadataFile")).exists()
 
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `Should download schema that has been normalized`() {
+        // Given
+        val subjectName = "test-proto"
+
+        client.register(
+            subjectName,
+            ProtobufSchema(
+                """
+                        syntax = "proto3";
+                        option java_outer_classname = "User";
+                        package foo.v1;
+                        option java_multiple_files = true;
+                        message TestMessage {
+                            string name = 1;
+                            string description = 2;
+                        }
+                    """, emptyList(), emptyMap(),null ,null),
+            true)
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    metadata = new MetadataExtension(true)
+                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/protobuf/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        val schemaFile = "$subjectName.proto"
+        val metadataFile = "$subjectName-metadata.json"
+        Assertions.assertThat(File(folderRule.root, "src/main/protobuf/test/$schemaFile")).exists()
+        Assertions.assertThat(File(folderRule.root, "src/main/protobuf/test/$metadataFile")).exists()
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        val resultFile = File(folderRule.root, "src/main/protobuf/test/$schemaFile")
+
+        Assertions.assertThat(resultFile.readText().trim()).isEqualTo(
+        """
+        syntax = "proto3";
+        package foo.v1;
+        
+        option java_multiple_files = true;
+        option java_outer_classname = "User";
+        
+        message TestMessage {
+          string name = 1;
+          string description = 2;
+        }""".trimIndent().trim())
     }
 
     private class SchemaArgumentProvider : ArgumentsProvider {

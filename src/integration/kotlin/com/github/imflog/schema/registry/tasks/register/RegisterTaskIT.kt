@@ -96,6 +96,81 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     }
 
     @ParameterizedTest
+    @ArgumentsSource(SchemaWithMetadataAndRuleSetArgumentProvider::class)
+    fun `RegisterSchemasTask should register normalised schemas with metadata and rulesets`(
+        type: SchemaType,
+        userSchema: String,
+        playerSchema: String,
+        metadata: String,
+        ruleSet: String,
+    ) {
+        folderRule.create()
+        val typeFolder = folderRule.newFolder(type.name)
+        val resultFolder = folderRule.newFolder("${type.name}/results")
+        val subjectName = "parameterized-${type.name}"
+        val extension = type.extension
+
+        val userFile = typeFolder.resolve("user.$extension")
+        userFile.writeText(userSchema)
+        val userSubject = "$subjectName-user-local"
+
+        val metadataFile = typeFolder.resolve("metadata.json")
+        metadataFile.writeText(metadata)
+
+        val ruleSetFile = typeFolder.resolve("ruleSet.json")
+        ruleSetFile.writeText(ruleSet)
+
+        val playerFile = typeFolder.resolve("player.$extension")
+        val playerPath = playerFile.relativeTo(folderRule.root).path
+        playerFile.writeText(playerSchema)
+        val playerSubject = "$subjectName-player-local"
+
+        // Small trick, for protobuf the name to import is not User but user.proto
+        val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
+                register {
+                    subject('$userSubject', '${userFile.absolutePath}', '${type.name}')
+                        .setMetadata('${metadataFile.absolutePath}')
+                        .setRuleSet('${ruleSetFile.absolutePath}')
+                        .setNormalized(true)
+                    subject('$playerSubject', '$playerPath', '${type.name}')
+                        .addReference('$referenceName', '$userSubject', 1)
+                        .setNormalized(true)
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("6.7.1")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(resultFolder.resolve("registered.csv")).exists()
+        Assertions.assertThat(resultFolder.resolve("registered.csv").readText())
+            .matches(
+                """subject, path, id
+                |$userSubject, ${userFile.absolutePath}, \d+
+                |$playerSubject, $playerPath, \d+
+                |""".trimMargin()
+            )
+    }
+
+    @ParameterizedTest
     @ArgumentsSource(LocalSchemaArgumentProvider::class)
     fun `Should register local references`(
         type: SchemaType,
@@ -273,6 +348,165 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                         User user = 2;
                     }
                     """,
+                )
+            )
+    }
+
+    private class SchemaWithMetadataAndRuleSetArgumentProvider : ArgumentsProvider {
+        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+            Stream.of(
+                Arguments.of(
+                    SchemaType.AVRO,
+                    """{
+                        "type": "record",
+                        "name": "User",
+                        "fields": [
+                            { "name": "name", "type": "string" }
+                        ]
+                    }""",
+                    """{
+                        "type": "record",
+                        "name": "Player",
+                        "fields": [
+                            { "name": "identifier", "type": "string", "confluent:tags": [ "PII" ] }, 
+                            { "name": "user", "type": "User" }
+                        ]
+                    }""",
+                    """{
+                      "domainRules": [
+                        {
+                          "name": "encryptPII",
+                          "kind": "TRANSFORM",
+                          "type": "ENCRYPT",
+                          "mode": "WRITEREAD",
+                          "tags": [
+                            "PII"
+                          ],
+                          "params": {
+                            "encrypt.kek.name": "kafka-csfle",
+                            "encrypt.kms.key.id": "projects/gcp-project/locations/europe-west6/keyRings/gcp-keyring/cryptoKeys/kafka-csfle",
+                            "encrypt.kms.type": "gcp-kms"
+                          },
+                          "onFailure": "ERROR,NONE"
+                        }
+                      ]
+                    }""",
+                    """{
+                      "tags": {
+                        "**.ssn": [ "PII" ]
+                      },
+                      "properties": {
+                        "owner": "Bob Jones",
+                        "email": "bob@acme.com"
+                      }
+                    }"""
+                ),
+                Arguments.of(
+                    SchemaType.JSON,
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "confluent:tags": [ "PII" ]
+                            }
+                        },
+                        "additionalProperties": false
+                    }""",
+                    """{
+                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "user": {"${"$"}ref": "User"}
+                        },
+                        "additionalProperties": false
+                    }""",
+                    """{
+                      "domainRules": [
+                        {
+                          "name": "encryptPII",
+                          "kind": "TRANSFORM",
+                          "type": "ENCRYPT",
+                          "mode": "WRITEREAD",
+                          "tags": [
+                            "PII"
+                          ],
+                          "params": {
+                            "encrypt.kek.name": "kafka-csfle",
+                            "encrypt.kms.key.id": "projects/gcp-project/locations/europe-west6/keyRings/gcp-keyring/cryptoKeys/kafka-csfle",
+                            "encrypt.kms.type": "gcp-kms"
+                          },
+                          "onFailure": "ERROR,NONE"
+                        }
+                      ]
+                    }""",
+                    """{
+                      "tags": {
+                        "**.ssn": [ "PII" ]
+                      },
+                      "properties": {
+                        "owner": "Bob Jones",
+                        "email": "bob@acme.com"
+                      }
+                    }"""
+                ),
+                Arguments.of(
+                    SchemaType.PROTOBUF,
+                    """
+                    syntax = "proto3";
+                    import "confluent/meta.proto";
+
+                    package com.github.imflog;
+                    
+                    option java_package = "com.github.proto.imflog.v1";
+                    option java_multiple_files = true;
+                    option java_outer_classname = "UserProto";
+                    
+                    message User {
+                        string name = 1 [(.confluent.field_meta).tags = "PII"];
+                    }
+                    """,
+                    """
+                    syntax = "proto3";
+                    package com.github.imflog;
+                    
+                    import "user.proto";
+                    
+                    message Player {
+                        string identifier = 1;
+                        User user = 2;
+                    }
+                    """,
+                    """{
+                      "domainRules": [
+                        {
+                          "name": "encryptPII",
+                          "kind": "TRANSFORM",
+                          "type": "ENCRYPT",
+                          "mode": "WRITEREAD",
+                          "tags": [
+                            "PII"
+                          ],
+                          "params": {
+                            "encrypt.kek.name": "kafka-csfle",
+                            "encrypt.kms.key.id": "projects/gcp-project/locations/europe-west6/keyRings/gcp-keyring/cryptoKeys/kafka-csfle",
+                            "encrypt.kms.type": "gcp-kms"
+                          },
+                          "onFailure": "ERROR,NONE"
+                        }
+                      ]
+                    }""",
+                    """{
+                      "tags": {
+                        "**.ssn": [ "PII" ]
+                      },
+                      "properties": {
+                        "owner": "Bob Jones",
+                        "email": "bob@acme.com"
+                      }
+                    }"""
                 )
             )
     }

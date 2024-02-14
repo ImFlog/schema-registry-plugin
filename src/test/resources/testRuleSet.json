@@ -1,0 +1,19 @@
+{
+  "domainRules": [
+    {
+      "name": "encryptPII",
+      "kind": "TRANSFORM",
+      "type": "ENCRYPT",
+      "mode": "WRITEREAD",
+      "tags": [
+        "PII"
+      ],
+      "params": {
+        "encrypt.kek.name": "kafka-csfle",
+        "encrypt.kms.key.id": "projects/gcp-project/locations/europe-west6/keyRings/gcp-keyring/cryptoKeys/kafka-csfle",
+        "encrypt.kms.type": "gcp-kms"
+      },
+      "onFailure": "ERROR,NONE"
+    }
+  ]
+}

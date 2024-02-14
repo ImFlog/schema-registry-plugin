@@ -3,8 +3,11 @@ package com.github.imflog.schema.registry.parser
 import com.github.imflog.schema.registry.LocalReference
 import com.github.imflog.schema.registry.SchemaParsingException
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.Subject
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.Metadata
+import io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import java.io.File
 
@@ -29,19 +32,16 @@ abstract class SchemaParser(
 
     @Throws(SchemaParsingException::class, NotImplementedError::class)
     fun parseSchemaFromFile(
-        subject: String,
-        schemaPath: String,
-        remoteReferences: List<SchemaReference>,
-        localReferences: List<LocalReference>,
+        subject: Subject
     ): ParsedSchema {
-        val schemaContent = rootDir.resolve(schemaPath).readText()
-        val parsedLocalSchemaString = if (localReferences.isNotEmpty()) {
-            resolveLocalReferences(subject, schemaContent, localReferences)
+        val schemaContent = rootDir.resolve(subject.file).readText()
+        val parsedLocalSchemaString = if (subject.localReferences.isNotEmpty()) {
+            resolveLocalReferences(subject.inputSubject, schemaContent, subject.localReferences)
         } else schemaContent
 
         return client
-            .parseSchema(schemaType.registryType, parsedLocalSchemaString, remoteReferences)
-            .orElseThrow { SchemaParsingException(subject, schemaType) }
+            .parseSchema(schemaType.registryType, parsedLocalSchemaString, subject.references, subject.metadata,subject.ruleSet)
+            .orElseThrow { SchemaParsingException(subject.inputSubject, schemaType) }
     }
 
     abstract fun resolveLocalReferences(

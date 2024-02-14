@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.tasks.compatibility
 
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
@@ -231,20 +232,17 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         val addressFile = folderRule.newFile(addressPath)
         addressFile.writeText(addressSchema)
         val addressReferenceName = "Address"
-        val addressSubject = "$subjectName-address-mixed"
-        client.register(addressSubject, parser.parseSchemaFromFile(addressSubject, addressFile.path, listOf(), listOf()))
+        val addressSubject = Subject("$subjectName-address-mixed",addressFile.path, type.toString())
+        client.register(addressSubject.inputSubject, parser.parseSchemaFromFile(addressSubject))
 
         val playerPath = "$type/player.$extension"
-        val playerSubject = "$subjectName-player-mixed"
         val playerFile = folderRule.newFile(playerPath)
         playerFile.writeText(playerSchema)
+        val playerSubject = Subject("$subjectName-player-mixed",playerFile.path, type.toString())
         client.register(
-            playerSubject,
+            playerSubject.inputSubject,
             parser.parseSchemaFromFile(
-                playerSubject,
-                playerFile.path,
-                listOf(),
-                listOf()
+                playerSubject
             )
         )
 
@@ -262,9 +260,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 compatibility {
-                    subject('$playerSubject', '${playerFile.absolutePath}', '${type.name}')
+                    subject('${playerSubject.inputSubject}', '${playerFile.absolutePath}', '${type.name}')
                         .addLocalReference('$userSubject', '$userPath')
-                        .addReference('$addressReferenceName', '$addressSubject', 1)
+                        .addReference('$addressReferenceName', '${addressSubject.inputSubject}', 1)
                 }
             }
         """

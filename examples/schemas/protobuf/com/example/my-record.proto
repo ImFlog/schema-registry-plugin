@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+import "confluent/meta.proto";
+
+
+message MyRecord {
+  string ssn = 1 [
+    (confluent.field_meta).tags = "PII"
+  ];
+}

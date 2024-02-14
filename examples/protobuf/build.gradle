@@ -20,6 +20,10 @@ schemaRegistry {
                 .addReference('company', 'company', 1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
+        subject('my-record','schemas/protobuf/com/example/my-record.proto','PROTOBUF')
+            .setMetadata('extra/metadata.json')
+            .setRuleSet('extra/ruleSet.json')
+            .setNormalized(true)
     }
 
     config {

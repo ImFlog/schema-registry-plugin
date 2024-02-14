@@ -20,6 +20,10 @@ schemaRegistry {
                 .addReference('company', 'company', -1)
         subject(locationAddressSubject)
         subject(locationCoordSubject)
+        subject("my-record","schemas/avro/my-record.avsc", "AVRO")
+                .setMetadata("extra/metadata.json")
+                .setRuleSet("extra/ruleSet.json")
+                .setNormalized(true)
     }
 
     config {
@@ -33,6 +37,7 @@ schemaRegistry {
         metadata = new MetadataExtension(true)
 //        subject('company', 'schemas/avro/downloaded') // is retrieved via reference from the user subject
         subject('user', 'schemas/avro/downloaded', true)
+        subject('my-record', 'schemas/avro/downloaded', true)
         subjectPattern('location.*', 'schemas/avro/downloaded/location')
     }
 

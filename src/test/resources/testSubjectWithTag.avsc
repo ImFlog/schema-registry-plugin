@@ -4,12 +4,9 @@
   "namespace": "com.mycompany",
   "fields": [
     {
-      "name": "nested",
-      "type": "B"
-    },
-    {
-      "name": "nested1",
-      "type": "B"
+      "name": "ssn",
+      "type": "string",
+      "confluent:tags": [ "PII" ]
     }
   ]
 }

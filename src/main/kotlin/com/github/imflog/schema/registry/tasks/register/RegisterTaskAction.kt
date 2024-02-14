@@ -7,6 +7,8 @@ import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
 import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.client.rest.entities.Metadata
+import io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import org.gradle.api.logging.Logging
 import java.io.File
@@ -27,10 +29,10 @@ class RegisterTaskAction(
     fun run(): Int {
         var errorCount = 0
         writeOutputFileHeader()
-        subjects.forEach { (subject, path, type, references: List<SchemaReference>, localReferences) ->
+        subjects.forEach { subject ->
             try {
-                val schemaId = registerSchema(subject, path, type.toSchemaType(), references, localReferences)
-                writeRegisteredSchemaOutput(subject, path, schemaId)
+                val schemaId = registerSchema(subject)
+                writeRegisteredSchemaOutput(subject.inputSubject,subject.file, schemaId)
             } catch (e: Exception) {
                 logger.error("Could not register schema for '$subject'", e)
                 errorCount++
@@ -40,18 +42,14 @@ class RegisterTaskAction(
     }
 
     private fun registerSchema(
-        subject: String,
-        path: String,
-        type: SchemaType,
-        references: List<SchemaReference>,
-        localReferences: List<LocalReference>
+        subject: Subject
     ): Int {
         val parsedSchema = SchemaParser
-            .provide(type, client, rootDir)
-            .parseSchemaFromFile(subject, path, references, localReferences)
-        logger.infoIfNotQuiet("Registering $subject (from $path)")
-        val schemaId = client.register(subject, parsedSchema)
-        logger.infoIfNotQuiet("$subject (from $path) has been registered with id $schemaId")
+            .provide(subject.type.toSchemaType(), client, rootDir)
+            .parseSchemaFromFile(subject)
+        logger.infoIfNotQuiet("Registering $subject (from $subject.file)")
+        val schemaId = client.register(subject.inputSubject, parsedSchema, subject.normalize)
+        logger.infoIfNotQuiet("$subject (from $subject.file) has been registered with id $schemaId")
         return schemaId
     }
 
