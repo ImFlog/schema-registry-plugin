@@ -539,20 +539,33 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(File(folderRule.root, "src/main/protobuf/test/$metadataFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
         val resultFile = File(folderRule.root, "src/main/protobuf/test/$schemaFile")
-
-        Assertions.assertThat(resultFile.readText().trim()).isEqualTo(
-        """
-        syntax = "proto3";
-        package foo.v1;
-        
-        option java_multiple_files = true;
-        option java_outer_classname = "User";
-        
-        message TestMessage {
-          string name = 1;
-          string description = 2;
-        }""".trimIndent().trim())
-    }
+        if("6.2.6" != System.getenv("KAFKA_VERSION")){
+            Assertions.assertThat(resultFile.readText().trim()).isEqualTo(
+            """
+            syntax = "proto3";
+            package foo.v1;
+            
+            option java_multiple_files = true;
+            option java_outer_classname = "User";
+            
+            message TestMessage {
+              string name = 1;
+              string description = 2;
+            }""".trimIndent().trim())
+        }else{
+            Assertions.assertThat(resultFile.readText().trim()).isEqualTo(
+            """
+            syntax = "proto3";
+            package foo.v1;
+            
+            option java_outer_classname = "User";
+            option java_multiple_files = true;
+            
+            message TestMessage {
+              string name = 1;
+              string description = 2;
+            }""".trimIndent().trim())
+        }}
 
     private class SchemaArgumentProvider : ArgumentsProvider {
         override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
