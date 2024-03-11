@@ -1,18 +1,17 @@
 buildscript {
     repositories {
         gradlePluginPortal()
-        mavenLocal()
         maven("https://packages.confluent.io/maven/")
         maven("https://jitpack.io")
     }
 
     dependencies {
-        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:2.0.0-SNAPSHOT")
+        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:2.0.0")
     }
 }
 
 plugins {
-    id("com.avast.gradle.docker-compose") version "0.16.8" apply true
+    id("com.avast.gradle.docker-compose") version "0.17.6" apply true
 }
 
 subprojects {
