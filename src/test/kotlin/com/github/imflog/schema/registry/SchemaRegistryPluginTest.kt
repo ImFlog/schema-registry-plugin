@@ -56,7 +56,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("6.7.1")
+                .withGradleVersion("8.6")
                 .withProjectDir(folderRule.toFile())
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
@@ -93,7 +93,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("6.7.1")
+                .withGradleVersion("8.6")
                 .withProjectDir(folderRule.toFile())
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
@@ -129,7 +129,7 @@ class SchemaRegistryPluginTest {
 
         try {
             GradleRunner.create()
-                .withGradleVersion("6.7.1")
+                .withGradleVersion("8.6")
                 .withProjectDir(folderRule.toFile())
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()

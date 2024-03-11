@@ -68,7 +68,7 @@ class SslIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
@@ -106,7 +106,7 @@ class SslIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()

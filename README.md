@@ -9,6 +9,8 @@ for Gradle builds.
 
 ## Usage
 
+This plugin requires Gradle 8.0 or later (kotlin minimum version required by downstream libraries).
+
 The plugin relies on two libraries that are not available on common repositories, you will have to add them to
 your `buildscript`:
 

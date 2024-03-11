@@ -76,7 +76,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -191,7 +191,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -225,7 +225,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -272,7 +272,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -325,7 +325,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -387,7 +387,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -463,7 +463,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
@@ -525,7 +525,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("6.7.1")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
