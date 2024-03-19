@@ -48,11 +48,12 @@ class AvroSchemaParserTest {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, folderRule.toFile())
         val aLocalReference = givenALocalReference()
+        val aUserSchemaFile = givenASchemaFile()
 
         // When
         val resolvedSchema = parser.resolveLocalReferences(
             USER_REFERENCE_NAME,
-            USER_SCHEMA,
+            aUserSchemaFile.path,
             listOf(aLocalReference)
         )
 
@@ -64,6 +65,12 @@ class AvroSchemaParserTest {
         val addressLocalFile = folderRule.resolve("Address.avsc").toFile()
         addressLocalFile.writeText(ADDRESS_SCHEMA)
         return LocalReference(ADDRESS_REFERENCE_NAME, addressLocalFile.path)
+    }
+
+    private fun givenASchemaFile(): File {
+        val userLocalFile = folderRule.resolve("User.avsc").toFile()
+        userLocalFile.writeText(USER_SCHEMA)
+        return userLocalFile
     }
 
     private fun localSchemaShouldBeAppended(resolvedSchema: String) {
@@ -83,11 +90,11 @@ class AvroSchemaParserTest {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
         val reference = LocalReference("B", "${testFilesPath}testType.avsc")
-        val schema = File("${testFilesPath}testSubject.avsc").readText()
+        val schema = File("${testFilesPath}testSubject.avsc")
         // When
         val resolvedSchema = parser.resolveLocalReferences(
             "test",
-            schema,
+            schema.path,
             listOf(reference)
         )
         // Then
@@ -123,14 +130,12 @@ class AvroSchemaParserTest {
     fun `Should resolve complex nested array example correctly`() {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
-
         val schema = File("${testFilesPath}ParentArraySubject.avsc")
-            .readText()
 
         assertDoesNotThrow {
             parser.resolveLocalReferences(
                 "test",
-                schema,
+                schema.path,
                 listOf(
                     LocalReference("NestedArrayType", "${testFilesPath}NestedArrayType.avsc"),
                     LocalReference("NestedNestedType", "${testFilesPath}NestedNestedType.avsc"),
@@ -143,14 +148,12 @@ class AvroSchemaParserTest {
     fun `Should resolve complex nested record example correctly`() {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
-
         val schema = File("${testFilesPath}ParentSubject.avsc")
-            .readText()
 
         assertDoesNotThrow {
             parser.resolveLocalReferences(
                 "test",
-                schema,
+                schema.path,
                 listOf(
                     LocalReference("NestedType", "${testFilesPath}NestedType.avsc"),
                     LocalReference("NestedNestedType", "${testFilesPath}NestedNestedType.avsc"),
@@ -165,11 +168,10 @@ class AvroSchemaParserTest {
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
         val reference = LocalReference("B", "${testFilesPath}testType.avsc")
         val schema = File("${testFilesPath}testSubjectWithArrayReference.avsc")
-            .readText()
         // When
         val resolvedSchema = parser.resolveLocalReferences(
             "test",
-            schema,
+            schema.path,
             listOf(reference)
         )
         // Then
@@ -212,11 +214,10 @@ class AvroSchemaParserTest {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
         val schema = File("${testFilesPath}testSubject.avsc")
-            .readText()
         // When
         val resolvedSchema = parser.resolveLocalReferences(
             "test",
-            schema,
+            schema.path,
             listOf()
         )
         // Then

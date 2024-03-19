@@ -34,10 +34,9 @@ abstract class SchemaParser(
     fun parseSchemaFromFile(
         subject: Subject
     ): ParsedSchema {
-        val schemaContent = rootDir.resolve(subject.file).readText()
         val parsedLocalSchemaString = if (subject.localReferences.isNotEmpty()) {
-            resolveLocalReferences(subject.inputSubject, schemaContent, subject.localReferences)
-        } else schemaContent
+            resolveLocalReferences(subject.inputSubject, subject.file, subject.localReferences)
+        } else loadContent(subject.file)
 
         return client
             .parseSchema(schemaType.registryType, parsedLocalSchemaString, subject.references, subject.metadata,subject.ruleSet)
@@ -46,8 +45,12 @@ abstract class SchemaParser(
 
     abstract fun resolveLocalReferences(
         subject: String,
-        schemaContent: String,
+        schemaPath: String,
         localReferences: List<LocalReference>
     ): String
+
+    protected fun loadContent(schemaPath: String): String {
+        return rootDir.resolve(schemaPath).readText()
+    }
 }
 

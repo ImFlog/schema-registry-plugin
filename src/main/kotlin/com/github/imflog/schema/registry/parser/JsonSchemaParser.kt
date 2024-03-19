@@ -19,10 +19,10 @@ class JsonSchemaParser(
 
     override fun resolveLocalReferences(
         subject: String,
-        schemaContent: String,
+        schemaPath: String,
         localReferences: List<LocalReference>
     ): String {
-        val jsonObj = JSONObject(schemaContent)
+        val jsonObj = JSONObject(loadContent(schemaPath))
         val localDefNodes = JSONObject()
         localReferences.forEach { reference ->
             localDefNodes.put(

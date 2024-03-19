@@ -215,7 +215,21 @@ For more concrete example, take a look at the [json example](examples/json/build
 
 #### Protobuf
 
-:warning: Local references is not yet supported for PROTOBUF.
+> :warning: Local references support for Protobuf is in Beta.
+
+Mixing local and remote references is perfectly fine for Protobuf.
+
+The plugin will resolve Protobuf local references recursively, unpacking nested imports. 
+
+Protobuf will always resolve imports relative to the supplied import roots, which in our case is the project's root 
+directory, meaning both names and paths of each local reference would normally match. At the moment, it's 
+**not possible** to resolve a local reference against a file outside the root directory. 
+
+It has only been tested with `proto3`, though it should work for simple scenarios in `proto2` as well.
+
+Things that are not yet supported:
+- Extensions
+- RPC definitions
 
 ### Register schemas
 

@@ -18,6 +18,7 @@ repositories {
 // Dependencies versions
 val confluentVersion = "7.6.0"
 val avroVersion = "1.11.2"
+val wireVersion = "4.9.1"
 dependencies {
     implementation(gradleApi())
     implementation("io.confluent", "kafka-schema-registry", confluentVersion) {
@@ -25,6 +26,8 @@ dependencies {
     }
     // Our custom avro version. See https://github.com/ImFlog/avro
     implementation("com.github.ImFlog.avro", "avro", avroVersion)
+    // Protobuf schema parser
+    implementation("com.squareup.wire", "wire-schema", wireVersion)
 }
 
 tasks.withType<KotlinCompile>().configureEach {
