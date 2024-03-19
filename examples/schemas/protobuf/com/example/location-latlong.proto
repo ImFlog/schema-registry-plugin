@@ -1,6 +1,7 @@
 // [START declaration]
 syntax = "proto3";
 package proto;
+import "company";
 // [END declaration]
 
 // [START java_declaration]

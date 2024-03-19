@@ -1,7 +1,7 @@
 // [START declaration]
 syntax = "proto3";
 package proto;
-import "schemas/protobuf/com/example/company.proto";
+import "company";
 // [END declaration]
 
 // [START java_declaration]
