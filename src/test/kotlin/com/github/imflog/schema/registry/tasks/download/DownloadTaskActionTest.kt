@@ -69,10 +69,10 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc").exists()).isTrue
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc").readText())
             .containsIgnoringCase("foo")
     }
@@ -280,7 +280,7 @@ class DownloadTaskActionTest {
 
         // Then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
             .containsIgnoringCase("test")
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
@@ -323,8 +323,8 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test-metadata.json")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test-metadata.json").exists()).isTrue
         // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/test-metadata.json").readText())
             .containsIgnoringCase("\"id\" :")
@@ -371,8 +371,8 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
-        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json").exists()).isTrue
         // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
         Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json").readText())
             .containsIgnoringCase("\"id\" :")
@@ -441,8 +441,8 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
-        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json").exists()).isTrue
         // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
         Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test-metadata.json").readText())
             .containsIgnoringCase("\"id\" :")
@@ -451,8 +451,8 @@ class DownloadTaskActionTest {
             .containsIgnoringCase("\"schema\" :")
             .containsIgnoringCase("\"references\" :")
 
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc")).isNotNull
-        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test_lib-metadata.json")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc").exists()).isTrue
+        Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test_lib-metadata.json").exists()).isTrue
         // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
         Assertions.assertThat(File(folderRoot, "src/main/avro/metadata/test_lib-metadata.json").readText())
             .containsIgnoringCase("\"id\" :")
@@ -520,10 +520,89 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
 
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc").exists()).isTrue
         // Would be cleaner to use a JSON assertion library but I am not sure this is really required for now
+    }
+
+    @Test
+    fun `Should download referenced schemas recursively`() {
+        // given
+        val testSubject = "test"
+        val testLibSubject = "test_lib"
+        val testLibDependencySubject = "test_lib_dependency"
+        val outputDir = "src/main/avro/external"
+
+        val registryClient = MockSchemaRegistryClient(listOf(AvroSchemaProvider()))
+
+        registryClient.register(
+            testLibDependencySubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test_lib_dependency",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        registryClient.register(
+            testLibSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test_lib",
+                    "fields": [
+                        { "name": "name", "type": "string" },
+                        { "name": "dependency", "type": "test_lib_dependency" }
+                    ]
+                }""",
+                listOf(
+                    SchemaReference("dependency", testLibDependencySubject, 1)
+                )
+            ).get()
+        )
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "test_lib" }
+                    ]
+                }""",
+                listOf(
+                    SchemaReference("name", testLibSubject, 1)
+                )
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(DownloadSubject(testSubject, outputDir, downloadReferences = true)),
+            MetadataExtension()
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(0)
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
+
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib.avsc").exists()).isTrue
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test_lib_dependency.avsc").exists()).isTrue
     }
 
     @Test
@@ -580,9 +659,10 @@ class DownloadTaskActionTest {
 
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc")).isNotNull
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isTrue
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").readText())
-            .isEqualTo("""
+            .isEqualTo(
+                """
                 {
                   "type" : "record",
                   "name" : "test",
@@ -591,10 +671,12 @@ class DownloadTaskActionTest {
                     "type" : "string"
                   } ]
                 }
-            """.trimIndent() + "\n") // trimIndent removes trailing newline
-        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc")).isNotNull
+            """.trimIndent() + "\n"
+            ) // trimIndent removes trailing newline
+        Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc").exists()).isTrue
         Assertions.assertThat(File(folderRoot, "src/main/avro/external/foo.avsc").readText())
-            .isEqualTo("""
+            .isEqualTo(
+                """
                 {
                   "type" : "record",
                   "name" : "foo",
@@ -603,6 +685,7 @@ class DownloadTaskActionTest {
                     "type" : "string"
                   } ]
                 }
-            """.trimIndent() + "\n") // trimIndent removes trailing newline
+            """.trimIndent() + "\n"
+            ) // trimIndent removes trailing newline
     }
 }

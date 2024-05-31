@@ -55,20 +55,9 @@ class DownloadTaskAction(
                 writeSchemaFile(downloadSubject, metadata, pretty, outputDir)
 
                 if (downloadSubject.downloadReferences) {
-                    metadata.references.forEach {
-                        logger.infoIfNotQuiet("Start downloading referenced schema ${it.subject}/${it.version} for ${downloadSubject.subject}")
-                        val referenceSubject = DownloadSubject(
-                            subject = it.subject,
-                            outputPath = downloadSubject.outputPath,
-                            version = it.version
-                        )
-                        val referenceMetadata = getSchemaMetadata(referenceSubject)
-
-                        if (metadataConfiguration.enabled) {
-                            writeSchemaMetadata(referenceSubject, referenceMetadata, metadataDirectory)
-                        }
-                        writeSchemaFile(referenceSubject, referenceMetadata, pretty, outputDir)
-                    }
+                    logger.infoIfNotQuiet("Start downloading referenced schema for ${downloadSubject.subject}")
+                    downloadReference(metadata, downloadSubject.outputPath, metadataDirectory, outputDir)
+                    logger.infoIfNotQuiet("Referenced schema downloaded for ${downloadSubject.subject}")
                 }
             } catch (e: Exception) {
                 logger.error("Error during schema retrieval for ${downloadSubject.subject}", e)
@@ -113,7 +102,12 @@ class DownloadTaskAction(
         if (subject.version == null) client.getLatestSchemaMetadata(subject.subject)
         else client.getSchemaMetadata(subject.subject, subject.version)
 
-    private fun writeSchemaFile(downloadSubject: DownloadSubject, schemaMetadata: SchemaMetadata, pretty: Boolean, outputDir: File) {
+    private fun writeSchemaFile(
+        downloadSubject: DownloadSubject,
+        schemaMetadata: SchemaMetadata,
+        pretty: Boolean,
+        outputDir: File
+    ) {
         val parsedSchema = parseSchemaWithRemoteReferences(
             downloadSubject.subject,
             schemaMetadata.schemaType.toSchemaType(),
@@ -130,7 +124,8 @@ class DownloadTaskAction(
     }
 
     private fun getSchemaString(parsedSchema: ParsedSchema, pretty: Boolean): String {
-        return if (pretty && isSupportedPrettyType(parsedSchema)) objectMapper.readTree(parsedSchema.toString()).toPrettyString() else parsedSchema.toString()
+        return if (pretty && isSupportedPrettyType(parsedSchema)) objectMapper.readTree(parsedSchema.toString())
+            .toPrettyString() else parsedSchema.toString()
     }
 
     /**
@@ -161,4 +156,27 @@ class DownloadTaskAction(
     ): ParsedSchema = client
         .parseSchema(schemaType.registryType, schemaContent, references)
         .orElseThrow { SchemaParsingException(subject, schemaType) }
+
+    private fun downloadReference(
+        metadata: SchemaMetadata,
+        outputPath: String,
+        metadataDirectory: File,
+        outputDir: File
+    ) {
+        metadata.references.forEach {
+            logger.infoIfNotQuiet("Start downloading referenced schema ${it.subject}/${it.version}")
+            val referenceSubject = DownloadSubject(
+                subject = it.subject,
+                outputPath = outputPath,
+                version = it.version
+            )
+            val referenceMetadata = getSchemaMetadata(referenceSubject)
+            downloadReference(referenceMetadata, outputPath, metadataDirectory, outputDir)
+
+            if (metadataConfiguration.enabled) {
+                writeSchemaMetadata(referenceSubject, referenceMetadata, metadataDirectory)
+            }
+            writeSchemaFile(referenceSubject, referenceMetadata, pretty, outputDir)
+        }
+    }
 }
