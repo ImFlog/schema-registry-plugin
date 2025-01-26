@@ -23,7 +23,8 @@ class DownloadTaskAction(
     private val rootDir: File,
     private val subjects: List<DownloadSubject>,
     private val metadataConfiguration: MetadataExtension,
-    private val pretty: Boolean = false
+    private val pretty: Boolean = false,
+    private val failFast: Boolean = false,
 ) {
 
     private val logger = Logging.getLogger(DownloadTaskAction::class.java)
@@ -62,6 +63,9 @@ class DownloadTaskAction(
             } catch (e: Exception) {
                 logger.error("Error during schema retrieval for ${downloadSubject.subject}", e)
                 errorCount++
+                if (failFast) {
+                    throw e
+                }
             }
         }
         return errorCount

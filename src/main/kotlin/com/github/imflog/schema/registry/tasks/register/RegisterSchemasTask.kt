@@ -40,13 +40,17 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     @Optional
     val outputDirectory: Property<String> = objects.property(String::class.java)
 
+    @Input
+    val failFast: Property<Boolean> = objects.property(Boolean::class.java)
+
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
             project.rootDir,
             subjects.get(),
-            outputDirectory.orNull
+            outputDirectory.orNull,
+            failFast.getOrElse(false)
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not registered, see logs for details", Throwable())

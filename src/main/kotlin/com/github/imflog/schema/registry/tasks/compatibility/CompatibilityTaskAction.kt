@@ -7,6 +7,7 @@ import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException
 import io.confluent.kafka.schemaregistry.rest.exceptions.Errors
+import org.gradle.api.GradleScriptException
 import org.gradle.api.logging.Logging
 import java.io.File
 import java.io.IOException
@@ -15,6 +16,7 @@ class CompatibilityTaskAction(
     private val client: SchemaRegistryClient,
     private val rootDir: File,
     private val subjects: List<Subject>,
+    private val failFast: Boolean = false,
 ) {
 
     private val logger = Logging.getLogger(CompatibilityTaskAction::class.java)
@@ -35,11 +37,18 @@ class CompatibilityTaskAction(
                         }
                     } catch (_: Exception) {
                         // If we use a confluent version < 6.1.0 this call may fail as the API response would be a boolean instead of the expected String list.
+                    } finally {
+                        if (failFast) {
+                            throw GradleScriptException("Schema ${subject.file} is not compatible with subject: ${subject.inputSubject}", Throwable())
+                        }
                     }
                 }
                 isCompatible
             } catch (ioEx: IOException) {
                 logger.error("", ioEx)
+                if (failFast) {
+                    throw ioEx
+                }
                 false
             } catch (restEx: RestClientException) {
                 // If the subject does not exist, it is compatible
@@ -47,6 +56,9 @@ class CompatibilityTaskAction(
                     true
                 } else {
                     logger.error("", restEx)
+                    if (failFast) {
+                        throw restEx
+                    }
                     false
                 }
             }

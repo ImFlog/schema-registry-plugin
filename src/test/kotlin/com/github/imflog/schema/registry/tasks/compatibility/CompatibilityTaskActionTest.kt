@@ -423,4 +423,127 @@ class CompatibilityTaskActionTest {
         // then
         Assertions.assertThat(errorCount).isEqualTo(0)
     }
+
+    @Test
+    fun `Should fail fast`() {
+        // given
+        val registryClient = MockSchemaRegistryClient()
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        // Compatible
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "newField", "type": "string", "default": ""}
+             ]
+            }
+        """
+        )
+        // Incompatible
+        File(folderRule.toFile(), "src/main/avro/external/test_incompat.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "boolean" }
+             ]
+            }
+        """
+        )
+        val subjects = arrayListOf(
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+            Subject("test", "src/main/avro/external/test_incompat.avsc", "AVRO"),
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+        )
+
+        // when
+        try {
+            CompatibilityTaskAction(
+                registryClient,
+                folderRule.toFile(),
+                subjects,
+                failFast = true,
+            ).run()
+            Assertions.fail("Should have thrown an exception")
+        } catch (e: Exception) {
+            // then
+            // Nothing to do
+        }
+    }
+
+    @Test
+    fun `Should fail silently on error`() {
+        // given
+        val registryClient = MockSchemaRegistryClient()
+        registryClient.register(
+            "test",
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        // Compatible
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "newField", "type": "string", "default": ""}
+             ]
+            }
+        """
+        )
+        // Incompatible
+        File(folderRule.toFile(), "src/main/avro/external/test_incompat.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "boolean" }
+             ]
+            }
+        """
+        )
+        val subjects = arrayListOf(
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+            Subject("test", "src/main/avro/external/test_incompat.avsc", "AVRO"),
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+        )
+
+        // when
+        val errorCount = CompatibilityTaskAction(
+            registryClient,
+            folderRule.toFile(),
+            subjects,
+            // failFast = false,
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(1)
+    }
 }

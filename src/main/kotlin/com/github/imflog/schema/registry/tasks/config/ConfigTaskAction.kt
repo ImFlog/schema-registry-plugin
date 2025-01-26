@@ -7,7 +7,8 @@ import org.gradle.api.logging.Logging
 
 class ConfigTaskAction(
     private val client: SchemaRegistryClient,
-    private val subjects: List<ConfigSubject>
+    private val subjects: List<ConfigSubject>,
+    private val failFast: Boolean = false,
 ) {
 
     private val logger = Logging.getLogger(ConfigTaskAction::class.java)
@@ -18,14 +19,20 @@ class ConfigTaskAction(
             logger.debug("$subject: setting config $config")
             try {
                 if (CompatibilityLevel.forName(config) == null) {
-                    logger.error("'$config' is not a valid schema registry compatibility")
+                    logger.error("'$config' is not a valid schema registry compatibility level")
                     errorCount++
+                    if (failFast) {
+                        throw IllegalArgumentException("'$config' is not a valid schema registry compatibility level")
+                    }
                 } else {
                     client.updateCompatibility(subject, config)
                 }
             } catch (ex: RestClientException) {
                 logger.error("Error during compatibility update for $subject", ex)
                 errorCount++
+                if (failFast) {
+                    throw ex
+                }
             }
         }
         return errorCount

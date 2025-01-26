@@ -688,4 +688,78 @@ class DownloadTaskActionTest {
             """.trimIndent() + "\n"
             ) // trimIndent removes trailing newline
     }
+
+    @Test
+    fun `Should fail silently`() {
+        // given
+        val testSubject = "test"
+        val fooSubject = "foo"
+        val outputDir = "src/main/avro/external"
+
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        val errorCount = DownloadTaskAction(
+            registryClient,
+            folderRoot,
+            arrayListOf(
+                DownloadSubject(testSubject, outputDir),
+                DownloadSubject(fooSubject, outputDir)
+            ),
+            MetadataExtension()
+        ).run()
+
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(2)
+    }
+
+    @Test
+    fun `Should fail fast`() {
+        // given
+        val testSubject = "test"
+        val fooSubject = "foo"
+        val outputDir = "src/main/avro/external"
+
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+
+        registryClient.register(
+            testSubject,
+            registryClient.parseSchema(
+                AvroSchema.TYPE,
+                """{
+                    "type": "record",
+                    "name": "test",
+                    "fields": [
+                        { "name": "name", "type": "string" }
+                    ]
+                }""",
+                listOf()
+            ).get()
+        )
+
+        folderRule.resolve("src/main/avro/external").toFile().mkdir()
+        val folderRoot = folderRule.toFile()
+
+        // when
+        try {
+            DownloadTaskAction(
+                registryClient,
+                folderRoot,
+                arrayListOf(
+                    DownloadSubject(fooSubject, outputDir), // Not registered
+                    DownloadSubject(testSubject, outputDir),
+                ),
+                MetadataExtension(),
+                failFast = true,
+            ).run()
+            Assertions.fail("Should have thrown an exception")
+        } catch (ex: Exception) {
+            Assertions.assertThat(File(folderRoot, "src/main/avro/external/test.avsc").exists()).isFalse // Nothing downloaded
+        }
+    }
 }
