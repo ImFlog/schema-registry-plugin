@@ -41,6 +41,9 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     @Input
     val pretty: Property<Boolean> = objects.property(Boolean::class.java)
 
+    @Input
+    val failFast: Property<Boolean> = objects.property(Boolean::class.java)
+
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
@@ -48,7 +51,8 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
             project.rootDir,
             subjects.get(),
             metadataConfig.get(),
-            pretty.get()
+            pretty.get(),
+            failFast.getOrElse(false),
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not downloaded, see logs for details", Throwable())

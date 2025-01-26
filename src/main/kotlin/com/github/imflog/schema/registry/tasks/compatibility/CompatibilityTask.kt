@@ -35,12 +35,16 @@ open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : Defau
     @Input
     val subjects: ListProperty<Subject> = objects.listProperty(Subject::class.java)
 
+    @Input
+    val failFast: Property<Boolean> = objects.property(Boolean::class.java)
+
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
             project.rootDir,
-            subjects.get()
+            subjects.get(),
+            failFast.getOrElse(false)
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount schemas not compatible, see logs for details.", Throwable())

@@ -33,7 +33,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             )
             val downloadExtension = (globalExtension as ExtensionAware).extensions.create(
                 DownloadSubjectExtension.EXTENSION_NAME,
-                DownloadSubjectExtension::class.java
+                DownloadSubjectExtension::class.java,
             )
             val registerExtension = (globalExtension as ExtensionAware).extensions.create(
                 RegisterSubjectExtension.EXTENSION_NAME,
@@ -60,6 +60,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     downloadTask.subjects.set(downloadExtension.subjects)
                     downloadTask.metadataConfig.set(downloadExtension.metadata)
                     downloadTask.pretty.set(globalExtension.pretty)
+                    downloadTask.failFast.set(globalExtension.failFast)
                 }
 
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
@@ -69,6 +70,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     registerSchemasTask.ssl.set(sslExtension.configs)
                     registerSchemasTask.subjects.set(registerExtension.subjects)
                     registerSchemasTask.outputDirectory.set(globalExtension.outputDirectory)
+                    registerSchemasTask.failFast.set(globalExtension.failFast)
                 }
 
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
@@ -77,6 +79,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     compatibilityTask.basicAuth.set(basicAuthExtension.basicAuth)
                     compatibilityTask.ssl.set(sslExtension.configs)
                     compatibilityTask.subjects.set(compatibilityExtension.subjects)
+                    compatibilityTask.failFast.set(globalExtension.failFast)
                 }
 
             tasks.register(ConfigTask.TASK_NAME, ConfigTask::class.java)
@@ -85,6 +88,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     configTask.basicAuth.set(basicAuthExtension.basicAuth)
                     configTask.ssl.set(sslExtension.configs)
                     configTask.subjects.set(configExtension.subjects)
+                    configTask.failFast.set(globalExtension.failFast)
                 }
         }
     }

@@ -393,7 +393,7 @@ class RegisterTaskActionTest {
             registryClient,
             folderRule.root.toFile(),
             subjects,
-            null
+            null,
         ).run()
 
         // Then
@@ -438,16 +438,112 @@ class RegisterTaskActionTest {
 
         // then
         Assertions.assertThat(registryClient.getLatestSchemaMetadata("test").schema)
-            .isEqualTo("syntax = \"proto3\";\n" +
-                    "package foo.v1;\n" +
-                    "\n" +
-                    "option java_multiple_files = true;\n" +
-                    "option java_outer_classname = \"FooProto\";\n" +
-                    "option java_package = \"com.example.proto.v1\";\n" +
-                    "\n" +
-                    "message Foo {\n" +
-                    "  string bar = 1;\n" +
-                    "}\n"
+            .isEqualTo(
+                "syntax = \"proto3\";\n" +
+                        "package foo.v1;\n" +
+                        "\n" +
+                        "option java_multiple_files = true;\n" +
+                        "option java_outer_classname = \"FooProto\";\n" +
+                        "option java_package = \"com.example.proto.v1\";\n" +
+                        "\n" +
+                        "message Foo {\n" +
+                        "  string bar = 1;\n" +
+                        "}\n"
+            )
+    }
+
+    @Test
+    fun `Should fail fast on error`() {
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" }
+             ]
+            }
+        """.trimIndent()
         )
+        File(folderRule.toFile(), "src/main/avro/external/test2.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test2",
+             "fields": [
+                {"name": "name", "type": "string" }
+             ]
+            }
+        """.trimIndent()
+        )
+
+        val subjects = listOf(
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+            Subject("test", "src/main/avro/external/unknown.avsc", "AVRO"),
+            Subject("test2", "src/main/avro/external/test2.avsc", "AVRO"),
+        )
+
+        // when
+        try {
+            RegisterTaskAction(
+                registryClient,
+                folderRule.toFile(),
+                subjects,
+                null,
+                true
+            ).run()
+            Assertions.fail("Should have thrown an exception")
+        } catch (e: Exception) {
+            // then
+            Assertions.assertThat(registryClient.allSubjects).hasSize(1)
+            // Doesn't register the second schema
+            Assertions.assertThat(registryClient.allSubjects).containsOnly("test")
+        }
+    }
+
+    @Test
+    fun `Should fail fail silently by default on error`() {
+        val registryClient =
+            MockSchemaRegistryClient(listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()))
+        File(folderRule.toFile(), "src/main/avro/external/test.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test",
+             "fields": [
+                {"name": "name", "type": "string" }
+             ]
+            }
+        """.trimIndent()
+        )
+        File(folderRule.toFile(), "src/main/avro/external/test2.avsc").writeText(
+            """
+            {"type": "record",
+             "name": "test2",
+             "fields": [
+                {"name": "name", "type": "string" }
+             ]
+            }
+        """.trimIndent()
+        )
+
+        val subjects = listOf(
+            Subject("test", "src/main/avro/external/test.avsc", "AVRO"),
+            Subject("test", "src/main/avro/external/unknown.avsc", "AVRO"),
+            Subject("test2", "src/main/avro/external/test2.avsc", "AVRO"),
+        )
+
+        // when
+        val errorCount = RegisterTaskAction(
+            registryClient,
+            folderRule.toFile(),
+            subjects,
+            null,
+            // failfast = false
+        ).run()
+        // then
+        Assertions.assertThat(errorCount).isEqualTo(1)
+        Assertions.assertThat(registryClient.allSubjects).hasSize(2)
+        // Doesn't register the second schema
+        Assertions.assertThat(registryClient.allSubjects).containsAll(listOf("test", "test2"))
     }
 }

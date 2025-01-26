@@ -34,11 +34,15 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask(
     @Input
     val subjects: ListProperty<ConfigSubject> = objects.listProperty(ConfigSubject::class.java)
 
+    @Input
+    val failFast: Property<Boolean> = objects.property(Boolean::class.java)
+
     @TaskAction
     fun configureSubjects() {
         val errorCount = ConfigTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
-            subjects.get()
+            subjects.get(),
+            failFast.getOrElse(false)
         ).run()
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount subject configuration not set, see logs for details", Throwable())
