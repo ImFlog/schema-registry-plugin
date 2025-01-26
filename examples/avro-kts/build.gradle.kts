@@ -9,6 +9,7 @@ schemaRegistry {
     quiet.set(false)
     outputDirectory.set("schemas/avro/results/")
     pretty.set(true)
+    failFast.set(true)
 
     register {
         subject("company", "schemas/avro/company.avsc", "AVRO")

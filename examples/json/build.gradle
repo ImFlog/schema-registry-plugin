@@ -13,6 +13,7 @@ schemaRegistry {
     quiet = false
     outputDirectory = 'schemas/json/results/'
     pretty = true
+    failFast = true
 
     register {
         subject('company', 'schemas/json/company.json', 'JSON')

@@ -13,6 +13,7 @@ schemaRegistry {
     quiet = false
     outputDirectory = 'schemas/protobuf/results/'
     pretty = true
+    failFast = true
 
     register {
         subject('company', 'schemas/protobuf/com/example/company.proto', 'PROTOBUF')
