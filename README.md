@@ -11,11 +11,8 @@ for Gradle builds.
 
 This plugin requires Gradle 8.0 or later (kotlin minimum version required by downstream libraries).
 
-The plugin relies on two libraries that are not available on common repositories, you will have to add them to
-your `buildscript`:
-
-* one developed by confluent for which you need to add the `https://packages.confluent.io/maven/`
-* one developed by myself to add new capability to Avro for which you need to add the `https://jitpack.io`
+The plugin relies on a confluent library that is not available on common repositories, you will have to add it to
+your `buildscript`.
 
 <div class="tabbed-code-block">
   <details open>
@@ -27,9 +24,6 @@ buildscript {
         gradlePluginPortal()
         maven {
             url = "https://packages.confluent.io/maven/"
-        }
-        maven {
-            url = "https://jitpack.io"
         }
     }
 }
@@ -47,7 +41,6 @@ buildscript {
     repositories {
         gradlePluginPortal()
         maven("https://packages.confluent.io/maven/")
-        maven("https://jitpack.io")
     }
 }
 plugins {
