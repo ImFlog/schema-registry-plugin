@@ -12,7 +12,6 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://packages.confluent.io/maven/")
-    maven("https://jitpack.io")
 }
 
 // Dependencies versions
@@ -24,8 +23,6 @@ dependencies {
     implementation("io.confluent", "kafka-schema-registry", confluentVersion) {
         exclude("org.slf4j", "slf4j-log4j12")
     }
-    // Our custom avro version. See https://github.com/ImFlog/avro
-    implementation("com.github.ImFlog.avro", "avro", avroVersion)
     // Protobuf schema parser
     implementation("com.squareup.wire", "wire-schema", wireVersion)
 }
