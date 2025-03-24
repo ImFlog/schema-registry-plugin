@@ -28,10 +28,7 @@ open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : Defau
     val url: Property<String> = objects.property(String::class.java)
 
     @Input
-    val basicAuth: Property<String> = objects.property(String::class.java)
-
-    @Input
-    val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+    val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
     val subjects: ListProperty<Subject> = objects.listProperty(Subject::class.java)
@@ -45,7 +42,7 @@ open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : Defau
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
-            RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get()),
             rootDir.get(),
             subjects.get(),
             failFast.getOrElse(false)

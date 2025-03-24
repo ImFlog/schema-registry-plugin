@@ -41,45 +41,6 @@ class SslIT : KafkaTestContainersUtils() {
     }
 
     @Test
-    fun `Should fail with incorrect ssl property`() {
-        buildFile = folderRule.newFile("build.gradle")
-        buildFile.writeText(
-            """
-            plugins {
-                id 'java'
-                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
-            }
-            schemaRegistry {
-                url = '$schemaRegistrySslEndpoint'
-                ssl {
-                    configs = [
-                        "ssl.truststore.location": "${folderRule.root.absolutePath}/registry.truststore.jks",
-                        "ssl.truststore.password": "registry",
-                        "ssl.keystore.location": "${folderRule.root.absolutePath}/registry.keystore.jks",
-                        "ssl.keystore.password": "registry",
-                        "foo": "bar"
-                    ]
-                }
-                config {
-                    subject('testSubject1', 'FULL_TRANSITIVE')
-                }
-            }
-            """
-        )
-
-        val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
-            .withArguments(ConfigTask.TASK_NAME)
-            .withPluginClasspath()
-            .withDebug(true)
-            .buildAndFail()
-        Assertions
-            .assertThat(result?.task(":configSubjectsTask")?.outcome)
-            .isEqualTo(TaskOutcome.FAILED)
-    }
-
-    @Test
     fun `Should use SSL correctly`() {
         buildFile = folderRule.newFile("build.gradle")
         buildFile.writeText(
@@ -90,14 +51,12 @@ class SslIT : KafkaTestContainersUtils() {
             }
             schemaRegistry {
                 url = '$schemaRegistrySslEndpoint'
-                ssl {
-                    configs = [
-                        "ssl.truststore.location": "${folderRule.root.absolutePath}/registry.truststore.jks",
-                        "ssl.truststore.password": "registry",
-                        "ssl.keystore.location": "${folderRule.root.absolutePath}/registry.keystore.jks",
-                        "ssl.keystore.password": "registry"
-                    ]
-                }
+                clientConfig = [
+                    "schema.registry.ssl.truststore.location": "${folderRule.root.absolutePath}/registry.truststore.jks",
+                    "schema.registry.ssl.truststore.password": "registry",
+                    "schema.registry.ssl.keystore.location": "${folderRule.root.absolutePath}/registry.keystore.jks",
+                    "schema.registry.ssl.keystore.password": "registry"
+                ]
                 config {
                     subject('testSubject1', 'FULL_TRANSITIVE')
                 }
