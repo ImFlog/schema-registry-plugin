@@ -1,0 +1,15 @@
+{
+  "name": "Shared",
+  "type": "record",
+  "namespace": "com.example.common",
+  "fields": [
+    {
+      "name": "foobar",
+      "type": "string"
+    },
+    {
+      "name": "bar",
+      "type": "string"
+    }
+  ]
+}

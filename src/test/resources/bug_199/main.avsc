@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "MainRecord",
+  "namespace": "com.example",
+  "fields": [
+    {
+      "name": "example",
+      "type": [
+        "TypeA",
+        "TypeB"
+      ]
+    }
+  ]
+}

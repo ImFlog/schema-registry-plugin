@@ -198,7 +198,7 @@ class AvroSchemaParserTest {
                 "name":"nested1",
                 "type":{
                     "type":"array",
-                    "items":"B"
+                    "items":"com.mycompany.B"
                 }
             }
           ]
@@ -240,6 +240,90 @@ class AvroSchemaParserTest {
           ]
         }"""
 
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should fix #199`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val mainRecord = File("${testFilesPath}/bug_199/main.avsc")
+
+        // When
+        val resolved = parser.resolveLocalReferences(
+            "test",
+            mainRecord.path,
+            listOf(
+                LocalReference("TypeA", "${testFilesPath}/bug_199/a.avsc"),
+                LocalReference("TypeB", "${testFilesPath}/bug_199/b.avsc"),
+                LocalReference("Shared", "${testFilesPath}/bug_199/shared.avsc")
+            )
+        )
+
+        // Then
+        val expected = """
+        {
+          "type": "record",
+          "name": "MainRecord",
+          "namespace": "com.example",
+          "fields": [
+            {
+              "name": "example",
+              "type": [
+                {
+                  "name": "TypeA",
+                  "type": "record",
+                  "fields": [
+                    {
+                       "name": "fooA",
+                       "type": "string"
+                    },
+                    {
+                      "name": "shared",
+                      "type": [
+                        "null",
+                        {
+                          "name": "Shared",
+                          "type": "record",
+                          "namespace": "com.example.common",
+                          "fields": [
+                            {
+                              "name": "foobar",
+                              "type": "string"
+                            },
+                            {
+                              "name": "bar",
+                              "type": "string"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                   
+                  ]
+                },
+                {
+                  "name": "TypeB",
+                  "type": "record",
+                  "fields": [
+                    {
+                       "name": "fooB",
+                       "type": "string"
+                    },
+                    {
+                      "name": "shared",
+                      "type": ["null", "com.example.common.Shared"]
+                    }
+                   
+                  ]
+                }
+              ]
+            }
+          ]
+        }    
+        """
         Assertions.assertThat(resolved).isEqualTo(
             JSONObject(expected).toString()
         )
