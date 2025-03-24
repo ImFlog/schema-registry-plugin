@@ -3,6 +3,7 @@ package com.github.imflog.schema.registry.parser
 import com.github.imflog.schema.registry.LocalReference
 import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 
@@ -26,13 +27,14 @@ class AvroSchemaParser(
             reference.name to JSONObject(reference.content(rootDir))
         }
 
-        // Resolve local references in references (as local references can have references)
-        val referenceSchemasWithLocalRef = referenceSchemas.mapValues { (_, schema) ->
-            resolveReferences(schema, referenceSchemas, null, mutableSetOf())
-        }
-
         // Set to track which references have already been inserted
         val insertedReferences = mutableSetOf<String>()
+
+        // Resolve local references in references (as local references can have references)
+        val referenceSchemasWithLocalRef = referenceSchemas.mapValues { (_, schema) ->
+            resolveReferences(schema, referenceSchemas, null, insertedReferences)
+        }
+
         // Process the schema recursively
         val resolvedSchema = resolveReferences(mainSchema, referenceSchemasWithLocalRef, null, insertedReferences)
         return resolvedSchema.toString()
@@ -93,7 +95,7 @@ class AvroSchemaParser(
             }
 
             // If it's a union type, process each type in the union
-            is org.json.JSONArray -> {
+            is JSONArray -> {
                 val types = schema.getJSONArray("type")
                 for (i in 0 until types.length()) {
                     when (val type = types.get(i)) {
@@ -135,7 +137,7 @@ class AvroSchemaParser(
                 insertedReferences.add(referenceKey)
                 return referencedSchema
             }
-            return referenceKey
+            return items
         }
         return items
     }
