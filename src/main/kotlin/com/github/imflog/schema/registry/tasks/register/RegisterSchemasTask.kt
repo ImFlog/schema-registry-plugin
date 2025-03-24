@@ -11,6 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 import javax.inject.Inject
 
 abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
@@ -43,11 +44,14 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     @Input
     val failFast: Property<Boolean> = objects.property(Boolean::class.java)
 
+    @Input
+    val rootDir: Property<File> = objects.property(File::class.java)
+
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
-            project.rootDir,
+            rootDir.get(),
             subjects.get(),
             outputDirectory.orNull,
             failFast.getOrElse(false)

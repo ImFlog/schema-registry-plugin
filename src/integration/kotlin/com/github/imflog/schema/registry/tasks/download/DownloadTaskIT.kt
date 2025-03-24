@@ -140,7 +140,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("7.6")
+            .withGradleVersion("8.6")
             .withProjectDir(folderRule.root)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()

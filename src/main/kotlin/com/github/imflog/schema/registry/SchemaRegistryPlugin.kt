@@ -61,6 +61,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     downloadTask.metadataConfig.set(downloadExtension.metadata)
                     downloadTask.pretty.set(globalExtension.pretty)
                     downloadTask.failFast.set(globalExtension.failFast)
+                    downloadTask.rootDir.set(project.rootDir)
                 }
 
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
@@ -71,6 +72,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     registerSchemasTask.subjects.set(registerExtension.subjects)
                     registerSchemasTask.outputDirectory.set(globalExtension.outputDirectory)
                     registerSchemasTask.failFast.set(globalExtension.failFast)
+                    registerSchemasTask.rootDir.set(project.rootDir)
                 }
 
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
@@ -80,6 +82,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                     compatibilityTask.ssl.set(sslExtension.configs)
                     compatibilityTask.subjects.set(compatibilityExtension.subjects)
                     compatibilityTask.failFast.set(globalExtension.failFast)
+                    compatibilityTask.rootDir.set(project.rootDir)
                 }
 
             tasks.register(ConfigTask.TASK_NAME, ConfigTask::class.java)
