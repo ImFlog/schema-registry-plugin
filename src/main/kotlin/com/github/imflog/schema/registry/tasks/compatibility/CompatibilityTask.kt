@@ -10,6 +10,7 @@ import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 import javax.inject.Inject
 
 
@@ -38,11 +39,14 @@ open class CompatibilityTask @Inject constructor(objects: ObjectFactory) : Defau
     @Input
     val failFast: Property<Boolean> = objects.property(Boolean::class.java)
 
+    @Input
+    val rootDir: Property<File> = objects.property(File::class.java)
+
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
             RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
-            project.rootDir,
+            rootDir.get(),
             subjects.get(),
             failFast.getOrElse(false)
         ).run()
