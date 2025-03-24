@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:2.3.1")
+        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:2.3.2-SNAPSHOT")
     }
 }
 
