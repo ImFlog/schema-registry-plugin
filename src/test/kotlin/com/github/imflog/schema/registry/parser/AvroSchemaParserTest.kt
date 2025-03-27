@@ -328,4 +328,77 @@ class AvroSchemaParserTest {
             JSONObject(expected).toString()
         )
     }
+
+    @Test
+    fun `Should fix #204`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val mainRecord = File("${testFilesPath}/bug_204/mainMap.avsc")
+
+        // When
+        val resolved = parser.resolveLocalReferences(
+            "test",
+            mainRecord.path,
+            listOf(
+                LocalReference("Map", "${testFilesPath}/bug_204/map.avsc")
+            )
+        )
+
+        // Then
+        val expected = """
+        {
+          "type": "record",
+          "name": "MainMap",
+          "namespace": "com.example",
+          "fields": [
+            {
+              "name": "foo",
+              "type": "string"
+            },
+            {
+               "default": {},
+               "name": "types",
+               "type": {
+                 "type": "map",
+                 "values": {
+                     "name": "Map",
+                     "type": "record",
+                     "fields": [
+                        {
+                          "name": "foo",
+                          "type": ["null", "string"],
+                          "default": null
+                        },
+                        {
+                          "name": "bar",
+                          "type": ["null", 
+                              {
+                                 "type": "array",
+                                 "items": "string"
+                              }
+                          ],
+                          "default": null
+                        },
+                        {
+                           "name": "foobar",
+                           "type": [
+                              "null",
+                              {
+                                  "type": "map",
+                                  "values": "string"
+                              }
+                           ],
+                           "default": null
+                        }
+                     ]
+                   }
+                 }
+            }
+          ]
+        }    
+        """
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
+        )
+    }
 }

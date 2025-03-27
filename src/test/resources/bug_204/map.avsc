@@ -1,0 +1,37 @@
+{
+  "type": "record",
+  "name": "Map",
+  "namespace": "com.example",
+  "fields": [
+    {
+      "name": "foo",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null,
+    },
+    {
+      "name": "bar",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": "string"
+        }
+      ],
+      "default": null,
+    },
+    {
+      "name": "foobar",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ],
+      "default": null,
+    }
+  ]
+}

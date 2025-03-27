@@ -86,6 +86,34 @@ class AvroSchemaParser(
                     schema.put("items", ref)
                 }
             }
+            // If it's a map type, process its values
+            "map" -> {
+                if (schema.opt("values") is JSONObject) {
+                    schema.put(
+                        "values",
+                        resolveReferences(
+                            schema.getJSONObject("values"),
+                            references,
+                            currentNamespace,
+                            insertedReferences
+                        )
+                    )
+                }
+                if (schema.opt("values") is JSONArray) {
+                    val values = schema.getJSONArray("values")
+                    for (i in 0 until values.length()) {
+                        values.put(
+                            i,
+                            resolveReferences(values.getJSONObject(i), references, currentNamespace, insertedReferences)
+                        )
+                    }
+                }
+                if (schema.opt("values") is String) {
+                    val values = schema.getString("values")
+                    val ref = handleStringRef(values, currentNamespace, references, insertedReferences)
+                    schema.put("values", ref)
+                }
+            }
             // If it's a JsonObject type, process its properties
             is JSONObject -> {
                 schema.put(
