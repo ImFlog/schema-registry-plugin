@@ -34,10 +34,7 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     val subjects: ListProperty<DownloadSubject> = objects.listProperty(DownloadSubject::class.java)
 
     @Input
-    val basicAuth: Property<String> = objects.property(String::class.java)
-
-    @Input
-    val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+    val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
     val pretty: Property<Boolean> = objects.property(Boolean::class.java)
@@ -51,7 +48,7 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
-            RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get()),
             rootDir.get(),
             subjects.get(),
             metadataConfig.get(),

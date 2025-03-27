@@ -74,6 +74,11 @@ schemaRegistry {
     quiet = true
     outputDirectory = "/home/kafka/results"
     pretty = true
+    clientConfig = [
+        "basic.auth.credentials.source": "USER_INFO",
+        "basic.auth.user.info": "user:password",
+        // ...
+    ]
 }
 ```
 
@@ -85,6 +90,9 @@ schemaRegistry {
   This is an optional parameter.
 * `pretty` is whether the downloaded Avro or json schemas should be formatted ("pretty-printed") or minified.
   This is an optional parameter.
+* `clientConfig` is a map of configuration properties for the Schema Registry client.
+  This is an optional parameter. All values from the [Confluent Schema Registry client configuration](https://docs.confluent.io/platform/current/schema-registry/sr-client-configs.html)
+  are supported.
 
 ### Download schemas
 
@@ -335,38 +343,36 @@ you can configure the plugin to access it securely.
 
 ### Basic authentication
 
-An extension allow you to specify the basic authentication like so:
+Basic authentication is handled like any other client configuration. But here is an example of how to configure it.
 
 ```groovy
 schemaRegistry {
     url = 'http://registry-url:8081'
-    credentials {
-        username = '$USERNAME'
-        password = '$PASSWORD'
-    }
+    clientConfig = [
+        "basic.auth.credentials.source": "USER_INFO",
+        "basic.auth.user.info": "user:password"
+    ]
 }
 ```
 
 ### Encryption (SSL)
 
-If you want to encrypt the traffic in transit (using SSL), use the following extension:
+If you want to encrypt the traffic in transit (using SSL), use the following client configuration:
 
 ```groovy
 schemaRegistry {
     url = 'https://registry-url:8081'
-    ssl {
-        configs = [
-                "ssl.truststore.location": "/path/to/registry.truststore.jks",
-                "ssl.truststore.password": "truststorePassword",
-                "ssl.keystore.location"  : "/path/to/registry.keystore.jks",
-                "ssl.keystore.password"  : "keystorePassword"
-        ]
-    }
+    clientConfig = [
+      "schema.registry.ssl.truststore.location": "/path/to/registry.truststore.jks",
+      "schema.registry.ssl.truststore.password": "truststorePassword",
+      "schema.registry.ssl.keystore.location"  : "/path/to/registry.keystore.jks",
+      "schema.registry.ssl.keystore.password"  : "keystorePassword"
+    ]
 }
 ```
 
-Valid key values are listed
-here: [org.apache.kafka.common.config.SslConfigs](https://github.com/confluentinc/kafka/blob/master/clients/src/main/java/org/apache/kafka/common/config/SslConfigs.java)
+Valid key values are listed here: [org.apache.kafka.common.config.SslConfigs](https://github.com/confluentinc/kafka/blob/master/clients/src/main/java/org/apache/kafka/common/config/SslConfigs.java)
+:warning: Make sure to prefix the key with `schema.registry.` else the SSL configuration will not be applied (implementation in the schema registry client).
 
 ### Examples
 

@@ -26,10 +26,7 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask(
     val url: Property<String> = objects.property(String::class.java)
 
     @Input
-    val basicAuth: Property<String> = objects.property(String::class.java)
-
-    @Input
-    val ssl: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+    val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
     val subjects: ListProperty<ConfigSubject> = objects.listProperty(ConfigSubject::class.java)
@@ -40,7 +37,7 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask(
     @TaskAction
     fun configureSubjects() {
         val errorCount = ConfigTaskAction(
-            RegistryClientWrapper.client(url.get(), basicAuth.get(), ssl.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get()),
             subjects.get(),
             failFast.getOrElse(false)
         ).run()
