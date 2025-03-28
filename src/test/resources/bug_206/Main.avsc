@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "MainRecord",
+  "namespace": "com.example",
+  "fields": [
+    {
+      "name": "foo",
+      "type": "com.example.one.NestedOne"
+    },
+    {
+      "name": "bar",
+      "type": "com.common.example.NestedTwo"
+    }
+  ]
+}
