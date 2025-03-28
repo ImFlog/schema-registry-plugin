@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "NestedOne",
+  "namespace": "com.example.one",
+  "fields": [
+    {
+      "name": "foo",
+      "type": "string"
+    },
+    {
+      "name": "bar",
+      "type": "com.common.example.Common"
+    }
+  ]
+}
