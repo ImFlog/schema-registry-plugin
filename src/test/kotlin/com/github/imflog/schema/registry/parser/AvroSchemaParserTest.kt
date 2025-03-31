@@ -401,4 +401,89 @@ class AvroSchemaParserTest {
             JSONObject(expected).toString()
         )
     }
+
+    @Test
+    fun `Should fix #206`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val mainRecord = File("${testFilesPath}/bug_206/Main.avsc")
+
+        // When
+        val resolved = parser.resolveLocalReferences(
+            "test",
+            mainRecord.path,
+            listOf(
+                LocalReference("Common", "${testFilesPath}/bug_206/Common.avsc"),
+                LocalReference("NestedOne", "${testFilesPath}/bug_206/NestedOne.avsc"),
+                LocalReference("NestedTwo", "${testFilesPath}/bug_206/NestedTwo.avsc")
+
+            )
+        )
+
+        val expected = """
+        {
+            "name": "MainRecord",
+            "namespace": "com.example",
+            "type": "record",
+            "fields":
+            [
+                {
+                    "name": "foo",
+                    "type":
+                    {
+                        "name": "NestedOne",
+                        "namespace": "com.example.one",
+                        "type": "record",
+                        "fields":
+                        [
+                            {
+                                "name": "foo",
+                                "type": "string"
+                            },
+                            {
+                                "name": "bar",
+                                "type":
+                                {
+                                    "name": "Common",
+                                    "namespace": "com.common.example",
+                                    "type": "record",
+                                    "fields":
+                                    [
+                                        {
+                                            "name": "foo",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "bar",
+                    "type":
+                    {
+                        "name": "NestedTwo",
+                        "namespace": "com.common.example",
+                        "type": "record",
+                        "fields":
+                        [
+                            {
+                                "name": "foo",
+                                "type": "string"
+                            },
+                            {
+                                "name": "bar",
+                                "type": "com.common.example.Common"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }    
+        """
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
+        )
+    }
 }

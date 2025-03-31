@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "Common",
+  "namespace": "com.common.example",
+  "fields": [
+    {
+      "name": "foo",
+      "type": "string"
+    }
+  ]
+}

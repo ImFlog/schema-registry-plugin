@@ -30,13 +30,8 @@ class AvroSchemaParser(
         // Set to track which references have already been inserted
         val insertedReferences = mutableSetOf<String>()
 
-        // Resolve local references in references (as local references can have references)
-        val referenceSchemasWithLocalRef = referenceSchemas.mapValues { (_, schema) ->
-            resolveReferences(schema, referenceSchemas, null, insertedReferences)
-        }
-
         // Process the schema recursively
-        val resolvedSchema = resolveReferences(mainSchema, referenceSchemasWithLocalRef, null, insertedReferences)
+        val resolvedSchema = resolveReferences(mainSchema, referenceSchemas, null, insertedReferences)
         return resolvedSchema.toString()
     }
 
@@ -152,12 +147,15 @@ class AvroSchemaParser(
         items: String,
         currentNamespace: String?,
         references: Map<String, JSONObject>,
-        insertedReferences: MutableSet<String>,
+        insertedReferences: MutableSet<String>
     ): Any {
         val referenceKey = findReferenceKey(items, currentNamespace, references)
         if (referenceKey != null) {
-            val referencedSchema = references[referenceKey]!!
+            // deep copy the reference and resolve local references in references (as local references can have references)
+            val refSchemaCopy = JSONObject(references[referenceKey]!!.toString())
+            val referencedSchema = resolveReferences(refSchemaCopy, references, null, insertedReferences)
             val refNamespace = referencedSchema.optString("namespace")
+
             if (refNamespace == currentNamespace) {
                 referencedSchema.remove("namespace")
             }
