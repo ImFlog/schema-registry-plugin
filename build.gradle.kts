@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "com.github.imflog"
-version = "2.3.2"
+version = "2.3.3-SNAPSHOT"
 
 
 plugins {
