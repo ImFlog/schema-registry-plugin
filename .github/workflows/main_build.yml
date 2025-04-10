@@ -24,7 +24,9 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "8"
-          cache: "gradle"
+      - uses: "gradle/actions/setup-gradle@v4"
+        with:
+          dependency-graph: "generate-and-submit"
       - name: "Build with Gradle"
         env:
           KAFKA_VERSION: ${{ matrix.kafka_version }}
