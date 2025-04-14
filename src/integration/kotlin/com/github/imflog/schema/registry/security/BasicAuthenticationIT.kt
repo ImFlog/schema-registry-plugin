@@ -111,10 +111,10 @@ class BasicAuthenticationIT {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
-                credentials {
-                    username = '$USERNAME'
-                    password = '$PASSWORD'
-                }
+                clientConfig = [
+                    'basic.auth.credentials.source': 'USER_INFO',
+                    'basic.auth.user.info': '$USERNAME:$PASSWORD'
+                ]
                 config {
                     subject('testSubject1', 'FULL_TRANSITIVE')
                 }
@@ -269,10 +269,10 @@ class BasicAuthenticationIT {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
-                credentials {
-                    username = '$USERNAME'
-                    password = '$PASSWORD'
-                }
+                clientConfig = [
+                    'basic.auth.credentials.source': 'USER_INFO',
+                    'basic.auth.user.info': '$USERNAME:$PASSWORD'
+                ]
                 config {
                     subject('testSubject1', 'FULL_TRANSITIVE')
                 }
@@ -348,10 +348,10 @@ class BasicAuthenticationIT {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
-                credentials {
-                    username = '$USERNAME'
-                    password = '$PASSWORD'
-                }
+                clientConfig = [
+                    'basic.auth.credentials.source': 'USER_INFO',
+                    'basic.auth.user.info': '$USERNAME:$PASSWORD'
+                ]
                 compatibility {
                     subject('testSubject1', 'avro/test.avsc')
                 }
@@ -405,10 +405,10 @@ class BasicAuthenticationIT {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT/'
-                credentials {
-                    username = '$USERNAME'
-                    password = '$PASSWORD'
-                }
+                clientConfig = [
+                    'basic.auth.credentials.source': 'USER_INFO',
+                    'basic.auth.user.info': '$USERNAME:$PASSWORD'
+                ]
                 download {
                     subject('test-subject', 'src/main/avro/test')
                 }
@@ -510,10 +510,10 @@ class BasicAuthenticationIT {
 
             schemaRegistry {
                 url = 'http://localhost:$REGISTRY_FAKE_AUTH_PORT'
-                credentials {
-                    username = '$USERNAME'
-                    password = '$PASSWORD'
-                }
+                clientConfig = [
+                    'basic.auth.credentials.source': 'USER_INFO',
+                    'basic.auth.user.info': '$USERNAME:$PASSWORD'
+                ]
                 register {
                     subject('testSubject1', 'avro/test.avsc')
                     subject('testSubject2', 'avro/other_test.avsc')

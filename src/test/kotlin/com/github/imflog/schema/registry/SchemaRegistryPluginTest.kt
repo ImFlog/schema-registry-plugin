@@ -69,43 +69,6 @@ class SchemaRegistryPluginTest {
     }
 
     @Test
-    fun `plugin should fail with wrong credentials extension configuration`() {
-        buildFile = File(folderRule.toFile(), "build.gradle")
-        buildFile.writeText(
-            """
-            plugins {
-                id 'java'
-                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
-            }
-
-            schemaRegistry {
-                url = 'http://localhost:1234/'
-                credentials {
-                    username = 'user'
-                    password = 'pass'
-                }
-                credentialsBar.username = 'user'
-                output = 'src/main/avro'
-                subjects = ['$subject']
-            }
-        """
-        )
-
-        try {
-            GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.toFile())
-                .withArguments(DownloadTask.TASK_NAME)
-                .withPluginClasspath()
-                .withDebug(true)
-                .build()
-            Assertions.fail<Any>("Should not reach this point")
-        } catch (ex: UnexpectedBuildFailure) {
-            Assertions.assertThat(ex.message).containsIgnoringCase("unknown property 'credentialsBar'")
-        }
-    }
-
-    @Test
     fun `plugin should only parse nested extensions`() {
         buildFile = File(folderRule.toFile(), "build.gradle")
         buildFile.writeText(
