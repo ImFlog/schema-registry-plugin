@@ -21,8 +21,6 @@ dependencies {
     implementation("io.confluent:kafka-schema-registry:7.9.0") {
         exclude("org.slf4j", "slf4j-log4j12")
     }
-    // Protobuf schema parser
-    implementation("com.squareup.wire:wire-schema:5.3.1")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -38,9 +36,11 @@ java {
 // Unit tests
 dependencies {
     testImplementation(gradleTestKit())
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.12.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.12.1")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.12.1")
+    testImplementation(platform("org.junit:junit-bom:5.12.1"))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.junit.jupiter:junit-jupiter-api")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("org.assertj:assertj-core:3.27.3")
     testImplementation("io.mockk:mockk:1.14.0")
 }
