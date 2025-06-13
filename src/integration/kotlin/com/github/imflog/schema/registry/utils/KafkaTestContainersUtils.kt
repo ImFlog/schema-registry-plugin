@@ -5,10 +5,10 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import org.testcontainers.containers.GenericContainer
+import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
-import org.testcontainers.images.builder.Transferable
-import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
+import java.io.File
 
 abstract class KafkaTestContainersUtils {
 
@@ -19,8 +19,8 @@ abstract class KafkaTestContainersUtils {
         private val KAFKA_NETWORK_ALIAS = "kafka-${CONFLUENT_VERSION}"
 
         private val network: Network = Network.newNetwork()
-        private val kafkaContainer: ConfluentKafkaContainer by lazy {
-            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$CONFLUENT_VERSION"))
+        private val kafkaContainer: KafkaContainer by lazy {
+            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$CONFLUENT_VERSION"))
                 .withNetwork(network)
                 .withNetworkAliases(KAFKA_NETWORK_ALIAS)
         }
@@ -51,8 +51,8 @@ abstract class KafkaTestContainersUtils {
                 .withEnv("SCHEMA_REGISTRY_SCHEMA_REGISTRY_GROUP_ID", "schema-registry-ssl")
                 .withEnv("SCHEMA_REGISTRY_KAFKASTORE_TOPIC", "_ssl_schemas")
                 .withEnv("SCHEMA_REGISTRY_SSL_CLIENT_AUTHENTICATION", "REQUIRED")
-                .withCopyToContainer(
-                    Transferable.of("/secrets"),
+                .withFileSystemBind(
+                    File(KafkaTestContainersUtils::class.java.getResource("/secrets").toURI()).absolutePath,
                     "/etc/schema-registry/secrets"
                 )
         }

@@ -29,6 +29,10 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
+tasks.withType<JavaCompile> {
+    options.release.set(8) // Set Java 8 compatibility
+}
+
 java {
     withSourcesJar()
 }
@@ -36,11 +40,9 @@ java {
 // Unit tests
 dependencies {
     testImplementation(gradleTestKit())
-    testImplementation(platform("org.junit:junit-bom:5.12.1"))
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine")
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
     testImplementation("org.assertj:assertj-core:3.27.3")
     testImplementation("io.mockk:mockk:1.14.0")
 }
@@ -62,10 +64,14 @@ val integrationImplementation: Configuration by configurations.getting {
     )
 }
 
-configurations["integrationImplementation"].extendsFrom(configurations.runtimeOnly.get())
+configurations["integrationImplementation"].extendsFrom(
+    configurations.runtimeOnly.get(),
+    configurations.testRuntimeOnly.get(),
+    configurations.testCompileClasspath.get()
+)
 
 dependencies {
-    integrationImplementation("com.github.tomakehurst:wiremock-jre8:2.28.1")
+    integrationImplementation("com.github.tomakehurst:wiremock-jre8:2.35.1")
     integrationImplementation("org.testcontainers:kafka:1.20.6")
 }
 
