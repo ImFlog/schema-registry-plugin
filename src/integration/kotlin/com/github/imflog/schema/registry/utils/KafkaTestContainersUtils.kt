@@ -4,9 +4,10 @@ import io.confluent.kafka.schemaregistry.avro.AvroSchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.json.JsonSchemaProvider
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
+import org.testcontainers.containers.BindMode
 import org.testcontainers.containers.GenericContainer
-import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
+import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
 import java.io.File
 
@@ -19,8 +20,8 @@ abstract class KafkaTestContainersUtils {
         private val KAFKA_NETWORK_ALIAS = "kafka-${CONFLUENT_VERSION}"
 
         private val network: Network = Network.newNetwork()
-        private val kafkaContainer: KafkaContainer by lazy {
-            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$CONFLUENT_VERSION"))
+        private val kafkaContainer: ConfluentKafkaContainer by lazy {
+            ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:$CONFLUENT_VERSION"))
                 .withNetwork(network)
                 .withNetworkAliases(KAFKA_NETWORK_ALIAS)
         }
@@ -28,7 +29,7 @@ abstract class KafkaTestContainersUtils {
             GenericContainer("confluentinc/cp-schema-registry:$CONFLUENT_VERSION")
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
-                .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9092")
+                .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9093")
                 .withEnv("SCHEMA_REGISTRY_HOST_NAME", "schema-registry")
         }
 
@@ -37,7 +38,7 @@ abstract class KafkaTestContainersUtils {
                 .withNetwork(network)
                 .withExposedPorts(SCHEMA_REGISTRY_INTERNAL_PORT)
                 .withEnv("SCHEMA_REGISTRY_LISTENERS", "https://0.0.0.0:$SCHEMA_REGISTRY_INTERNAL_PORT")
-                .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9092")
+                .withEnv("SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS", "PLAINTEXT://$KAFKA_NETWORK_ALIAS:9093")
                 .withEnv("SCHEMA_REGISTRY_HOST_NAME", "registry-ssl")
                 .withEnv("SCHEMA_REGISTRY_SSL_KEYSTORE_LOCATION", "/etc/schema-registry/secrets/registry.keystore.jks")
                 .withEnv("SCHEMA_REGISTRY_SSL_KEYSTORE_PASSWORD", "registry")
@@ -53,7 +54,8 @@ abstract class KafkaTestContainersUtils {
                 .withEnv("SCHEMA_REGISTRY_SSL_CLIENT_AUTHENTICATION", "REQUIRED")
                 .withFileSystemBind(
                     File(KafkaTestContainersUtils::class.java.getResource("/secrets").toURI()).absolutePath,
-                    "/etc/schema-registry/secrets"
+                    "/etc/schema-registry/secrets",
+                    BindMode.READ_ONLY
                 )
         }
 
