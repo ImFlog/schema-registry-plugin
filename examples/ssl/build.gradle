@@ -15,14 +15,12 @@ dockerCompose {
 
 schemaRegistry {
     url = 'https://localhost:8181'
-    ssl {
-        configs = [
-                "ssl.truststore.location": "$project.rootDir/../src/integration/resources/secrets/registry.truststore.jks",
-                "ssl.truststore.password": "registry",
-                "ssl.keystore.location"  : "$project.rootDir/../src/integration/resources/secrets/registry.keystore.jks",
-                "ssl.keystore.password"  : "registry"
-        ]
-    }
+    clientConfig = [
+            "schema.registry.ssl.truststore.location": "$project.rootDir/../src/integration/resources/secrets/registry.truststore.jks",
+            "schema.registry.ssl.truststore.password": "registry",
+            "schema.registry.ssl.keystore.location"  : "$project.rootDir/../src/integration/resources/secrets/registry.keystore.jks",
+            "schema.registry.ssl.keystore.password"  : "registry"
+    ]
 
     register {
         subject('company', 'schemas/avro/company.avsc', 'AVRO')

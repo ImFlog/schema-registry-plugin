@@ -1,7 +1,5 @@
 package com.github.imflog.schema.registry
 
-import com.github.imflog.schema.registry.security.BasicAuthExtension
-import com.github.imflog.schema.registry.security.SslExtension
 import com.github.imflog.schema.registry.tasks.compatibility.CompatibilitySubjectExtension
 import com.github.imflog.schema.registry.tasks.compatibility.CompatibilityTask
 import com.github.imflog.schema.registry.tasks.config.ConfigSubjectExtension
@@ -21,15 +19,6 @@ class SchemaRegistryPlugin : Plugin<Project> {
             val globalExtension = extensions.create(
                 SchemaRegistryExtension.EXTENSION_NAME,
                 SchemaRegistryExtension::class.java
-            )
-
-            val basicAuthExtension = (globalExtension as ExtensionAware).extensions.create(
-                BasicAuthExtension.EXTENSION_NAME,
-                BasicAuthExtension::class.java
-            )
-            val sslExtension = (globalExtension as ExtensionAware).extensions.create(
-                SslExtension.EXTENSION_NAME,
-                SslExtension::class.java
             )
             val downloadExtension = (globalExtension as ExtensionAware).extensions.create(
                 DownloadSubjectExtension.EXTENSION_NAME,
@@ -55,8 +44,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(DownloadTask.TASK_NAME, DownloadTask::class.java)
                 .configure { downloadTask ->
                     downloadTask.url.set(globalExtension.url)
-                    downloadTask.basicAuth.set(basicAuthExtension.basicAuth)
-                    downloadTask.ssl.set(sslExtension.configs)
+                    downloadTask.clientConfig.set(globalExtension.clientConfig)
                     downloadTask.subjects.set(downloadExtension.subjects)
                     downloadTask.metadataConfig.set(downloadExtension.metadata)
                     downloadTask.pretty.set(globalExtension.pretty)
@@ -67,8 +55,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(RegisterSchemasTask.TASK_NAME, RegisterSchemasTask::class.java)
                 .configure { registerSchemasTask ->
                     registerSchemasTask.url.set(globalExtension.url)
-                    registerSchemasTask.basicAuth.set(basicAuthExtension.basicAuth)
-                    registerSchemasTask.ssl.set(sslExtension.configs)
+                    registerSchemasTask.clientConfig.set(globalExtension.clientConfig)
                     registerSchemasTask.subjects.set(registerExtension.subjects)
                     registerSchemasTask.outputDirectory.set(globalExtension.outputDirectory)
                     registerSchemasTask.failFast.set(globalExtension.failFast)
@@ -78,8 +65,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(CompatibilityTask.TASK_NAME, CompatibilityTask::class.java)
                 .configure { compatibilityTask ->
                     compatibilityTask.url.set(globalExtension.url)
-                    compatibilityTask.basicAuth.set(basicAuthExtension.basicAuth)
-                    compatibilityTask.ssl.set(sslExtension.configs)
+                    compatibilityTask.clientConfig.set(globalExtension.clientConfig)
                     compatibilityTask.subjects.set(compatibilityExtension.subjects)
                     compatibilityTask.failFast.set(globalExtension.failFast)
                     compatibilityTask.rootDir.set(project.rootDir)
@@ -88,8 +74,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
             tasks.register(ConfigTask.TASK_NAME, ConfigTask::class.java)
                 .configure { configTask ->
                     configTask.url.set(globalExtension.url)
-                    configTask.basicAuth.set(basicAuthExtension.basicAuth)
-                    configTask.ssl.set(sslExtension.configs)
+                    configTask.clientConfig.set(globalExtension.clientConfig)
                     configTask.subjects.set(configExtension.subjects)
                     configTask.failFast.set(globalExtension.failFast)
                 }
