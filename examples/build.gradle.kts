@@ -7,12 +7,12 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:2.3.4-SNAPSHOT")
+        classpath("com.github.imflog:kafka-schema-registry-gradle-plugin:2.4.0")
     }
 }
 
 plugins {
-    id("com.avast.gradle.docker-compose") version "0.17.6" apply true
+    id("com.avast.gradle.docker-compose") version "0.17.12" apply true
 }
 
 subprojects {
