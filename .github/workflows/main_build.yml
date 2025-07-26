@@ -9,6 +9,14 @@ jobs:
   build:
     name: "Build"
     runs-on: "ubuntu-latest"
+    strategy:
+      matrix:
+        kafka_version: [
+          "7.5.9",
+          "7.6.0",
+          "7.7.4",
+          "7.8.3"
+        ]
     steps:
       - uses: "actions/checkout@v4"
       - uses: "gradle/actions/wrapper-validation@v4"
