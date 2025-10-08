@@ -127,6 +127,59 @@ class AvroSchemaParserTest {
     }
 
     @Test
+    fun `Should handle local recursive type properly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testRecursiveType.avsc")
+        val schema = File("${testFilesPath}testRecursiveSubject.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONObject(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """{
+          "name" : "A",
+          "namespace" : "com.mycompany",
+          "type" : "record",
+          "fields" : [
+              {
+                "name" : "myB",
+                "type" : {
+                    "name" : "B",
+                    "type" : "record",
+                    "fields" : [
+                      {
+                          "name" : "foo",
+                          "type" : "string"
+                      },
+                      {
+                          "name" : "child",
+                          "type" : "com.mycompany.B"
+                      }
+                    ]
+                }
+              },
+              {
+                "name" : "myList",
+                "type" : {
+                    "items" : "string",
+                    "type" : "array"
+                }
+              }
+          ],
+        }"""
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
+        )
+    }
+
+    @Test
     fun `Should resolve complex nested array example correctly`() {
         // Given
         val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
