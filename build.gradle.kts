@@ -6,7 +6,7 @@ version = "2.4.2-SNAPSHOT"
 
 
 plugins {
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.2.20"
     id("com.gradle.plugin-publish") version "1.3.1"
 }
 
