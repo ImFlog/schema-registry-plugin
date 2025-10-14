@@ -27,11 +27,11 @@ class AvroSchemaParser(
             reference.name to JSONObject(reference.content(rootDir))
         }
 
-        // Set to track which references have already been inserted
-        val insertedReferences = mutableSetOf<String>()
+        // Set to track which references have already been visited
+        val visitedReferences = mutableSetOf<String>()
 
         // Process the schema recursively
-        val resolvedSchema = resolveReferences(mainSchema, referenceSchemas, null, insertedReferences)
+        val resolvedSchema = resolveReferences(mainSchema, referenceSchemas, null, visitedReferences)
         return resolvedSchema.toString()
     }
 
@@ -39,7 +39,7 @@ class AvroSchemaParser(
         schema: JSONObject,
         references: Map<String, JSONObject>,
         parentNamespace: String?,
-        insertedReferences: MutableSet<String>
+        visitedReferences: MutableSet<String>
     ): JSONObject {
         // Get the current namespace, falling back to parent namespace if not present
         val currentNamespace = schema.optString("namespace", parentNamespace)
@@ -50,7 +50,7 @@ class AvroSchemaParser(
                 val fields = schema.getJSONArray("fields")
                 for (i in 0 until fields.length()) {
                     val field = fields.getJSONObject(i)
-                    fields.put(i, resolveReferences(field, references, currentNamespace, insertedReferences))
+                    fields.put(i, resolveReferences(field, references, currentNamespace, visitedReferences))
                 }
             }
             // If it's an array type, process its items
@@ -62,7 +62,7 @@ class AvroSchemaParser(
                             schema.getJSONObject("items"),
                             references,
                             currentNamespace,
-                            insertedReferences
+                            visitedReferences
                         )
                     )
                 }
@@ -71,13 +71,13 @@ class AvroSchemaParser(
                     for (i in 0 until items.length()) {
                         items.put(
                             i,
-                            resolveReferences(items.getJSONObject(i), references, currentNamespace, insertedReferences)
+                            resolveReferences(items.getJSONObject(i), references, currentNamespace, visitedReferences)
                         )
                     }
                 }
                 if (schema.opt("items") is String) {
                     val items = schema.getString("items")
-                    val ref = handleStringRef(items, currentNamespace, references, insertedReferences)
+                    val ref = handleStringRef(items, currentNamespace, references, visitedReferences)
                     schema.put("items", ref)
                 }
             }
@@ -90,7 +90,7 @@ class AvroSchemaParser(
                             schema.getJSONObject("values"),
                             references,
                             currentNamespace,
-                            insertedReferences
+                            visitedReferences
                         )
                     )
                 }
@@ -99,13 +99,13 @@ class AvroSchemaParser(
                     for (i in 0 until values.length()) {
                         values.put(
                             i,
-                            resolveReferences(values.getJSONObject(i), references, currentNamespace, insertedReferences)
+                            resolveReferences(values.getJSONObject(i), references, currentNamespace, visitedReferences)
                         )
                     }
                 }
                 if (schema.opt("values") is String) {
                     val values = schema.getString("values")
-                    val ref = handleStringRef(values, currentNamespace, references, insertedReferences)
+                    val ref = handleStringRef(values, currentNamespace, references, visitedReferences)
                     schema.put("values", ref)
                 }
             }
@@ -113,7 +113,7 @@ class AvroSchemaParser(
             is JSONObject -> {
                 schema.put(
                     "type",
-                    resolveReferences(schema.getJSONObject("type"), references, currentNamespace, insertedReferences)
+                    resolveReferences(schema.getJSONObject("type"), references, currentNamespace, visitedReferences)
                 )
             }
 
@@ -123,12 +123,12 @@ class AvroSchemaParser(
                 for (i in 0 until types.length()) {
                     when (val type = types.get(i)) {
                         is String -> {
-                            val ref = handleStringRef(type, currentNamespace, references, insertedReferences)
+                            val ref = handleStringRef(type, currentNamespace, references, visitedReferences)
                             types.put(i, ref)
                         }
 
                         is JSONObject -> {
-                            types.put(i, resolveReferences(type, references, currentNamespace, insertedReferences))
+                            types.put(i, resolveReferences(type, references, currentNamespace, visitedReferences))
                         }
                     }
                 }
@@ -136,7 +136,7 @@ class AvroSchemaParser(
 
             // If it's a string type reference
             is String -> {
-                val ref = handleStringRef(schema.getString("type"), currentNamespace, references, insertedReferences)
+                val ref = handleStringRef(schema.getString("type"), currentNamespace, references, visitedReferences)
                 schema.put("type", ref)
             }
         }
@@ -147,23 +147,24 @@ class AvroSchemaParser(
         items: String,
         currentNamespace: String?,
         references: Map<String, JSONObject>,
-        insertedReferences: MutableSet<String>
+        visitedReferences: MutableSet<String>
     ): Any {
         val referenceKey = findReferenceKey(items, currentNamespace, references)
         if (referenceKey != null) {
+            if (!visitedReferences.contains(referenceKey)) {
+                visitedReferences.add(referenceKey)
+            } else {
+                return items
+            }
             // deep copy the reference and resolve local references in references (as local references can have references)
             val refSchemaCopy = JSONObject(references[referenceKey]!!.toString())
-            val referencedSchema = resolveReferences(refSchemaCopy, references, null, insertedReferences)
+            val referencedSchema = resolveReferences(refSchemaCopy, references, null, visitedReferences)
             val refNamespace = referencedSchema.optString("namespace")
 
             if (refNamespace == currentNamespace) {
                 referencedSchema.remove("namespace")
             }
-            if (!insertedReferences.contains(referenceKey)) {
-                insertedReferences.add(referenceKey)
-                return referencedSchema
-            }
-            return items
+            return referencedSchema
         }
         return items
     }

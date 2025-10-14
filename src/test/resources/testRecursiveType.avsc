@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "B",
+  "namespace": "com.mycompany",
+  "fields": [
+    {
+      "name": "foo",
+      "type": "string"
+    },
+    {
+      "name": "child",
+      "type": "com.mycompany.B"
+    }
+  ]
+}

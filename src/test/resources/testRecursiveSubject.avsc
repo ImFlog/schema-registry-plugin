@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "A",
+  "namespace": "com.mycompany",
+  "fields": [
+    {
+      "name": "myB",
+      "type": "B"
+    },
+    {
+      "name": "myList",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    }
+  ]
+}
