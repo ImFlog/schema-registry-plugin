@@ -5,12 +5,18 @@ import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONTokener
 import java.io.File
 
 class AvroSchemaParser(
     client: SchemaRegistryClient,
     rootDir: File
 ) : SchemaParser(client, rootDir) {
+
+    data class MainSchema(
+        val schema: JSONObject,
+        val isObject: Boolean,
+    )
 
     override val schemaType: SchemaType = SchemaType.AVRO
 
@@ -20,7 +26,7 @@ class AvroSchemaParser(
         localReferences: List<LocalReference>
     ): String {
         // Load and parse the main schema
-        val mainSchema = JSONObject(loadContent(schemaPath))
+        val mainSchema = loadMainSchema(loadContent(schemaPath))
 
         // Create a map of reference name to schema content
         val referenceSchemas = localReferences.associate { reference ->
@@ -31,8 +37,14 @@ class AvroSchemaParser(
         val visitedReferences = mutableSetOf<String>()
 
         // Process the schema recursively
-        val resolvedSchema = resolveReferences(mainSchema, referenceSchemas, null, visitedReferences)
-        return resolvedSchema.toString()
+        val resolvedSchema = resolveReferences(mainSchema.schema, referenceSchemas, null, visitedReferences)
+        if (mainSchema.isObject) {
+            return resolvedSchema.toString()
+        }
+        val myArray = JSONArray()
+        myArray.put(resolvedSchema.get("items"))
+
+        return myArray.toString();
     }
 
     private fun resolveReferences(
@@ -200,5 +212,26 @@ class AvroSchemaParser(
         }
 
         return null
+    }
+
+    // if json is object return it, if array with one item, coerce it into a json object
+    private fun loadMainSchema(input: String): MainSchema {
+        return when (val parsedInput = JSONTokener(input).nextValue()) {
+            is JSONObject -> MainSchema(parsedInput, true)
+            is JSONArray -> {
+                if (parsedInput.length() == 1) {
+                    val mySchema = JSONObject();
+                    mySchema.put("type", "array")
+                    mySchema.put("items", parsedInput.get(0))
+
+                    MainSchema(mySchema, false)
+                } else {
+                    throw IllegalArgumentException("Invalid schema format: array must contain exactly one JSONObject")
+                }
+            }
+            else -> {
+                throw IllegalArgumentException("Invalid schema format: must be a JSONObject or an array containing a JSONObject")
+            }
+        }
     }
 }
