@@ -4,6 +4,7 @@ import com.github.imflog.schema.registry.LocalReference
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.assertj.core.api.Assertions
 import org.intellij.lang.annotations.Language
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -123,6 +124,64 @@ class AvroSchemaParserTest {
 
         Assertions.assertThat(resolved).isEqualTo(
             JSONObject(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should resolve simple array type subject correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val schema = File("${testFilesPath}testSubjectArraySimple.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf()
+        )
+        // Then
+        val resolved = JSONArray(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """
+          [
+            "string"
+          ]
+        """
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONArray(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should resolve array type subject correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectArray.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONArray(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """
+          [
+            {
+              "name":"B",
+              "namespace": "com.mycompany",
+              "type": "enum",
+              "symbols": ["X1", "X2"]
+            }
+          ]
+        """
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONArray(expected).toString()
         )
     }
 
