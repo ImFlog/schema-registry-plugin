@@ -71,7 +71,7 @@ configurations["integrationImplementation"].extendsFrom(
 )
 
 dependencies {
-    integrationImplementation("com.github.tomakehurst:wiremock-jre8:2.35.1")
+    integrationImplementation("com.github.tomakehurst:wiremock-jre8:3.0.1")
     integrationImplementation("org.testcontainers:kafka:1.21.3")
 }
 
