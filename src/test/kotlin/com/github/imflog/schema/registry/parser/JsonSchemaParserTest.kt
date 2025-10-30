@@ -73,8 +73,7 @@ class JsonSchemaParserTest {
 
     private fun localSchemaShouldBeAppended(resolvedSchema: String) {
         Assertions
-            .assertThat(JSONObject(resolvedSchema).getJSONArray("${"$"}defs").get(0))
-            .usingRecursiveComparison() // To check the content of the JSON Objects instead of the equal method
-            .isEqualTo(JSONObject(mapOf(ADDRESS_REFERENCE_NAME to JSONObject(ADDRESS_SCHEMA))))
+            .assertThat(JSONObject(resolvedSchema).getJSONArray("${"$"}defs").get(0).toString())
+            .isEqualTo(JSONObject(mapOf(ADDRESS_REFERENCE_NAME to JSONObject(ADDRESS_SCHEMA))).toString())
     }
 }

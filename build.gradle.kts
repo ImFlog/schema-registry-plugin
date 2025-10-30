@@ -18,19 +18,19 @@ repositories {
 // Dependencies versions
 dependencies {
     implementation(gradleApi())
-    implementation("io.confluent:kafka-schema-registry:7.9.0") {
+    implementation("io.confluent:kafka-schema-registry:8.1.0") {
         exclude("org.slf4j", "slf4j-log4j12")
     }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_1_8)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
 tasks.withType<JavaCompile> {
-    options.release.set(8) // Set Java 8 compatibility
+    options.release.set(17) // Set Java 17 compatibility
 }
 
 java {
@@ -71,7 +71,7 @@ configurations["integrationImplementation"].extendsFrom(
 )
 
 dependencies {
-    integrationImplementation("com.github.tomakehurst:wiremock-jre8:2.35.1")
+    integrationImplementation("org.wiremock:wiremock-standalone:3.13.1")
     integrationImplementation("org.testcontainers:kafka:1.21.3")
 }
 
