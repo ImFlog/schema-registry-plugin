@@ -80,9 +80,8 @@ class AvroSchemaParserTest {
                     .getJSONArray("fields")
                     .getJSONObject(1)
                     .getJSONObject("type")
-            )
-            .usingRecursiveComparison() // To check the content of the JSON Objects instead of the equal method
-            .isEqualTo(JSONObject(ADDRESS_SCHEMA))
+                    .toString()
+            ).isEqualTo(JSONObject(ADDRESS_SCHEMA).toString())
     }
 
     @Test
