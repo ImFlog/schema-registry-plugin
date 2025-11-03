@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
+import org.junit.jupiter.params.support.ParameterDeclarations
 import org.junit.jupiter.params.provider.ArgumentsSource
 import java.io.File
 import java.util.stream.Stream
@@ -287,7 +288,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
 
     private class SchemaArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
@@ -309,20 +310,20 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 ),
                 Arguments.of(
                     SchemaType.JSON,
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
                         "type": "object",
                         "properties": {
                             "name": {"type": "string"}
                         },
                         "additionalProperties": false
                     }""",
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
                         "type": "object",
                         "properties": {
                             "identifier": {"type": "string"},
-                            "user": {"${"$"}ref": "User"}
+                            "user": {"$ref": "User"}
                         },
                         "additionalProperties": false
                     }"""
@@ -353,7 +354,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     }
 
     private class SchemaWithMetadataAndRuleSetArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
@@ -403,8 +404,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 ),
                 Arguments.of(
                     SchemaType.JSON,
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
                         "type": "object",
                         "properties": {
                             "name": {
@@ -414,12 +415,12 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                         },
                         "additionalProperties": false
                     }""",
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
                         "type": "object",
                         "properties": {
                             "identifier": {"type": "string"},
-                            "user": {"${"$"}ref": "User"}
+                            "user": {"$ref": "User"}
                         },
                         "additionalProperties": false
                     }""",
@@ -512,7 +513,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     }
 
     private class LocalSchemaArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
@@ -534,21 +535,21 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 ),
                 Arguments.of(
                     SchemaType.JSON,
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "User",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "User",
                         "type": "object",
                         "properties": {
                             "name": {"type": "string"}
                         },
                         "additionalProperties": false
                     }""",
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
                         "type": "object",
                         "properties": {
                             "identifier": {"type": "string"},
-                            "user": {"${"$"}ref": "User"}
+                            "user": {"$ref": "User"}
                         },
                         "additionalProperties": false
                     }"""
@@ -580,36 +581,36 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     }
 
     private class RemoteLocalSchemaArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.JSON,
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "Address",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "Address",
                         "type": "object",
                         "properties": {
                             "street": {"type": "string"}
                         },
                         "additionalProperties": false
                     }""",
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "User",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "User",
                         "type": "object",
                         "properties": {
                             "name": {"type": "string"},
-                            "address": {"${"$"}ref": "Address"}
+                            "address": {"$ref": "Address"}
                         },
                         "additionalProperties": false
                     }""",
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "Player",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "Player",
                         "type": "object",
                         "properties": {
                             "identifier": {"type": "string"},
-                            "user": {"${"$"}ref": "User"}
+                            "user": {"$ref": "User"}
                         },
                         "additionalProperties": false
                     }"""

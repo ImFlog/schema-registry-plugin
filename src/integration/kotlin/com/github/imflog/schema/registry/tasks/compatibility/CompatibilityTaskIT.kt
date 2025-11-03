@@ -20,6 +20,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
 import java.util.stream.Stream
 
@@ -279,7 +280,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     }
 
     private class SchemaSuccessArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
@@ -313,9 +314,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 Arguments.of(
                     SchemaType.JSON,
                     JsonSchema(
-                        """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "User",
+                        $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "User",
         
                             "type": "object",
                             "properties": {
@@ -325,9 +326,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                         }"""
                     ),
                     JsonSchema(
-                        """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "Player",
+                        $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "Player",
                             "type": "object",
                             "properties": {
                                 "identifier": { "type": "string" }
@@ -335,14 +336,14 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                             "additionalProperties": false
                         }"""
                     ),
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "Player",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "Player",
     
                         "type": "object",
                         "properties": {
                             "identifier": { "type": "string" },
-                            "user": { "${"$"}ref": "#User" }
+                            "user": { "$ref": "#User" }
                         },
                         "additionalProperties": false
                     }"""
@@ -385,7 +386,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     }
 
     private class SchemaLocalAndRemoteReferenceSuccessArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
@@ -422,42 +423,42 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 ),
                 Arguments.of(
                     SchemaType.JSON,
-                    """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "Address",
+                    $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "Address",
                             "type": "object",
                             "properties": {
                                 "street": {"type": "string"}
                             },
                             "additionalProperties": false
                         }""",
-                    """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "User",
+                    $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "User",
                             "type": "object",
                             "properties": {
                                 "name": {"type": "string"},
-                                "address": {"${"$"}ref": "Address"}
+                                "address": {"$ref": "Address"}
                             },
                             "additionalProperties": false
                         }""",
 
-                    """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "Player",
+                    $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "Player",
                             "type": "object",
                             "properties": {
                                 "identifier": { "type": "string" }
                             },
                             "additionalProperties": false
                         }""",
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "Player",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "Player",
                         "type": "object",
                         "properties": {
                             "identifier": { "type": "string" },
-                            "user": { "${"$"}ref": "#User" }
+                            "user": { "$ref": "#User" }
                         },
                         "additionalProperties": false
                     }"""
@@ -507,7 +508,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     }
 
     private class SchemaLocalReferenceSuccessArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     SchemaType.AVRO,
@@ -541,9 +542,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 Arguments.of(
                     SchemaType.JSON,
                     JsonSchema(
-                        """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "User",
+                        $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "User",
                             "type": "object",
                             "properties": {
                                 "name": { "type": "string" }
@@ -552,9 +553,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                         }"""
                     ),
                     JsonSchema(
-                        """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "Player",
+                        $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "Player",
                             "type": "object",
                             "properties": {
                                 "identifier": { "type": "string" }
@@ -562,13 +563,13 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                             "additionalProperties": false
                         }"""
                     ),
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "Player",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "Player",
                         "type": "object",
                         "properties": {
                             "identifier": { "type": "string" },
-                            "user": { "${"$"}ref": "#User" }
+                            "user": { "$ref": "#User" }
                         },
                         "additionalProperties": false
                     }"""
@@ -612,7 +613,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     }
 
     private class SchemaFailureArgumentProvider : ArgumentsProvider {
-        override fun provideArguments(context: ExtensionContext): Stream<out Arguments> =
+        override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(
                 Arguments.of(
                     AvroSchema.TYPE,
@@ -646,9 +647,9 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 Arguments.of(
                     JsonSchema.TYPE,
                     JsonSchema(
-                        """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "User",
+                        $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "User",
         
                             "type": "object",
                             "properties": {
@@ -658,25 +659,25 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                         }"""
                     ),
                     JsonSchema(
-                        """{
-                            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                            "${"$"}id": "Player",
+                        $$"""{
+                            "$schema": "http://json-schema.org/draft-07/schema#",
+                            "$id": "Player",
         
                             "type": "object",
                             "properties": {
                                 "identifier": { "type": "string" },
-                                "user": { "${"$"}ref": "#User" }
+                                "user": { "$ref": "#User" }
                             },
                             "additionalProperties": false
                         }"""
                     ),
-                    """{
-                        "${"$"}schema": "http://json-schema.org/draft-07/schema#",
-                        "${"$"}id": "Player",
+                    $$"""{
+                        "$schema": "http://json-schema.org/draft-07/schema#",
+                        "$id": "Player",
     
                         "properties": {
                             "identifier": {"type": "number"},
-                            "user": { "${"$"}ref": "#User" }
+                            "user": { "$ref": "#User" }
                         },
                         "additionalProperties": false
                     }"""
