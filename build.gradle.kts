@@ -18,7 +18,7 @@ repositories {
 // Dependencies versions
 dependencies {
     implementation(gradleApi())
-    implementation("io.confluent:kafka-schema-registry:8.1.0") {
+    implementation("io.confluent:kafka-schema-registry:8.1.1") {
         exclude("org.slf4j", "slf4j-log4j12")
     }
 }
