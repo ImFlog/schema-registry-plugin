@@ -61,6 +61,51 @@ class AvroSchemaParserTest {
         localSchemaShouldBeAppended(resolvedSchema)
     }
 
+    @Test
+    fun `Should resolve references with custom root directory`() {
+        // Given
+        val customRoot = folderRule.resolve("src/main/avro")
+        customRoot.toFile().mkdirs()
+        val parser = AvroSchemaParser(schemaRegistryClient, customRoot.toFile())
+
+        val addressFile = customRoot.resolve("Address.avsc").toFile()
+        addressFile.writeText(
+            """{
+             "type": "record",
+             "name": "Address",
+             "fields": [
+                {"name": "street", "type": "string" }
+             ]
+        }"""
+        )
+
+        val userFile = customRoot.resolve("User.avsc").toFile()
+        userFile.writeText(
+            """{
+             "type": "record",
+             "name": "User",
+             "fields": [
+                {"name": "name", "type": "string" },
+                {"name": "address", "type": "Address"}
+             ]
+        }"""
+        )
+
+        // The path in LocalReference is relative to the rootDir.
+        val localRef = LocalReference("Address", "Address.avsc")
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User",
+            "User.avsc",
+            listOf(localRef)
+        )
+
+        // Then
+        Assertions.assertThat(JSONObject(resolvedSchema)).isNotNull
+        Assertions.assertThat(resolvedSchema).contains("street")
+    }
+
     private fun givenALocalReference(): LocalReference {
         val addressLocalFile = folderRule.resolve("Address.avsc").toFile()
         addressLocalFile.writeText(ADDRESS_SCHEMA)

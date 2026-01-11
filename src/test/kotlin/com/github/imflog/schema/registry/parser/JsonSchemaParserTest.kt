@@ -59,6 +59,53 @@ class JsonSchemaParserTest {
         localSchemaShouldBeAppended(resolvedSchema)
     }
 
+    @Test
+    fun `Should resolve references with custom root directory`() {
+        // Given
+        val customRoot = folderRule.resolve("src/main/json")
+        customRoot.toFile().mkdirs()
+        val parser = JsonSchemaParser(schemaRegistryClient, customRoot.toFile())
+
+        val addressFile = customRoot.resolve("Address.json").toFile()
+        addressFile.writeText(
+            """{
+            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+            "${"$"}id": "Address",
+            "type": "object",
+            "properties": {
+                "street": {"type": "string"}
+            }
+        }"""
+        )
+
+        val userFile = customRoot.resolve("User.json").toFile()
+        userFile.writeText(
+            """{
+            "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+            "${"$"}id": "User",
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "address": {"${"$"}ref": "Address"}
+            }
+        }"""
+        )
+
+        // The path in LocalReference is relative to the rootDir.
+        val localRef = LocalReference("Address", "Address.json")
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "User",
+            "User.json",
+            listOf(localRef)
+        )
+
+        // Then
+        Assertions.assertThat(JSONObject(resolvedSchema)).isNotNull
+        Assertions.assertThat(resolvedSchema).contains("street")
+    }
+
     private fun givenALocalReference(): LocalReference {
         val addressLocalFile = folderRule.resolve("Address.json").toFile()
         addressLocalFile.writeText(ADDRESS_SCHEMA)

@@ -21,7 +21,7 @@ class ProtobufSchemaParser(
         localReferences: List<LocalReference>
     ): String {
         val schema = schemaFor(rootDir)
-        val source = schema.protoFile(File(schemaPath).relativeTo(rootDir).path)
+        val source = schema.protoFile(rootDir.resolve(schemaPath).absoluteFile.relativeTo(rootDir.absoluteFile).path)
             ?: throw SchemaParsingException(
                 subject,
                 schemaType,
@@ -48,7 +48,7 @@ class ProtobufSchemaParser(
 
     private fun parseRefs(localReferences: List<LocalReference>): Map<String, File> {
         return localReferences.associate {
-            Pair(it.name, File(it.path).normalize())
+            Pair(it.name, rootDir.resolve(it.path).normalize())
         }
     }
 
@@ -90,7 +90,7 @@ class ProtobufSchemaParser(
                 // but the way LocalReference is constructed implies it could be elsewhere, so we'll have to
                 // follow through with the API.
                 val dependency = if (ref != null) {
-                    schema.protoFile(ref.relativeTo(rootDir).path)
+                    schema.protoFile(ref.absoluteFile.relativeTo(rootDir.absoluteFile).path)
                         ?: throw SchemaParsingException(
                             subject,
                             schemaType,

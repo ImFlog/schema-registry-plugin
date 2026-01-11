@@ -281,6 +281,57 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     }
 
     @Test
+    fun `CompatibilityTask should support custom root directory`() {
+        folderRule.create()
+        val customRoot = folderRule.newFolder("src", "main", "avro")
+
+        val userFile = File(customRoot, "User.avsc")
+        userFile.writeText(
+            """
+            {
+              "type": "record",
+              "name": "User",
+              "fields": [
+                { "name": "name", "type": "string" }
+              ]
+            }
+        """.trimIndent()
+        )
+
+        // Register the first version
+        client.register("user", io.confluent.kafka.schemaregistry.avro.AvroSchema(userFile.readText()), false)
+
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                rootDir = 'src/main/avro'
+                compatibility {
+                    subject('user', 'User.avsc', 'AVRO')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
     fun `CompatibilityTask should be UP-TO-DATE on second run`() {
         // Given
         val subjectName = "uptodate-test"

@@ -569,6 +569,46 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         }}
 
     @Test
+    fun `DownloadTask should support custom root directory`() {
+        // Given
+        val subjectName = "download-custom-root"
+        client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
+
+        folderRule.create()
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                rootDir = 'downloaded-schemas'
+                download {
+                    subject('$subjectName', 'test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        Assertions.assertThat(File(folderRule.root, "downloaded-schemas/test/$subjectName.avsc")).exists()
+    }
+
+    @Test
     fun `Download task should be UP-TO-DATE on second run`() {
         // Given
         val subjectName = "uptodate-test"
