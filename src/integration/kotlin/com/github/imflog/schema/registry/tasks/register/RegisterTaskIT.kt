@@ -337,7 +337,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 outputDirectory = '${resultFolder.absolutePath}'
                 rootDir = 'src/main/avro'
                 register {
-                    subject('user', 'User.avsc', 'AVRO')
+                    subject('user-$subjectId', 'User.avsc', 'AVRO')
                         .addLocalReference('Address', 'Address.avsc')
                 }
             }
@@ -404,7 +404,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 outputDirectory = '${resultFolder.absolutePath}'
                 rootDir = 'src/main/json'
                 register {
-                    subject('user', 'User.json', 'JSON')
+                    subject('user-$subjectId', 'User.json', 'JSON')
                         .addLocalReference('Address', 'Address.json')
                 }
             }
@@ -461,7 +461,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 outputDirectory = '${resultFolder.absolutePath}'
                 rootDir = 'src/main/avro'
                 register {
-                    subject('user', 'User.avsc', 'AVRO')
+                    subject('user-$subjectId', 'User.avsc', 'AVRO')
                         .setMetadata('metadata.json')
                         .setRuleSet('ruleSet.json')
                 }
@@ -525,8 +525,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
                 outputDirectory = '${resultFolder.absolutePath}'
                 rootDir = 'src/main/proto'
                 register {
-                    subject('address', 'com/example/address.proto', 'PROTOBUF')
-                    subject('user', 'com/example/user.proto', 'PROTOBUF')
+                    subject('user-$subjectId', 'com/example/user.proto', 'PROTOBUF')
                         .addLocalReference('com/example/address.proto', 'com/example/address.proto')
                 }
             }

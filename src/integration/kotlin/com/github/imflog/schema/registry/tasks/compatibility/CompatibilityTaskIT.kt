@@ -23,15 +23,18 @@ import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
+import java.util.UUID
 import java.util.stream.Stream
 
 class CompatibilityTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
+    private lateinit var subjectId: String
 
     @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
+        subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
@@ -53,7 +56,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-$subjectId"
 
         val userSubject = "$subjectName-user"
         client.register(userSubject, userSchema)
@@ -108,7 +111,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-fail-$subjectId"
 
         val userSubject = "$subjectName-user"
         client.register(userSubject, userSchema)
@@ -162,7 +165,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-$type"
+        val subjectName = "parameterized-$type-$subjectId"
         val playerPath = "$type/player.${type.extension}"
         val playerSubject = "$subjectName-player"
 
@@ -220,7 +223,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         val rootFolder = folderRule.newFolder(type.name)
         val parser = SchemaParser.provide(type, client, rootFolder)
-        val subjectName = "parameterized-mixed"
+        val subjectName = "parameterized-mixed-$subjectId"
         val extension = type.extension
 
         // Local
@@ -299,7 +302,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         )
 
         // Register the first version
-        client.register("user", io.confluent.kafka.schemaregistry.avro.AvroSchema(userFile.readText()), false)
+        client.register("user-$subjectId", io.confluent.kafka.schemaregistry.avro.AvroSchema(userFile.readText()), false)
 
         folderRule.newFile("settings.gradle")
         buildFile = folderRule.newFile("build.gradle")
@@ -314,7 +317,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
                 url = '$schemaRegistryEndpoint'
                 rootDir = 'src/main/avro'
                 compatibility {
-                    subject('user', 'User.avsc', 'AVRO')
+                    subject('user-$subjectId', 'User.avsc', 'AVRO')
                 }
             }
         """

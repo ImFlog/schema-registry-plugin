@@ -25,12 +25,14 @@ import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
+import java.util.UUID
 import java.util.stream.Stream
 
 class DownloadTaskIT : KafkaTestContainersUtils() {
 
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
+    private lateinit var subjectId: String
     private val objectMapper = ObjectMapper()
         .configure(SerializationFeature.INDENT_OUTPUT, true)
         .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
@@ -39,6 +41,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     fun init() {
         folderRule = TemporaryFolder()
         folderRule.create()
+        subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
@@ -51,7 +54,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @ArgumentsSource(SchemaArgumentProvider::class)
     fun `Should download schemas`(type: String, oldSchema: ParsedSchema, newSchema: ParsedSchema) {
         // Given
-        val subjectName = "parameterized-$type"
+        val subjectName = "parameterized-$type-$subjectId"
 
         client.register(subjectName, oldSchema)
         client.register(subjectName, newSchema)
@@ -117,7 +120,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         )
 
         // Given
-        val subjectName = "prettyprinted-$type"
+        val subjectName = "prettyprinted-$type-$subjectId"
 
         client.register(subjectName, schema)
 
@@ -168,7 +171,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         newSchema: ParsedSchema
     ) {
         // Given
-        val subjectName = "parameterized-$type"
+        val subjectName = "parameterized-$type-$subjectId"
 
         client.register(subjectName, oldSchema)
         client.register(subjectName, newSchema)
@@ -184,7 +187,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subjectPattern('parameterized-[a-zA-Z]+', '${folderRule.root.absolutePath}/src/main/$type/test')
+                    subjectPattern('parameterized-[a-zA-Z]+-$subjectId', '${folderRule.root.absolutePath}/src/main/$type/test')
                 }
             }
         """
@@ -219,7 +222,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subject('UNKNOWN', 'src/main/avro/test')
+                    subject('UNKNOWN-$subjectId', 'src/main/avro/test')
                 }
             }
         """
@@ -238,7 +241,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `Should save files under a custom output name`() {
         // Given
-        val subjectName = "test-user"
+        val subjectName = "test-user-$subjectId"
         val outputName = "other_output_name"
 
         client.register(
@@ -290,7 +293,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `Should download schema metadata in default directory`() {
         // Given
-        val subjectName = "test"
+        val subjectName = "test-$subjectId"
 
         client.register(
             subjectName,
@@ -344,7 +347,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `Should download schema metadata in specific directory`() {
         // Given
-        val subjectName = "test"
+        val subjectName = "test-spec-$subjectId"
 
         client.register(
             subjectName,
@@ -406,9 +409,9 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `Should download schema with references in specific directory`() {
         // Given
-        val subjectName = "reference_test"
+        val subjectName = "reference_test-$subjectId"
         val recordName = "UserReference"
-        val subjectNameLib = "reference_test_lib"
+        val subjectNameLib = "reference_test_lib-$subjectId"
         val recordNameLib = "UserReferenceLib"
 
         client.register(
@@ -488,7 +491,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `Should download schema that has been normalized`() {
         // Given
-        val subjectName = "test-proto"
+        val subjectName = "test-proto-$subjectId"
 
         client.register(
             subjectName,
@@ -571,7 +574,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
     @Test
     fun `DownloadTask should support custom root directory`() {
         // Given
-        val subjectName = "download-custom-root"
+        val subjectName = "download-custom-root-$subjectId"
         client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
 
         folderRule.create()
