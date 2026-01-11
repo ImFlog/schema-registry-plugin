@@ -3,7 +3,6 @@ package com.github.imflog.schema.registry.parser
 import com.github.imflog.schema.registry.LocalReference
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.assertj.core.api.Assertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.io.TempDir

@@ -568,6 +568,92 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             }""".trimIndent().trim())
         }}
 
+    @Test
+    fun `Download task should be UP-TO-DATE on second run`() {
+        // Given
+        val subjectName = "uptodate-test"
+        client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    subject('$subjectName', 'src/main/avro/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result1: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result1.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+
+        // When (second run)
+        val result2: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result2.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+    }
+
+    @Test
+    fun `Download task should not fail with serialization error when metadata is enabled`() {
+        // Given
+        val subjectName = "metadata-serialization-test"
+        client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            import com.github.imflog.schema.registry.tasks.download.MetadataExtension
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                download {
+                    metadata = new MetadataExtension(true, 'src/main/avro/metadata')
+                    subject('$subjectName', 'src/main/avro/test')
+                }
+            }
+        """
+        )
+
+        // When
+        val result: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(DownloadTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
     private class SchemaArgumentProvider : ArgumentsProvider {
         override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =
             Stream.of(

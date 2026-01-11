@@ -8,11 +8,14 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import java.io.File
 import javax.inject.Inject
 
 
-open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
+abstract class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     init {
         group = "registry"
         description = "Set subject compatibility in registry"
@@ -21,6 +24,13 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask(
     companion object {
         const val TASK_NAME = "configSubjectsTask"
     }
+
+    @get:OutputFile
+    @get:Optional
+    val dummyOutputFile: File?
+        get() = if (subjects.get().isNotEmpty()) {
+            project.layout.buildDirectory.file("tmp/$name/dummy").get().asFile
+        } else null
 
     @Input
     val url: Property<String> = objects.property(String::class.java)
@@ -44,5 +54,7 @@ open class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask(
         if (errorCount > 0) {
             throw GradleScriptException("$errorCount subject configuration not set, see logs for details", Throwable())
         }
+        dummyOutputFile?.parentFile?.mkdirs()
+        dummyOutputFile?.createNewFile()
     }
 }

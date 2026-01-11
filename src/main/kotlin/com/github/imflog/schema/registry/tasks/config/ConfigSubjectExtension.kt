@@ -2,6 +2,7 @@ package com.github.imflog.schema.registry.tasks.config
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
+import java.io.Serializable
 
 open class ConfigSubjectExtension(objects: ObjectFactory) {
 
@@ -19,4 +20,4 @@ open class ConfigSubjectExtension(objects: ObjectFactory) {
 data class ConfigSubject(
     val inputSubject: String,
     val compatibility: String
-)
+) : Serializable

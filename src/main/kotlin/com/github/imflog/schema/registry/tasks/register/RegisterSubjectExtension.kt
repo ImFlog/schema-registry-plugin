@@ -1,7 +1,6 @@
 package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.Subject
-import com.github.imflog.schema.registry.toSchemaType
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
