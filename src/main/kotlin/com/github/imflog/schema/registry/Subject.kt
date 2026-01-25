@@ -20,6 +20,8 @@ data class Subject(
     @Transient
     var ruleSet: RuleSet? = null
     var normalize: Boolean = false
+    private var metadataPath: String? = null
+    private var ruleSetPath: String? = null
 
     fun addReference(name: String, subject: String, version: Int): Subject {
         references.add(SchemaReference(name, subject, version))
@@ -37,15 +39,24 @@ data class Subject(
     }
 
     fun setMetadata(path: String): Subject {
-        val metadataContent = File(path).readText(Charsets.UTF_8)
-        metadata =  Gson().fromJson(metadataContent, Metadata::class.java)
+        metadataPath = path
         return this
     }
 
     fun setRuleSet(path: String): Subject {
-        val ruleSetContent = File(path).readText(Charsets.UTF_8)
-        ruleSet = Gson().fromJson(ruleSetContent, RuleSet::class.java)
+        ruleSetPath = path
         return this
+    }
+
+    fun resolveMetadata(rootDir: File) {
+        metadataPath?.let {
+            val metadataContent = rootDir.resolve(it).readText(Charsets.UTF_8)
+            metadata = Gson().fromJson(metadataContent, Metadata::class.java)
+        }
+        ruleSetPath?.let {
+            val ruleSetContent = rootDir.resolve(it).readText(Charsets.UTF_8)
+            ruleSet = Gson().fromJson(ruleSetContent, RuleSet::class.java)
+        }
     }
 
     fun setNormalized(normalize: Boolean): Subject {

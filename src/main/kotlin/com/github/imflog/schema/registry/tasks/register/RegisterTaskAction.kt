@@ -27,6 +27,7 @@ class RegisterTaskAction(
         writeOutputFileHeader()
         subjects.forEach { subject ->
             try {
+                subject.resolveMetadata(rootDir)
                 val schemaId = registerSchema(subject)
                 writeRegisteredSchemaOutput(subject.inputSubject, subject.file, schemaId)
             } catch (e: Exception) {

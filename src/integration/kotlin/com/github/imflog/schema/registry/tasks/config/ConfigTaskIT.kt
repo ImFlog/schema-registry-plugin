@@ -10,14 +10,17 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
+import java.util.UUID
 
 class ConfigTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
+    private lateinit var subjectId: String
 
     @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
+        subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
@@ -39,7 +42,7 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 config {
-                    subject('testSubject1', 'FULL_TRANSITIVE')
+                    subject('testSubject1-$subjectId', 'FULL_TRANSITIVE')
                 }
             }
             """.trimIndent()
@@ -114,8 +117,8 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 config {
-                    subject('testSubject1', 'FULL_TRANSITIVE')
-                    subject('testSubject2', 'FUL_TRANSITIVE') // intentionally broken
+                    subject('testSubject1-$subjectId', 'FULL_TRANSITIVE')
+                    subject('testSubject2-$subjectId', 'FUL_TRANSITIVE') // intentionally broken
                 }
             }
             """.trimIndent()

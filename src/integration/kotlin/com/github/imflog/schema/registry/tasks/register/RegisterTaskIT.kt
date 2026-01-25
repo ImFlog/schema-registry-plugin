@@ -290,6 +290,258 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
+    @Test
+    fun `RegisterSchemasTask should support custom root directory for avro`() {
+        folderRule.create()
+        val customRoot = folderRule.newFolder("src", "main", "avro")
+        val resultFolder = folderRule.newFolder("results-avro")
+
+        val addressFile = File(customRoot, "Address.avsc")
+        addressFile.writeText(
+            """
+            {
+              "type": "record",
+              "name": "Address",
+              "fields": [
+                { "name": "street", "type": "string" }
+              ]
+            }
+        """.trimIndent()
+        )
+
+        val userFile = File(customRoot, "User.avsc")
+        userFile.writeText(
+            """
+            {
+              "type": "record",
+              "name": "User",
+              "fields": [
+                { "name": "name", "type": "string" },
+                { "name": "address", "type": "Address" }
+              ]
+            }
+        """.trimIndent()
+        )
+
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build-avro.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
+                rootDir = 'src/main/avro'
+                register {
+                    subject('user-$subjectId', 'User.avsc', 'AVRO')
+                        .addLocalReference('Address', 'Address.avsc')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME, "-b", "build-avro.gradle")
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `RegisterSchemasTask should support custom root directory for json`() {
+        folderRule.create()
+        val customRoot = folderRule.newFolder("src", "main", "json")
+        val resultFolder = folderRule.newFolder("results-json")
+
+        val addressFile = File(customRoot, "Address.json")
+        addressFile.writeText(
+            """
+            {
+                "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                "${"$"}id": "Address",
+                "type": "object",
+                "properties": {
+                    "street": {"type": "string"}
+                }
+            }
+        """.trimIndent()
+        )
+
+        val userFile = File(customRoot, "User.json")
+        userFile.writeText(
+            """
+            {
+                "${"$"}schema": "http://json-schema.org/draft-07/schema#",
+                "${"$"}id": "User",
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "address": {"${"$"}ref": "Address"}
+                }
+            }
+        """.trimIndent()
+        )
+
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build-json.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
+                rootDir = 'src/main/json'
+                register {
+                    subject('user-$subjectId', 'User.json', 'JSON')
+                        .addLocalReference('Address', 'Address.json')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME, "-b", "build-json.gradle")
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `RegisterSchemasTask should support custom root directory for metadata and ruleset`() {
+        folderRule.create()
+        val customRoot = folderRule.newFolder("src", "main", "avro")
+        val resultFolder = folderRule.newFolder("results-avro")
+
+        val schemaFile = File(customRoot, "User.avsc")
+        schemaFile.writeText(
+            """
+            {
+              "type": "record",
+              "name": "User",
+              "fields": [
+                { "name": "name", "type": "string" }
+              ]
+            }
+        """.trimIndent()
+        )
+
+        val metadataFile = File(customRoot, "metadata.json")
+        metadataFile.writeText("""{"notes": "some notes"}""")
+
+        val ruleSetFile = File(customRoot, "ruleSet.json")
+        ruleSetFile.writeText("""{"domainRules": []}""")
+
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
+                rootDir = 'src/main/avro'
+                register {
+                    subject('user-$subjectId', 'User.avsc', 'AVRO')
+                        .setMetadata('metadata.json')
+                        .setRuleSet('ruleSet.json')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `RegisterSchemasTask should support custom root directory for protobuf`() {
+        folderRule.create()
+        val customRoot = folderRule.newFolder("src", "main", "proto")
+        val resultFolder = folderRule.newFolder("results")
+
+        val addressFile = File(customRoot, "com/example/address.proto")
+        addressFile.parentFile.mkdirs()
+        addressFile.writeText(
+            """
+            syntax = "proto3";
+            package com.example;
+            message Address {
+              string street = 1;
+            }
+        """.trimIndent()
+        )
+
+        val userFile = File(customRoot, "com/example/user.proto")
+        userFile.writeText(
+            """
+            syntax = "proto3";
+            package com.example;
+            import "com/example/address.proto";
+            message User {
+              string name = 1;
+              Address address = 2;
+            }
+        """.trimIndent()
+        )
+
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
+                rootDir = 'src/main/proto'
+                register {
+                    subject('user-$subjectId', 'com/example/user.proto', 'PROTOBUF')
+                        .addLocalReference('com/example/address.proto', 'com/example/address.proto')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
 
     @Test
     fun `RegisterSchemasTask should be UP-TO-DATE on second run`() {

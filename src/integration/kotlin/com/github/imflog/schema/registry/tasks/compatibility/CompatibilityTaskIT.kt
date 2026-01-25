@@ -23,15 +23,18 @@ import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
 import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
+import java.util.UUID
 import java.util.stream.Stream
 
 class CompatibilityTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
+    private lateinit var subjectId: String
 
     @BeforeEach
     fun init() {
         folderRule = TemporaryFolder()
+        subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
@@ -53,7 +56,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-$subjectId"
 
         val userSubject = "$subjectName-user"
         client.register(userSubject, userSchema)
@@ -108,7 +111,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-fail-$subjectId"
 
         val userSubject = "$subjectName-user"
         client.register(userSubject, userSchema)
@@ -162,7 +165,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         folderRule.newFolder(type.name)
 
-        val subjectName = "parameterized-$type"
+        val subjectName = "parameterized-$type-$subjectId"
         val playerPath = "$type/player.${type.extension}"
         val playerSubject = "$subjectName-player"
 
@@ -220,7 +223,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         val rootFolder = folderRule.newFolder(type.name)
         val parser = SchemaParser.provide(type, client, rootFolder)
-        val subjectName = "parameterized-mixed"
+        val subjectName = "parameterized-mixed-$subjectId"
         val extension = type.extension
 
         // Local
@@ -277,6 +280,57 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             .withPluginClasspath()
             .withDebug(true)
             .build()
+        Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `CompatibilityTask should support custom root directory`() {
+        folderRule.create()
+        val customRoot = folderRule.newFolder("src", "main", "avro")
+
+        val userFile = File(customRoot, "User.avsc")
+        userFile.writeText(
+            """
+            {
+              "type": "record",
+              "name": "User",
+              "fields": [
+                { "name": "name", "type": "string" }
+              ]
+            }
+        """.trimIndent()
+        )
+
+        // Register the first version
+        client.register("user-$subjectId", io.confluent.kafka.schemaregistry.avro.AvroSchema(userFile.readText()), false)
+
+        folderRule.newFile("settings.gradle")
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                rootDir = 'src/main/avro'
+                compatibility {
+                    subject('user-$subjectId', 'User.avsc', 'AVRO')
+                }
+            }
+        """
+        )
+
+        val result: BuildResult? = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 

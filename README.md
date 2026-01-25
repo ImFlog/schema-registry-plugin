@@ -74,6 +74,7 @@ schemaRegistry {
     url = 'http://registry-url:8081/'
     quiet = true
     outputDirectory = "/home/kafka/results"
+    rootDir = "/home/kafka/project"
     pretty = true
     clientConfig = [
         "basic.auth.credentials.source": "USER_INFO",
@@ -87,6 +88,8 @@ schemaRegistry {
 * `quiet` is whether you want to disable "INFO" level logs.
   This can be useful if you test the compatibility of a lot of schema.
   Could be removed if https://github.com/gradle/gradle/issues/1010 is fixed.
+* `rootDir` is the base directory used to resolve all task paths (schema files, references, output paths, metadata, rulesets).
+  Defaults to the Gradle project's root directory.
 * `outputDirectory` is the directory where action result will be stored as files (only register for now).
   This is an optional parameter.
 * `pretty` is whether the downloaded Avro or json schemas should be formatted ("pretty-printed") or minified.
@@ -122,6 +125,8 @@ schemaRegistry {
     }
 }
 ```
+
+All `outputPath` values are resolved relative to `rootDir` (defaults to the Gradle project root).
 
 Here is the list of all the signatures for the `subject` extension:
 
@@ -170,6 +175,7 @@ schemaRegistry {
 ```
 
 You have to list all the (subject, avsc file path) pairs that you want to test.
+All local file paths are resolved relative to `rootDir` (defaults to the Gradle project root).
 
 If you have references with other schemas stored in the registry that are required before the compatibility check,
 you can call the `addReference("name", "subject", version)`,
@@ -223,9 +229,9 @@ Mixing local and remote references is perfectly fine for Protobuf.
 
 The plugin will resolve Protobuf local references recursively, unpacking nested imports. 
 
-Protobuf will always resolve imports relative to the supplied import roots, which in our case is the project's root 
-directory, meaning both names and paths of each local reference would normally match. At the moment, it's 
-**not possible** to resolve a local reference against a file outside the root directory. 
+Protobuf will always resolve imports relative to the supplied import roots, which in our case is the configured
+`rootDir` (defaults to the Gradle project root), meaning both names and paths of each local reference would normally match.
+At the moment, it's **not possible** to resolve a local reference against a file outside the root directory.
 
 It has only been tested with `proto3`, though it should work for simple scenarios in `proto2` as well.
 
@@ -257,6 +263,8 @@ schemaRegistry {
     }
 }
 ```
+
+All local file paths are resolved relative to `rootDir` (defaults to the Gradle project root).
 
 If you have references to other schemas required before the register,
 you can call the `addReference("name", "subject", version)`,

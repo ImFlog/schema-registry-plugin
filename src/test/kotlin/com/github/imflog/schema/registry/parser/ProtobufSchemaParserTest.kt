@@ -955,6 +955,53 @@ class ProtobufSchemaParserTest {
         )
     }
 
+    @Test
+    fun `Should resolve references with custom root directory`() {
+        // Given
+        val customRoot = folderRule.resolve("src/main/proto")
+        customRoot.createDirectories()
+        val parser = ProtobufSchemaParser(schemaRegistryClient, customRoot.toFile())
+
+        val addressFile = customRoot.resolve("com/example/Address.proto").toFile()
+        addressFile.parentFile.mkdirs()
+        addressFile.writeText(
+            """
+            syntax = "proto3";
+            package com.example;
+            message Address {
+              string street = 1;
+            }
+        """.trimIndent()
+        )
+
+        val userFile = customRoot.resolve("com/example/User.proto").toFile()
+        userFile.writeText(
+            """
+            syntax = "proto3";
+            package com.example;
+            import "com/example/Address.proto";
+            message User {
+              string name = 1;
+              Address address = 2;
+            }
+        """.trimIndent()
+        )
+
+        // The path in LocalReference is relative to the rootDir.
+        val localRef = LocalReference("com/example/Address.proto", "com/example/Address.proto")
+
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "com/example/User.proto",
+            "com/example/User.proto",
+            listOf(localRef)
+        )
+
+        // Then
+        Assertions.assertThat(resolvedSchema).contains("message Address")
+        Assertions.assertThat(resolvedSchema).contains("message User")
+    }
+
     private fun givenALocalReference(referenceName: String, fileName: String, fileContent: String): LocalReference {
         val localReferenceFile = folderRule.resolve(fileName).toFile()
         localReferenceFile.toPath().parent.createDirectories()

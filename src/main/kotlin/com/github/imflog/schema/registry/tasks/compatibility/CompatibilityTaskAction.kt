@@ -26,6 +26,7 @@ class CompatibilityTaskAction(
         subjects.forEach { subject ->
             logger.debug("Loading schema for subject(${subject.inputSubject}) from ${subject.file}.")
             val isCompatible = try {
+                subject.resolveMetadata(rootDir)
                 val parsedSchema = SchemaParser
                     .provide(subject.type.toSchemaType(), client, rootDir)
                     .parseSchemaFromFile(subject)
