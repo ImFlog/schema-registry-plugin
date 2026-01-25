@@ -9,22 +9,26 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
-import org.junit.jupiter.params.support.ParameterDeclarations
 import org.junit.jupiter.params.provider.ArgumentsSource
+import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
+import java.util.UUID
 import java.util.stream.Stream
 
 class RegisterTaskIT : KafkaTestContainersUtils() {
     private lateinit var folderRule: TemporaryFolder
     private lateinit var buildFile: File
+    private lateinit var subjectId: String
 
     @BeforeEach
     fun beforeEach() {
         folderRule = TemporaryFolder()
+        subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
@@ -43,7 +47,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         val typeFolder = folderRule.newFolder(type.name)
         val resultFolder = folderRule.newFolder("${type.name}/results")
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-$subjectId"
         val extension = type.extension
 
         val userFile = typeFolder.resolve("user.$extension")
@@ -108,7 +112,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         folderRule.create()
         val typeFolder = folderRule.newFolder(type.name)
         val resultFolder = folderRule.newFolder("${type.name}/results")
-        val subjectName = "parameterized-${type.name}"
+        val subjectName = "parameterized-${type.name}-$subjectId"
         val extension = type.extension
 
         val userFile = typeFolder.resolve("user.$extension")
@@ -180,7 +184,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     ) {
         folderRule.create()
         folderRule.newFolder(type.name)
-        val subjectName = "parameterized-${type.name}-local"
+        val subjectName = "parameterized-${type.name}-local-$subjectId"
         val extension = type.extension
 
         val userPath = "$type/user.$extension"
@@ -235,7 +239,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         //  Also, when all format support mixed local + remote, we will keep only this test.
         folderRule.create()
         folderRule.newFolder(type.name)
-        val subjectName = "parameterized-${type.name}-mixed"
+        val subjectName = "parameterized-${type.name}-mixed-$subjectId"
         val extension = type.extension
 
         // Local
@@ -286,6 +290,66 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         Assertions.assertThat(result?.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
+
+    @Test
+    fun `RegisterSchemasTask should be UP-TO-DATE on second run`() {
+        folderRule.create()
+        val typeFolder = folderRule.newFolder("avro")
+        val resultFolder = folderRule.newFolder("avro/results")
+
+        val userFile = typeFolder.resolve("user.avsc")
+        userFile.writeText(
+            """{
+            "type": "record",
+            "name": "User",
+            "fields": [
+                { "name": "name", "type": "string" }
+            ]
+        }"""
+        )
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                outputDirectory = '${resultFolder.absolutePath}'
+                register {
+                    subject('user', '${userFile.absolutePath}', 'AVRO')
+                }
+            }
+        """
+        )
+
+        // When
+        val result1: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result1.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+
+        // When (second run)
+        val result2: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result2.task(":registerSchemasTask")?.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+    }
 
     private class SchemaArgumentProvider : ArgumentsProvider {
         override fun provideArguments(parameters: ParameterDeclarations, context: ExtensionContext): Stream<out Arguments> =

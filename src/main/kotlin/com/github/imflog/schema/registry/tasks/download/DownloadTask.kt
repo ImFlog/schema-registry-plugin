@@ -8,12 +8,13 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import javax.inject.Inject
 
 
-open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
+abstract class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
 
     companion object {
         const val TASK_NAME = "downloadSchemasTask"
@@ -23,6 +24,17 @@ open class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTas
         group = "registry"
         description = "Download schemas from the registry"
     }
+
+    @get:OutputDirectories
+    val outputDirectories: List<File>
+        get() {
+            val outputDirs = subjects.get().map { rootDir.get().resolve(it.outputPath) }.toMutableList()
+            val metadataConfig = metadataConfig.get()
+            if (metadataConfig.enabled && metadataConfig.outputPath != null) {
+                outputDirs.add(rootDir.get().resolve(metadataConfig.outputPath))
+            }
+            return outputDirs.distinct()
+        }
 
     @Input
     val metadataConfig: Property<MetadataExtension> = objects.property(MetadataExtension::class.java)

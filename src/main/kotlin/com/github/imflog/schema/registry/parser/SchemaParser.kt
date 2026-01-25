@@ -6,9 +6,6 @@ import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.Subject
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import io.confluent.kafka.schemaregistry.client.rest.entities.Metadata
-import io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet
-import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import java.io.File
 
 abstract class SchemaParser(

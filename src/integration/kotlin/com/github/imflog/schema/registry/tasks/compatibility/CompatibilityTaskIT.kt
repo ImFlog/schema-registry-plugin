@@ -15,6 +15,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -277,6 +278,61 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             .withDebug(true)
             .build()
         Assertions.assertThat(result?.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+    }
+
+    @Test
+    fun `CompatibilityTask should be UP-TO-DATE on second run`() {
+        // Given
+        val subjectName = "uptodate-test"
+        client.register(
+            subjectName,
+            AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}""")
+        )
+
+        folderRule.create()
+        val userFile = folderRule.newFile("user.avsc")
+        userFile.writeText("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"},{"name":"address","type":["null","string"],"default":null}]}""")
+
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                compatibility {
+                    subject('$subjectName', '${userFile.absolutePath}', 'AVRO')
+                }
+            }
+        """
+        )
+
+        // When
+        val result1: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result1.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+
+        // When (second run)
+        val result2: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(CompatibilityTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result2.task(":testSchemasTask")?.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
     }
 
     private class SchemaSuccessArgumentProvider : ArgumentsProvider {

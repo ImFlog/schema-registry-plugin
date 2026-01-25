@@ -5,25 +5,28 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.Metadata
 import io.confluent.kafka.schemaregistry.client.rest.entities.RuleSet
 import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
 import java.io.File
+import java.io.Serializable
 
 data class Subject(
     val inputSubject: String,
     val file: String,
     val type: String
-) {
+) : Serializable {
+    @Transient
     val references: MutableList<SchemaReference> = mutableListOf()
     val localReferences: MutableList<LocalReference> = mutableListOf()
+    @Transient
     var metadata: Metadata? = null
+    @Transient
     var ruleSet: RuleSet? = null
     var normalize: Boolean = false
-
 
     fun addReference(name: String, subject: String, version: Int): Subject {
         references.add(SchemaReference(name, subject, version))
         return this
     }
 
-    fun addReference(name: String, subject:String): Subject {
+    fun addReference(name: String, subject: String): Subject {
         references.add(SchemaReference(name, subject, -1))
         return this
     }
@@ -49,6 +52,4 @@ data class Subject(
         this.normalize = normalize
         return this
     }
-
-
 }

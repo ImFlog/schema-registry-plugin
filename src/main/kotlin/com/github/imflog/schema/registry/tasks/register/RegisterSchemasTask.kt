@@ -9,7 +9,9 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import javax.inject.Inject
@@ -43,6 +45,21 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
 
     @Input
     val rootDir: Property<File> = objects.property(File::class.java)
+
+    @get:InputFiles
+    val inputFiles: List<File>
+        get() = subjects.get().flatMap { subject ->
+            val files = mutableListOf(rootDir.get().resolve(subject.file))
+            subject.localReferences.forEach { files.add(rootDir.get().resolve(it.path)) }
+            files
+        }
+
+    @get:OutputFile
+    @get:Optional
+    val outputFile: File?
+        get() = outputDirectory.orNull?.let {
+            rootDir.get().resolve(it).resolve("registered.csv")
+        }
 
     @TaskAction
     fun registerSchemas() {

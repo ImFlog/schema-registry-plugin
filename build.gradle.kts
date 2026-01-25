@@ -73,7 +73,7 @@ configurations["integrationImplementation"].extendsFrom(
 
 dependencies {
     integrationImplementation("org.wiremock:wiremock-standalone:3.13.2")
-    integrationImplementation("org.testcontainers:kafka:1.21.3")
+    integrationImplementation("org.testcontainers:kafka:1.21.4")
 }
 
 task<Test>("integrationTest") {

@@ -56,6 +56,51 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
     }
 
     @Test
+    fun `ConfigTask should be UP-TO-DATE on second run`() {
+        folderRule.create()
+        buildFile = folderRule.newFile("build.gradle")
+        buildFile.writeText(
+            """
+            plugins {
+                id 'java'
+                id 'com.github.imflog.kafka-schema-registry-gradle-plugin'
+            }
+
+            schemaRegistry {
+                url = '$schemaRegistryEndpoint'
+                config {
+                    subject('testSubject1', 'FULL_TRANSITIVE')
+                }
+            }
+            """.trimIndent()
+        )
+
+        // When
+        val result1: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(ConfigTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result1.task(":configSubjectsTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+
+        // When (second run)
+        val result2: BuildResult = GradleRunner.create()
+            .withGradleVersion("8.6")
+            .withProjectDir(folderRule.root)
+            .withArguments(ConfigTask.TASK_NAME)
+            .withPluginClasspath()
+            .withDebug(true)
+            .build()
+
+        // Then
+        Assertions.assertThat(result2.task(":configSubjectsTask")?.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+    }
+
+    @Test
     fun `ConfigTask should detect and reject invalid compatibility settings`() {
         folderRule.create()
         buildFile = folderRule.newFile("build.gradle")

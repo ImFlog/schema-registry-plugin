@@ -4,6 +4,8 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 
+import java.io.Serializable
+
 open class DownloadSubjectExtension(objects: ObjectFactory) {
 
     companion object {
@@ -66,11 +68,11 @@ data class DownloadSubject(
     val regex: Boolean = false,
     val outputFileName: String? = null,
     val downloadReferences: Boolean = false
-)
+) : Serializable
 
 data class MetadataExtension(
     val enabled: Boolean = false,
     val outputPath: String? = null
-) {
+) : Serializable {
     constructor(enabled: Boolean) : this(enabled, null)
 }
