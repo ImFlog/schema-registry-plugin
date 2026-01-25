@@ -11,7 +11,7 @@ Subject locationCoordSubject = new Subject('location-latlong', 'schemas/protobuf
 schemaRegistry {
     url = 'http://localhost:8081'
     quiet = false
-    rootDir = new File(".").getAbsolutePath()
+    rootDir = project.rootDir.toString()
     outputDirectory = 'schemas/protobuf/results/'
     pretty = true
     failFast = true
