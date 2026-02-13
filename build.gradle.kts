@@ -40,7 +40,7 @@ java {
 // Unit tests
 dependencies {
     testImplementation(gradleTestKit())
-    testImplementation("org.junit.platform:junit-platform-launcher:6.0.1")
+    testImplementation("org.junit.platform:junit-platform-launcher:6.0.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:6.0.2")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:6.0.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:6.0.2")
