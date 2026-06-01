@@ -24,9 +24,9 @@ object RegistryClientWrapper {
             buildHeaders(config)
         )
 
-    private fun buildHeaders(config: Map<String, String>): Map<String, String>? {
+    internal fun buildHeaders(config: Map<String, String>): Map<String, String>? {
         val headers = config
-            .filterKeys { it.startsWith(HEADER_PREFIX) }
+            .filterKeys { it.startsWith(HEADER_PREFIX) && it.length > HEADER_PREFIX.length }
             .mapKeys { it.key.removePrefix(HEADER_PREFIX) }
         return headers.ifEmpty { null }
     }
