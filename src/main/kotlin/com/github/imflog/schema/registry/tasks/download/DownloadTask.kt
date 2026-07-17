@@ -49,6 +49,9 @@ abstract class DownloadTask @Inject constructor(objects: ObjectFactory) : Defaul
     val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
+    val clientHeadersConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+
+    @Input
     val pretty: Property<Boolean> = objects.property(Boolean::class.java)
 
     @Input
@@ -60,7 +63,7 @@ abstract class DownloadTask @Inject constructor(objects: ObjectFactory) : Defaul
     @TaskAction
     fun downloadSchemas() {
         val errorCount = DownloadTaskAction(
-            RegistryClientWrapper.client(url.get(), clientConfig.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get(), clientHeadersConfig.get()),
             rootDir.get(),
             subjects.get(),
             metadataConfig.get(),

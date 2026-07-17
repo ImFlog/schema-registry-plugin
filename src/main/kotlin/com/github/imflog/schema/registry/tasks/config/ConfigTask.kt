@@ -39,6 +39,9 @@ abstract class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultT
     val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
+    val clientHeadersConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+
+    @Input
     val subjects: ListProperty<ConfigSubject> = objects.listProperty(ConfigSubject::class.java)
 
     @Input
@@ -47,7 +50,7 @@ abstract class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultT
     @TaskAction
     fun configureSubjects() {
         val errorCount = ConfigTaskAction(
-            RegistryClientWrapper.client(url.get(), clientConfig.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get(), clientHeadersConfig.get()),
             subjects.get(),
             failFast.getOrElse(false)
         ).run()

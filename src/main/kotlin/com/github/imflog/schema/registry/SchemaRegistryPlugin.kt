@@ -45,6 +45,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure { downloadTask ->
                     downloadTask.url.set(globalExtension.url)
                     downloadTask.clientConfig.set(globalExtension.clientConfig)
+                    downloadTask.clientHeadersConfig.set(globalExtension.clientHeadersConfig)
                     downloadTask.subjects.set(downloadExtension.subjects)
                     downloadTask.metadataConfig.set(downloadExtension.metadata)
                     downloadTask.pretty.set(globalExtension.pretty)
@@ -56,6 +57,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure { registerSchemasTask ->
                     registerSchemasTask.url.set(globalExtension.url)
                     registerSchemasTask.clientConfig.set(globalExtension.clientConfig)
+                    registerSchemasTask.clientHeadersConfig.set(globalExtension.clientHeadersConfig)
                     registerSchemasTask.subjects.set(registerExtension.subjects)
                     registerSchemasTask.outputDirectory.set(globalExtension.outputDirectory)
                     registerSchemasTask.failFast.set(globalExtension.failFast)
@@ -66,6 +68,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure { compatibilityTask ->
                     compatibilityTask.url.set(globalExtension.url)
                     compatibilityTask.clientConfig.set(globalExtension.clientConfig)
+                    compatibilityTask.clientHeadersConfig.set(globalExtension.clientHeadersConfig)
                     compatibilityTask.subjects.set(compatibilityExtension.subjects)
                     compatibilityTask.failFast.set(globalExtension.failFast)
                     compatibilityTask.rootDir.set(globalExtension.rootDir.map { project.file(it) }.orElse(project.rootDir))
@@ -75,6 +78,7 @@ class SchemaRegistryPlugin : Plugin<Project> {
                 .configure { configTask ->
                     configTask.url.set(globalExtension.url)
                     configTask.clientConfig.set(globalExtension.clientConfig)
+                    configTask.clientHeadersConfig.set(globalExtension.clientHeadersConfig)
                     configTask.subjects.set(configExtension.subjects)
                     configTask.failFast.set(globalExtension.failFast)
                 }
