@@ -81,6 +81,11 @@ schemaRegistry {
         "basic.auth.user.info": "user:password",
         // ...
     ]
+    clientHeadersConfig = [
+        "X-Client-Id": "my-client-id",
+        "X-API-key": "abcd1234"
+        // ...
+    ]
 }
 ```
 
@@ -97,6 +102,8 @@ schemaRegistry {
 * `clientConfig` is a map of configuration properties for the Schema Registry client.
   This is an optional parameter. All values from the [Confluent Schema Registry client configuration](https://docs.confluent.io/platform/current/schema-registry/sr-client-configs.html)
   are supported.
+* `clientHeadersConfig` is a map of HTTP headers to add to the Schema Registry client requests.
+  This is an optional parameter.
 
 ### Download schemas
 
