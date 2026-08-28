@@ -1,0 +1,14 @@
+[
+  "null",
+  {
+    "type": "record",
+    "name": "Wrapper",
+    "namespace": "com.mycompany",
+    "fields": [
+      {
+        "name": "value",
+        "type": "com.mycompany.B"
+      }
+    ]
+  }
+]

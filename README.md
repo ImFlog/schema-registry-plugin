@@ -219,6 +219,9 @@ Notes:
 
 Mixing local and remote references is perfectly fine for Avro without specific configurations.
 
+Local references are resolved whatever the shape of the root schema: a record (or any other complex type),
+a union (`["null", "com.mycompany.MyType"]`) or a plain type name (`"com.mycompany.MyType"`).
+
 #### Json
 
 Mixing local and remote references is perfectly fine for JSON.
@@ -316,6 +319,9 @@ Notes:
 #### Avro
 
 Mixing local and remote references is perfectly fine for Avro without specific configurations.
+
+Local references are resolved whatever the shape of the root schema: a record (or any other complex type),
+a union (`["null", "com.mycompany.MyType"]`) or a plain type name (`"com.mycompany.MyType"`).
 
 #### Json
 
