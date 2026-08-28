@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.parser
 
 import com.github.imflog.schema.registry.LocalReference
+import com.github.imflog.schema.registry.SchemaParsingException
 import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import org.json.JSONArray
@@ -13,11 +14,6 @@ class AvroSchemaParser(
     rootDir: File
 ) : SchemaParser(client, rootDir) {
 
-    data class MainSchema(
-        val schema: JSONObject,
-        val isObject: Boolean,
-    )
-
     override val schemaType: SchemaType = SchemaType.AVRO
 
     override fun resolveLocalReferences(
@@ -25,9 +21,6 @@ class AvroSchemaParser(
         schemaPath: String,
         localReferences: List<LocalReference>
     ): String {
-        // Load and parse the main schema
-        val mainSchema = loadMainSchema(loadContent(schemaPath))
-
         // Create a map of reference name to schema content
         val referenceSchemas = localReferences.associate { reference ->
             reference.name to JSONObject(reference.content(rootDir))
@@ -36,15 +29,31 @@ class AvroSchemaParser(
         // Set to track which references have already been visited
         val visitedReferences = mutableSetOf<String>()
 
-        // Process the schema recursively
-        val resolvedSchema = resolveReferences(mainSchema.schema, referenceSchemas, null, visitedReferences)
-        if (mainSchema.isObject) {
-            return resolvedSchema.toString()
-        }
-        val myArray = JSONArray()
-        myArray.put(resolvedSchema.get("items"))
+        // A schema root is a complex type (object), a union (array) or a plain type name (string)
+        return when (val mainSchema = JSONTokener(loadContent(schemaPath)).nextValue()) {
+            is JSONObject -> resolveReferences(mainSchema, referenceSchemas, null, visitedReferences).toString()
 
-        return myArray.toString();
+            // Wrap the union in a "type" holder so that it goes through the union branch of
+            // resolveReferences, then unwrap it to keep the union at the root.
+            is JSONArray -> resolveReferences(
+                JSONObject().put("type", mainSchema),
+                referenceSchemas,
+                null,
+                visitedReferences
+            ).getJSONArray("type").toString()
+
+            // A root type name is either a local reference to inline, or a type to keep as is
+            is String -> when (val resolved = handleStringRef(mainSchema, null, referenceSchemas, visitedReferences)) {
+                is JSONObject -> resolved.toString()
+                else -> JSONObject.quote(mainSchema)
+            }
+
+            else -> throw SchemaParsingException(
+                subject,
+                schemaType,
+                "the schema root must be an object, a union array or a type name"
+            )
+        }
     }
 
     private fun resolveReferences(
@@ -78,7 +87,7 @@ class AvroSchemaParser(
                         )
                     )
                 }
-                if (schema.opt("items") is org.json.JSONArray) {
+                if (schema.opt("items") is JSONArray) {
                     val items = schema.getJSONArray("items")
                     for (i in 0 until items.length()) {
                         items.put(
@@ -212,26 +221,5 @@ class AvroSchemaParser(
         }
 
         return null
-    }
-
-    // if json is object return it, if array with one item, coerce it into a json object
-    private fun loadMainSchema(input: String): MainSchema {
-        return when (val parsedInput = JSONTokener(input).nextValue()) {
-            is JSONObject -> MainSchema(parsedInput, true)
-            is JSONArray -> {
-                if (parsedInput.length() == 1) {
-                    val mySchema = JSONObject();
-                    mySchema.put("type", "array")
-                    mySchema.put("items", parsedInput.get(0))
-
-                    MainSchema(mySchema, false)
-                } else {
-                    throw IllegalArgumentException("Invalid schema format: array must contain exactly one JSONObject")
-                }
-            }
-            else -> {
-                throw IllegalArgumentException("Invalid schema format: must be a JSONObject or an array containing a JSONObject")
-            }
-        }
     }
 }

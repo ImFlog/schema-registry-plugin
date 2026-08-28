@@ -1,6 +1,7 @@
 package com.github.imflog.schema.registry.parser
 
 import com.github.imflog.schema.registry.LocalReference
+import com.github.imflog.schema.registry.SchemaParsingException
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient
 import org.assertj.core.api.Assertions
 import org.intellij.lang.annotations.Language
@@ -227,6 +228,171 @@ class AvroSchemaParserTest {
         Assertions.assertThat(resolved).isEqualTo(
             JSONArray(expected).toString()
         )
+    }
+
+    @Test
+    fun `Should resolve union of primitive types correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectArrayPrimitiveUnion.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONArray(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """
+          [
+            "null",
+            "string"
+          ]
+        """
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONArray(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should resolve union mixing a primitive and a local reference correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectArrayMixedUnion.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONArray(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """
+          [
+            "null",
+            {
+              "name":"B",
+              "namespace": "com.mycompany",
+              "type": "enum",
+              "symbols": ["X1", "X2"]
+            }
+          ]
+        """
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONArray(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should resolve union containing an inline definition correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectArrayInlineUnion.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONArray(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """
+          [
+            "null",
+            {
+              "type": "record",
+              "name": "Wrapper",
+              "namespace": "com.mycompany",
+              "fields": [
+                {
+                  "name": "value",
+                  "type": {
+                    "name":"B",
+                    "type": "enum",
+                    "symbols": ["X1", "X2"]
+                  }
+                }
+              ]
+            }
+          ]
+        """
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONArray(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should resolve a type name root referencing a local reference correctly`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectStringRef.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        val resolved = JSONObject(resolvedSchema).toString()
+
+        @Language("JSON")
+        val expected = """
+          {
+            "name":"B",
+            "namespace": "com.mycompany",
+            "type": "enum",
+            "symbols": ["X1", "X2"]
+          }
+        """
+
+        Assertions.assertThat(resolved).isEqualTo(
+            JSONObject(expected).toString()
+        )
+    }
+
+    @Test
+    fun `Should keep a primitive type name root untouched`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectStringPrimitive.avsc")
+        // When
+        val resolvedSchema = parser.resolveLocalReferences(
+            "test",
+            schema.path,
+            listOf(reference)
+        )
+        // Then
+        Assertions.assertThat(resolvedSchema).isEqualTo(""""string"""")
+    }
+
+    @Test
+    fun `Should throw when the schema root is neither an object, a union nor a type name`() {
+        // Given
+        val parser = AvroSchemaParser(schemaRegistryClient, File(testFilesPath))
+        val reference = LocalReference("B", "${testFilesPath}testType.avsc")
+        val schema = File("${testFilesPath}testSubjectInvalidRoot.avsc")
+        // When / Then
+        Assertions.assertThatThrownBy {
+            parser.resolveLocalReferences(
+                "test",
+                schema.path,
+                listOf(reference)
+            )
+        }.isInstanceOf(SchemaParsingException::class.java)
     }
 
     @Test
