@@ -6,7 +6,6 @@ import com.github.imflog.schema.registry.SchemaType
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import org.json.JSONArray
 import org.json.JSONObject
-import org.json.JSONTokener
 import java.io.File
 
 class AvroSchemaParser(
@@ -29,18 +28,20 @@ class AvroSchemaParser(
         // Set to track which references have already been visited
         val visitedReferences = mutableSetOf<String>()
 
+        // Wrap the root in a "type" holder. It doubles as the union holder below, and it lets
+        // JSONObject parse the schema whatever its root is: JSONTokener.nextValue() cannot be
+        // used here as it fails on nested values since org.json 20250107.
+        val schemaHolder = JSONObject("""{"type": ${loadContent(schemaPath)}}""")
+
         // A schema root is a complex type (object), a union (array) or a plain type name (string)
-        return when (val mainSchema = JSONTokener(loadContent(schemaPath)).nextValue()) {
+        return when (val mainSchema = schemaHolder.get("type")) {
             is JSONObject -> resolveReferences(mainSchema, referenceSchemas, null, visitedReferences).toString()
 
-            // Wrap the union in a "type" holder so that it goes through the union branch of
-            // resolveReferences, then unwrap it to keep the union at the root.
-            is JSONArray -> resolveReferences(
-                JSONObject().put("type", mainSchema),
-                referenceSchemas,
-                null,
-                visitedReferences
-            ).getJSONArray("type").toString()
+            // The holder sends the union through the union branch of resolveReferences,
+            // unwrap it afterwards to keep the union at the root.
+            is JSONArray -> resolveReferences(schemaHolder, referenceSchemas, null, visitedReferences)
+                .getJSONArray("type")
+                .toString()
 
             // A root type name is either a local reference to inline, or a type to keep as is
             is String -> when (val resolved = handleStringRef(mainSchema, null, referenceSchemas, visitedReferences)) {
