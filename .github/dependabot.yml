@@ -5,3 +5,16 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    groups:
+      test-dependencies:
+        patterns:
+          - "org.junit*"
+          - "org.assertj:*"
+          - "io.mockk:*"
+          - "org.wiremock:*"
+          - "org.testcontainers:*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
