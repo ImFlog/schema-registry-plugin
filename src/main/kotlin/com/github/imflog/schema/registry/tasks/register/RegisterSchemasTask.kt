@@ -34,6 +34,9 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
+    val clientHeadersConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+
+    @Input
     val subjects: ListProperty<Subject> = objects.listProperty(Subject::class.java)
 
     @Input
@@ -64,7 +67,7 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     @TaskAction
     fun registerSchemas() {
         val errorCount = RegisterTaskAction(
-            RegistryClientWrapper.client(url.get(), clientConfig.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get(), clientHeadersConfig.get()),
             rootDir.get(),
             subjects.get(),
             outputDirectory.orNull,

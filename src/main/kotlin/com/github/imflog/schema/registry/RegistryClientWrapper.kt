@@ -13,11 +13,12 @@ import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
  */
 object RegistryClientWrapper {
 
-    fun client(url: String, config: Map<String, String>): SchemaRegistryClient =
+    fun client(url: String, config: Map<String, String>, headersConfig: Map<String, String>): SchemaRegistryClient =
         CachedSchemaRegistryClient(
             listOf(url),
             100,
             listOf(AvroSchemaProvider(), JsonSchemaProvider(), ProtobufSchemaProvider()),
             config,
+            headersConfig.ifEmpty { null }
         )
 }

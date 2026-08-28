@@ -49,6 +49,9 @@ abstract class CompatibilityTask @Inject constructor(objects: ObjectFactory) : D
     val clientConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
 
     @Input
+    val clientHeadersConfig: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+
+    @Input
     val subjects: ListProperty<Subject> = objects.listProperty(Subject::class.java)
 
     @Input
@@ -60,7 +63,7 @@ abstract class CompatibilityTask @Inject constructor(objects: ObjectFactory) : D
     @TaskAction
     fun testCompatibility() {
         val errorCount = CompatibilityTaskAction(
-            RegistryClientWrapper.client(url.get(), clientConfig.get()),
+            RegistryClientWrapper.client(url.get(), clientConfig.get(), clientHeadersConfig.get()),
             rootDir.get(),
             subjects.get(),
             failFast.getOrElse(false)

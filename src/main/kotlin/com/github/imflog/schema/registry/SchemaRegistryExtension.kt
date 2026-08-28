@@ -35,4 +35,9 @@ open class SchemaRegistryExtension(objects: ObjectFactory) {
         objects.mapProperty(String::class.java, String::class.java).apply {
             convention(mutableMapOf())
         }
+
+    val clientHeadersConfig: MapProperty<String, String> =
+        objects.mapProperty(String::class.java, String::class.java).apply {
+            convention(mutableMapOf())
+        }
 }
