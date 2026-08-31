@@ -19,12 +19,12 @@ jobs:
         ]
     steps:
       - uses: "actions/checkout@v7"
-      - uses: "gradle/actions/wrapper-validation@v5"
+      - uses: "gradle/actions/wrapper-validation@v6"
       - uses: "actions/setup-java@v6"
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: "gradle/actions/setup-gradle@v5"
+      - uses: "gradle/actions/setup-gradle@v6"
         with:
           dependency-graph: "generate-and-submit"
       - name: "Build with Gradle"
