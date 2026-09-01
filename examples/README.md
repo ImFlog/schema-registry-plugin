@@ -23,6 +23,14 @@ Those are full example of how to use the plugin. They all do the same thing but 
 * test the compatibility with the `company_v2` 
 You can find the used schemas and the downloaded in [schemas/avro/company.avsc](schemas/avro/company.avsc) for instance.
 
+## Client headers
+The `avro`, `avro-kts` and `ssl` samples declare a `clientHeadersConfig` map.
+Every entry is sent as an HTTP header on all the calls made to the registry
+(register, config, download and compatibility), which is handy for registries
+sitting behind a gateway expecting an API key or a client identifier.
+The local registry started by docker-compose simply ignores those headers,
+so the samples keep working as is.
+
 ## Override confluent version
 The goal is to show how it is possible to override the confluent version.
 The run tasks should work but you can run `./gradlew :override-confluent-version:buildEnvironment` to see the resolved confluent version.

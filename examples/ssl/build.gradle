@@ -21,6 +21,12 @@ schemaRegistry {
             "schema.registry.ssl.keystore.location"  : "$project.rootDir/../src/integration/resources/secrets/registry.keystore.jks",
             "schema.registry.ssl.keystore.password"  : "registry"
     ]
+    // Extra HTTP headers sent with every call to the registry (optional).
+    // Useful for registries behind a gateway requiring an API key or a client identifier.
+    clientHeadersConfig = [
+            'X-Client-Id': 'schema-registry-plugin-examples',
+            'X-Api-Key'  : 'abcd1234'
+    ]
 
     register {
         subject('company', 'schemas/avro/company.avsc', 'AVRO')

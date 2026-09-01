@@ -10,6 +10,13 @@ schemaRegistry {
     outputDirectory.set("schemas/avro/results/")
     pretty.set(true)
     failFast.set(true)
+    // Extra HTTP headers sent with every call to the registry (optional)
+    clientHeadersConfig.set(
+        mapOf(
+            "X-Client-Id" to "schema-registry-plugin-examples",
+            "X-Api-Key" to "abcd1234"
+        )
+    )
 
     register {
         subject("company", "schemas/avro/company.avsc", "AVRO")
