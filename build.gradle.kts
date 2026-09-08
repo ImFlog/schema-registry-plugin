@@ -58,12 +58,11 @@ val integrationSource = sourceSets.create("integration") {
     runtimeClasspath += sourceSets.main.get().output
 }
 
-val integrationImplementation: Configuration by configurations.getting {
-    extendsFrom(
-        configurations.implementation.get(),
-        configurations.testImplementation.get()
-    )
-}
+val integrationImplementation: Configuration = configurations.getByName("integrationImplementation")
+integrationImplementation.extendsFrom(
+    configurations.implementation.get(),
+    configurations.testImplementation.get()
+)
 
 configurations["integrationImplementation"].extendsFrom(
     configurations.runtimeOnly.get(),
@@ -76,7 +75,7 @@ dependencies {
     integrationImplementation("org.testcontainers:kafka:1.21.4")
 }
 
-task<Test>("integrationTest") {
+tasks.register<Test>("integrationTest") {
     description = "Runs integration tests."
     group = "verification"
 

@@ -3,13 +3,13 @@ package com.github.imflog.schema.registry.tasks.compatibility
 import com.github.imflog.schema.registry.SchemaType
 import com.github.imflog.schema.registry.Subject
 import com.github.imflog.schema.registry.parser.SchemaParser
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -17,32 +17,49 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
 import java.util.UUID
 import java.util.stream.Stream
 
-class CompatibilityTaskIT : KafkaTestContainersUtils() {
-    private lateinit var folderRule: TemporaryFolder
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class CompatibilityTaskIT(private val gradleVersion: String) : KafkaTestContainersUtils() {
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
     private lateinit var subjectId: String
 
     @BeforeEach
     fun init() {
-        folderRule = TemporaryFolder()
         subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
     fun tearDown() {
-        client.allSubjects.reversed().forEach {
-            client.deleteSubject(it)
+        deleteAllSubjects()
+    }
+
+    /**
+     * A schema cannot be deleted while another one still references it, and `allSubjects` carries no
+     * dependency ordering, so sweep repeatedly and stop once a pass deletes nothing.
+     */
+    private fun deleteAllSubjects() {
+        var remaining = client.allSubjects.toList()
+        while (remaining.isNotEmpty()) {
+            val undeleted = remaining.filter { subject ->
+                runCatching { client.deleteSubject(subject) }.isFailure
+            }
+            if (undeleted.size == remaining.size) break
+            remaining = undeleted
         }
-        folderRule.delete()
     }
 
     @ParameterizedTest
@@ -53,8 +70,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
     ) {
-        folderRule.create()
-        folderRule.newFolder(type.name)
+        tempDir.resolve(type.name).mkdirs()
 
         val subjectName = "parameterized-${type.name}-$subjectId"
 
@@ -67,13 +83,13 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
         client.register(playerSubject, playerSchema)
 
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = tempDir.resolve(playerPath)
         playerFile.writeText(playerSchemaUpdated)
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -91,8 +107,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -108,8 +124,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
     ) {
-        folderRule.create()
-        folderRule.newFolder(type.name)
+        tempDir.resolve(type.name).mkdirs()
 
         val subjectName = "parameterized-${type.name}-fail-$subjectId"
 
@@ -121,13 +136,13 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
         client.register(playerSubject, playerSchema)
 
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = tempDir.resolve(playerPath)
         playerFile.writeText(playerSchemaUpdated)
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -145,8 +160,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -162,8 +177,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         playerSchema: ParsedSchema,
         playerSchemaUpdated: String
     ) {
-        folderRule.create()
-        folderRule.newFolder(type.name)
+        tempDir.resolve(type.name).mkdirs()
 
         val subjectName = "parameterized-$type-$subjectId"
         val playerPath = "$type/player.${type.extension}"
@@ -171,17 +185,17 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
         client.register(playerSubject, playerSchema)
 
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = tempDir.resolve(playerPath)
         playerFile.writeText(playerSchemaUpdated)
 
         val userPath = "$type/user.${type.extension}"
-        val userFile = folderRule.newFile(userPath)
+        val userFile = tempDir.resolve(userPath)
         userFile.writeText(userSchema.canonicalString())
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -200,8 +214,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -220,28 +234,27 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
     ) {
         // TODO: Instead of repeating code, we could create build.gradle files in resources.
         //  Also, when all format support mixed local + remote, we will keep only this test.
-        folderRule.create()
-        val rootFolder = folderRule.newFolder(type.name)
+        val rootFolder = tempDir.resolve(type.name).apply { mkdirs() }
         val parser = SchemaParser.provide(type, client, rootFolder)
         val subjectName = "parameterized-mixed-$subjectId"
         val extension = type.extension
 
         // Local
         val userPath = "$type/user.$extension"
-        val userFile = folderRule.newFile(userPath)
+        val userFile = tempDir.resolve(userPath)
         userFile.writeText(userSchema)
         val userSubject = "User"
 
         // Remote
         val addressPath = "$type/address.$extension"
-        val addressFile = folderRule.newFile(addressPath)
+        val addressFile = tempDir.resolve(addressPath)
         addressFile.writeText(addressSchema)
         val addressReferenceName = "Address"
         val addressSubject = Subject("$subjectName-address-mixed",addressFile.path, type.toString())
         client.register(addressSubject.inputSubject, parser.parseSchemaFromFile(addressSubject))
 
         val playerPath = "$type/player.$extension"
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = tempDir.resolve(playerPath)
         playerFile.writeText(playerSchema)
         val playerSubject = Subject("$subjectName-player-mixed",playerFile.path, type.toString())
         client.register(
@@ -254,7 +267,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         // Update player schema file in place
         playerFile.writeText(playerSchemaUpdated)
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -274,8 +287,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -285,8 +298,7 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `CompatibilityTask should support custom root directory`() {
-        folderRule.create()
-        val customRoot = folderRule.newFolder("src", "main", "avro")
+        val customRoot = tempDir.resolve("src/main/avro").apply { mkdirs() }
 
         val userFile = File(customRoot, "User.avsc")
         userFile.writeText(
@@ -304,8 +316,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         // Register the first version
         client.register("user-$subjectId", io.confluent.kafka.schemaregistry.avro.AvroSchema(userFile.readText()), false)
 
-        folderRule.newFile("settings.gradle")
-        buildFile = folderRule.newFile("build.gradle")
+        tempDir.resolve("settings.gradle").createNewFile()
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -324,8 +336,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -343,11 +355,10 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
             AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}""")
         )
 
-        folderRule.create()
-        val userFile = folderRule.newFile("user.avsc")
+        val userFile = tempDir.resolve("user.avsc")
         userFile.writeText("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"},{"name":"address","type":["null","string"],"default":null}]}""")
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -366,8 +377,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result1: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -378,8 +389,8 @@ class CompatibilityTaskIT : KafkaTestContainersUtils() {
 
         // When (second run)
         val result2: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(CompatibilityTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)

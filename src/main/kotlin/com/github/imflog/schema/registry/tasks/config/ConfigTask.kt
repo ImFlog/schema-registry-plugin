@@ -11,10 +11,12 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
 
 
+@DisableCachingByDefault(because = "Updates compatibility in a remote registry; the declared output is only an up-to-date marker")
 abstract class ConfigTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     init {
         group = "registry"

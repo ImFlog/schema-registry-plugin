@@ -9,7 +9,8 @@ for Gradle builds.
 
 ## Usage
 
-This plugin requires Gradle 8.0 or later (kotlin minimum version required by downstream libraries).
+This plugin requires Gradle 8.6 or later (kotlin minimum version required by downstream libraries).
+It is built with Gradle 9.7.1 and its integration tests run against both 8.6 and 9.7.1.
 Starting with the version 3.0.0 of the plugin, Java 17 or later is required to use the plugin (due to schema registry client dependency).
 
 The plugin relies on a confluent library that is not available on common repositories, you will have to add it to

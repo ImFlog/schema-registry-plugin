@@ -1,33 +1,36 @@
 package com.github.imflog.schema.registry.security
 
 import com.github.imflog.schema.registry.tasks.config.ConfigTask
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
-class SslIT : KafkaTestContainersUtils() {
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class SslIT(private val gradleVersion: String) : KafkaTestContainersUtils() {
 
-    private val folderRule: TemporaryFolder = TemporaryFolder()
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
 
     @BeforeEach
     fun init() {
-        folderRule.create()
-
-        val keystoreFile = folderRule.newFile("registry.keystore.jks")
+        val keystoreFile = tempDir.resolve("registry.keystore.jks")
         keystoreFile.writeBytes(
             SslIT::class.java
                 .getResource("/secrets/registry.keystore.jks")
                 .readBytes()
         )
-        val truststore = folderRule.newFile("registry.truststore.jks")
+        val truststore = tempDir.resolve("registry.truststore.jks")
         truststore.writeBytes(
             SslIT::class.java
                 .getResource("/secrets/registry.truststore.jks")
@@ -35,14 +38,9 @@ class SslIT : KafkaTestContainersUtils() {
         )
     }
 
-    @AfterEach
-    fun tearDown() {
-        folderRule.delete()
-    }
-
     @Test
     fun `Should use SSL correctly`() {
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -52,9 +50,9 @@ class SslIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistrySslEndpoint'
                 clientConfig = [
-                    "schema.registry.ssl.truststore.location": "${folderRule.root.absolutePath}/registry.truststore.jks",
+                    "schema.registry.ssl.truststore.location": "${tempDir.absolutePath}/registry.truststore.jks",
                     "schema.registry.ssl.truststore.password": "registry",
-                    "schema.registry.ssl.keystore.location": "${folderRule.root.absolutePath}/registry.keystore.jks",
+                    "schema.registry.ssl.keystore.location": "${tempDir.absolutePath}/registry.keystore.jks",
                     "schema.registry.ssl.keystore.password": "registry"
                 ]
                 config {
@@ -65,8 +63,8 @@ class SslIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
