@@ -5,6 +5,7 @@ import com.github.imflog.schema.registry.tasks.compatibility.CompatibilityTask
 import com.github.imflog.schema.registry.tasks.config.ConfigTask
 import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import com.github.imflog.schema.registry.tasks.register.RegisterSchemasTask
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -12,7 +13,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -22,11 +22,17 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
-class ClientHeadersIT {
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class ClientHeadersIT(private val gradleVersion: String) {
 
-    private lateinit var folderRule: TemporaryFolder
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
 
     private val avroSchema = """
@@ -83,29 +89,22 @@ class ClientHeadersIT {
         ]
     """.trimIndent()
 
-    @BeforeEach
-    fun init() {
-        folderRule = TemporaryFolder()
-        folderRule.create()
-    }
-
     @AfterEach
     fun tearDown() {
-        folderRule.delete()
         wireMockServerItem.resetAll()
     }
 
     private fun runTask(taskName: String): BuildResult? = GradleRunner.create()
-        .withGradleVersion("8.6")
-        .withProjectDir(folderRule.root)
+        .withGradleVersion(gradleVersion)
+        .withProjectDir(tempDir)
         .withArguments(taskName)
         .withPluginClasspath()
         .withDebug(true)
         .build()
 
     private fun failTask(taskName: String): BuildResult? = GradleRunner.create()
-        .withGradleVersion("8.6")
-        .withProjectDir(folderRule.root)
+        .withGradleVersion(gradleVersion)
+        .withProjectDir(tempDir)
         .withArguments(taskName)
         .withPluginClasspath()
         .withDebug(true)
@@ -131,7 +130,7 @@ class ClientHeadersIT {
 
         @Test
         fun `ConfigTask should send the configured headers`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -161,7 +160,7 @@ class ClientHeadersIT {
 
         @Test
         fun `ConfigTask should fail when the required headers are not configured`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -205,7 +204,7 @@ class ClientHeadersIT {
 
         @Test
         fun `ConfigTask should send the headers along with the clientConfig properties`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -250,7 +249,7 @@ class ClientHeadersIT {
 
         @Test
         fun `ConfigTask should work when no header is configured`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -299,7 +298,7 @@ class ClientHeadersIT {
 
         @Test
         fun `DownloadSchemaTask should send the configured headers`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -320,7 +319,7 @@ class ClientHeadersIT {
             val result: BuildResult? = runTask(DownloadTask.TASK_NAME)
 
             Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-            Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$subject.avsc")).exists()
+            Assertions.assertThat(File(tempDir, "src/main/avro/test/$subject.avsc")).exists()
             wireMockServerItem.verify(
                 WireMock.getRequestedFor(WireMock.urlMatching("/subjects/$subject/versions/latest"))
                     .withHeader(API_KEY_HEADER, WireMock.equalTo(API_KEY_VALUE))
@@ -330,7 +329,7 @@ class ClientHeadersIT {
 
         @Test
         fun `DownloadSchemaTask should fail when the required headers are not configured`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -372,10 +371,10 @@ class ClientHeadersIT {
 
         @Test
         fun `RegisterSchemasTask should send the configured headers`() {
-            folderRule.newFolder("avro")
-            folderRule.newFile("avro/test.avsc").writeText(avroSchema)
+            tempDir.resolve("avro").mkdirs()
+            tempDir.resolve("avro/test.avsc").writeText(avroSchema)
 
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -405,10 +404,10 @@ class ClientHeadersIT {
 
         @Test
         fun `RegisterSchemasTask should fail when the required headers are not configured`() {
-            folderRule.newFolder("avro")
-            folderRule.newFile("avro/test.avsc").writeText(avroSchema)
+            tempDir.resolve("avro").mkdirs()
+            tempDir.resolve("avro/test.avsc").writeText(avroSchema)
 
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -451,10 +450,10 @@ class ClientHeadersIT {
 
         @Test
         fun `CompatibilityTask should send the configured headers`() {
-            folderRule.newFolder("avro")
-            folderRule.newFile("avro/test.avsc").writeText(avroSchema)
+            tempDir.resolve("avro").mkdirs()
+            tempDir.resolve("avro/test.avsc").writeText(avroSchema)
 
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -484,10 +483,10 @@ class ClientHeadersIT {
 
         @Test
         fun `CompatibilityTask should fail when the required headers are not configured`() {
-            folderRule.newFolder("avro")
-            folderRule.newFile("avro/test.avsc").writeText(avroSchema)
+            tempDir.resolve("avro").mkdirs()
+            tempDir.resolve("avro/test.avsc").writeText(avroSchema)
 
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {

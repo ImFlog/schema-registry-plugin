@@ -10,10 +10,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
 
 
+@DisableCachingByDefault(because = "Outputs are fetched from a remote registry and cannot be reproduced from the declared inputs")
 abstract class DownloadTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
 
     companion object {

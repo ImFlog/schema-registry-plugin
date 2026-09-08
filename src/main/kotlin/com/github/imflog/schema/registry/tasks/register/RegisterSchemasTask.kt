@@ -12,10 +12,14 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Registers schemas in a remote registry; the outcome depends on remote state")
 abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
 
     companion object {
@@ -50,6 +54,7 @@ abstract class RegisterSchemasTask @Inject constructor(objects: ObjectFactory) :
     val rootDir: Property<File> = objects.property(File::class.java)
 
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     val inputFiles: List<File>
         get() = subjects.get().flatMap { subject ->
             val files = mutableListOf(rootDir.get().resolve(subject.file))

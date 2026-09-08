@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.github.imflog.schema.registry.toSchemaType
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import io.confluent.kafka.schemaregistry.ParsedSchema
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
@@ -11,7 +12,6 @@ import io.confluent.kafka.schemaregistry.client.rest.entities.*
 import io.confluent.kafka.schemaregistry.json.JsonSchema
 import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchema
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -19,18 +19,24 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
 import java.util.UUID
 import java.util.stream.Stream
 
-class DownloadTaskIT : KafkaTestContainersUtils() {
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class DownloadTaskIT(private val gradleVersion: String) : KafkaTestContainersUtils() {
 
-    private lateinit var folderRule: TemporaryFolder
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
     private lateinit var subjectId: String
     private val objectMapper = ObjectMapper()
@@ -39,14 +45,11 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
     @BeforeEach
     fun init() {
-        folderRule = TemporaryFolder()
-        folderRule.create()
         subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
     fun tearDown() {
-        folderRule.delete()
         client.reset()
     }
 
@@ -59,7 +62,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         client.register(subjectName, oldSchema)
         client.register(subjectName, newSchema)
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -70,7 +73,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/$type/test')
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/$type/test')
                     subject('$subjectName', 'src/main/$type/test_v1', 1)
                     subject('$subjectName', 'src/main/$type/test_v2', 2)
                 }
@@ -80,8 +83,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -89,17 +92,17 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // Then
         val schemaFile = "$subjectName.${oldSchema.schemaType().toSchemaType().extension}"
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/$type/test")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
 
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test_v1")).exists()
-        val resultFile1 = File(folderRule.root, "src/main/$type/test_v1/$schemaFile")
+        Assertions.assertThat(File(tempDir, "src/main/$type/test_v1")).exists()
+        val resultFile1 = File(tempDir, "src/main/$type/test_v1/$schemaFile")
         Assertions.assertThat(resultFile1).exists()
         Assertions.assertThat(resultFile1.readText()).doesNotContain("description")
 
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test_v2")).exists()
-        val resultFile2 = File(folderRule.root, "src/main/$type/test_v2/$schemaFile")
+        Assertions.assertThat(File(tempDir, "src/main/$type/test_v2")).exists()
+        val resultFile2 = File(tempDir, "src/main/$type/test_v2/$schemaFile")
         Assertions.assertThat(resultFile2).exists()
         Assertions.assertThat(resultFile2.readText()).contains("description")
     }
@@ -124,7 +127,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         client.register(subjectName, schema)
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -136,7 +139,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                 url = '$schemaRegistryEndpoint'
                 pretty = true
                 download {
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/$type/test')
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/$type/test')
                 }
             }
         """
@@ -144,8 +147,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -155,10 +158,10 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         val schemaType = schema.schemaType().toSchemaType()
         val schemaFile = "$subjectName.${schemaType.extension}"
 
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/$type/test")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).hasContent(
+        Assertions.assertThat(File(tempDir, "src/main/$type/test/$schemaFile")).hasContent(
             objectMapper.readTree(schema.toString()).toPrettyString()
         )
     }
@@ -176,7 +179,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         client.register(subjectName, oldSchema)
         client.register(subjectName, newSchema)
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -187,7 +190,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subjectPattern('parameterized-[a-zA-Z]+-$subjectId', '${folderRule.root.absolutePath}/src/main/$type/test')
+                    subjectPattern('parameterized-[a-zA-Z]+-$subjectId', '${tempDir.absolutePath}/src/main/$type/test')
                 }
             }
         """
@@ -195,8 +198,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -204,14 +207,14 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // Then
         val schemaFile = "$subjectName.${oldSchema.schemaType().toSchemaType().extension}"
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/$type/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/$type/test")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/$type/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
     @Test
     fun `Should fail download when schema does not exist`() {
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -229,8 +232,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -257,7 +260,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             )
         )
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -268,7 +271,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test', "$outputName")
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/avro/test', "$outputName")
                 }
             }
         """
@@ -276,8 +279,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -285,8 +288,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // Then
         val schemaFile = "$outputName.avsc"
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test/$schemaFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -308,7 +311,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             )
         )
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -321,7 +324,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                 url = '$schemaRegistryEndpoint'
                 download {
                     metadata = new MetadataExtension(true)
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test')
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/avro/test')
                 }
             }
         """
@@ -329,8 +332,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -339,8 +342,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         // Then
         val schemaFile = "$subjectName.avsc"
         val metadataFile = "$subjectName-metadata.json"
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$metadataFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test/$metadataFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -369,7 +372,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                 null,true),true
         )
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -381,9 +384,9 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    metadata = new MetadataExtension(true, '${folderRule.root.absolutePath}/src/main/avro/metadata')
+                    metadata = new MetadataExtension(true, '${tempDir.absolutePath}/src/main/avro/metadata')
 
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test')
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/avro/test')
                 }
             }
         """
@@ -391,8 +394,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -401,8 +404,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         // Then
         val schemaFile = "$subjectName.avsc"
         val metadataFile = "$subjectName-metadata.json"
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$metadataFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/metadata/$metadataFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
 
@@ -445,7 +448,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             )
         )
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -457,9 +460,9 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
             schemaRegistry {
                 url = '$schemaRegistryEndpoint'
                 download {
-                    metadata = new MetadataExtension(true, '${folderRule.root.absolutePath}/src/main/avro/metadata')
+                    metadata = new MetadataExtension(true, '${tempDir.absolutePath}/src/main/avro/metadata')
 
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/avro/test', true)
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/avro/test', true)
                 }
             }
         """
@@ -467,8 +470,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -477,13 +480,13 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         // Then
         val schemaFile = "$subjectName.avsc"
         val metadataFile = "$subjectName-metadata.json"
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$schemaFile")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$metadataFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/metadata/$metadataFile")).exists()
 
         val libSchemaFile = "$subjectNameLib.avsc"
         val libMetadataFile = "$subjectNameLib-metadata.json"
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/test/$libSchemaFile")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/avro/metadata/$libMetadataFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/test/$libSchemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/avro/metadata/$libMetadataFile")).exists()
 
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
     }
@@ -508,7 +511,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                     """, emptyList(), emptyMap(),null ,null),
             true)
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -521,7 +524,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
                 url = '$schemaRegistryEndpoint'
                 download {
                     metadata = new MetadataExtension(true)
-                    subject('$subjectName', '${folderRule.root.absolutePath}/src/main/protobuf/test')
+                    subject('$subjectName', '${tempDir.absolutePath}/src/main/protobuf/test')
                 }
             }
         """
@@ -529,8 +532,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -539,10 +542,10 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         // Then
         val schemaFile = "$subjectName.proto"
         val metadataFile = "$subjectName-metadata.json"
-        Assertions.assertThat(File(folderRule.root, "src/main/protobuf/test/$schemaFile")).exists()
-        Assertions.assertThat(File(folderRule.root, "src/main/protobuf/test/$metadataFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/protobuf/test/$schemaFile")).exists()
+        Assertions.assertThat(File(tempDir, "src/main/protobuf/test/$metadataFile")).exists()
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        val resultFile = File(folderRule.root, "src/main/protobuf/test/$schemaFile")
+        val resultFile = File(tempDir, "src/main/protobuf/test/$schemaFile")
         if("6.2.6" != System.getenv("KAFKA_VERSION")){
             Assertions.assertThat(resultFile.readText().trim()).isEqualTo(
             """
@@ -577,9 +580,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         val subjectName = "download-custom-root-$subjectId"
         client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
 
-        folderRule.create()
-        folderRule.newFile("settings.gradle")
-        buildFile = folderRule.newFile("build.gradle")
+        tempDir.resolve("settings.gradle").createNewFile()
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -599,8 +601,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -608,7 +610,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // Then
         Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
-        Assertions.assertThat(File(folderRule.root, "downloaded-schemas/test/$subjectName.avsc")).exists()
+        Assertions.assertThat(File(tempDir, "downloaded-schemas/test/$subjectName.avsc")).exists()
     }
 
     @Test
@@ -617,7 +619,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         val subjectName = "uptodate-test"
         client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -636,8 +638,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result1: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -648,8 +650,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When (second run)
         val result2: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -665,7 +667,7 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
         val subjectName = "metadata-serialization-test"
         client.register(subjectName, AvroSchema("""{"type":"record","name":"User","fields":[{"name":"name","type":"string"}]}"""))
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -686,8 +688,8 @@ class DownloadTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(DownloadTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)

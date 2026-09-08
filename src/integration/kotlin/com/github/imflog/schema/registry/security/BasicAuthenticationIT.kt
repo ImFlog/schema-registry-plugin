@@ -5,6 +5,7 @@ import com.github.imflog.schema.registry.tasks.compatibility.CompatibilityTask
 import com.github.imflog.schema.registry.tasks.config.ConfigTask
 import com.github.imflog.schema.registry.tasks.download.DownloadTask
 import com.github.imflog.schema.registry.tasks.register.RegisterSchemasTask
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.common.ConsoleNotifier
@@ -12,7 +13,6 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.confluent.kafka.schemaregistry.avro.AvroSchema
 import io.confluent.kafka.schemaregistry.client.rest.entities.Schema
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -22,11 +22,17 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 
-class BasicAuthenticationIT {
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class BasicAuthenticationIT(private val gradleVersion: String) {
 
-    private lateinit var folderRule: TemporaryFolder
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
 
     private val defaultSchema = """{
@@ -67,16 +73,8 @@ class BasicAuthenticationIT {
         }
     }
 
-    @BeforeEach
-    fun init() {
-        // Reset the client before each test
-        folderRule = TemporaryFolder()
-        folderRule.create()
-    }
-
     @AfterEach
     fun tearDown() {
-        folderRule.delete()
         wireMockAuthServerItem.resetAll()
     }
 
@@ -101,7 +99,7 @@ class BasicAuthenticationIT {
 
         @Test
         fun `ConfigTask should set subject compatibility`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -123,8 +121,8 @@ class BasicAuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(ConfigTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -134,7 +132,7 @@ class BasicAuthenticationIT {
 
         @Test
         fun `ConfigTask should fail to set subject compatibility without credentials when required`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -152,8 +150,8 @@ class BasicAuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(ConfigTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -194,8 +192,8 @@ class BasicAuthenticationIT {
 
         @Test
         fun `Compatibility task should fail if credential not provided on authenticated registry`() {
-            folderRule.newFolder("avro")
-            val testAvsc = folderRule.newFile("avro/test.avsc")
+            tempDir.resolve("avro").mkdirs()
+            val testAvsc = tempDir.resolve("avro/test.avsc")
             val schemaTest = """
             {
                 "type":"record",
@@ -210,7 +208,7 @@ class BasicAuthenticationIT {
         """.trimIndent()
             testAvsc.writeText(schemaTest)
 
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             // Auth configuration is omited to test the failure
             buildFile.writeText(
                 """
@@ -229,8 +227,8 @@ class BasicAuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(CompatibilityTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -259,7 +257,7 @@ class BasicAuthenticationIT {
 
             @Test
             fun `ConfigTask should set subject compatibility`() {
-                buildFile = folderRule.newFile("build.gradle")
+                buildFile = tempDir.resolve("build.gradle")
                 buildFile.writeText(
                     """
             plugins {
@@ -281,8 +279,8 @@ class BasicAuthenticationIT {
                 )
 
                 val result: BuildResult? = GradleRunner.create()
-                    .withGradleVersion("8.6")
-                    .withProjectDir(folderRule.root)
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(tempDir)
                     .withArguments(ConfigTask.TASK_NAME)
                     .withPluginClasspath()
                     .withDebug(true)
@@ -292,7 +290,7 @@ class BasicAuthenticationIT {
 
             @Test
             fun `ConfigTask should fail to set subject compatibility without credentials when required`() {
-                buildFile = folderRule.newFile("build.gradle")
+                buildFile = tempDir.resolve("build.gradle")
                 buildFile.writeText(
                     """
             plugins {
@@ -310,8 +308,8 @@ class BasicAuthenticationIT {
                 )
 
                 val result: BuildResult? = GradleRunner.create()
-                    .withGradleVersion("8.6")
-                    .withProjectDir(folderRule.root)
+                    .withGradleVersion(gradleVersion)
+                    .withProjectDir(tempDir)
                     .withArguments(ConfigTask.TASK_NAME)
                     .withPluginClasspath()
                     .withDebug(true)
@@ -322,8 +320,8 @@ class BasicAuthenticationIT {
 
         @Test
         fun `CompatibilityTask should validate input schema with no references`() {
-            folderRule.newFolder("avro")
-            val testAvsc = folderRule.newFile("avro/test.avsc")
+            tempDir.resolve("avro").mkdirs()
+            val testAvsc = tempDir.resolve("avro/test.avsc")
             val schemaTest = """
             {
                 "type":"record",
@@ -338,7 +336,7 @@ class BasicAuthenticationIT {
         """.trimIndent()
             testAvsc.writeText(schemaTest)
 
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -360,8 +358,8 @@ class BasicAuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(CompatibilityTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -395,7 +393,7 @@ class BasicAuthenticationIT {
 
         @Test
         fun `DownloadSchemaTask should download last schema version`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -417,21 +415,21 @@ class BasicAuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
                 .build()
 
-            Assertions.assertThat(File(folderRule.root, "src/main/avro/test")).exists()
-            Assertions.assertThat(File(folderRule.root, "src/main/avro/test/test-subject.avsc")).exists()
+            Assertions.assertThat(File(tempDir, "src/main/avro/test")).exists()
+            Assertions.assertThat(File(tempDir, "src/main/avro/test/test-subject.avsc")).exists()
             Assertions.assertThat(result?.task(":downloadSchemasTask")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
         }
 
         @Test
         fun `DownloadSchemaTask should fail download when credentials not setup and required`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -449,8 +447,8 @@ class BasicAuthenticationIT {
             )
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(DownloadTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -498,7 +496,7 @@ class BasicAuthenticationIT {
 
         @Test
         fun `RegisterSchemasTask should register schemas`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             import io.confluent.kafka.schemaregistry.client.rest.entities.SchemaReference
@@ -523,8 +521,8 @@ class BasicAuthenticationIT {
         """
             )
 
-            folderRule.newFolder("avro")
-            val testAvsc = folderRule.newFile("avro/test.avsc")
+            tempDir.resolve("avro").mkdirs()
+            val testAvsc = tempDir.resolve("avro/test.avsc")
             val schemaTest = """
             {
                 "type":"record",
@@ -539,10 +537,10 @@ class BasicAuthenticationIT {
         """.trimIndent()
             testAvsc.writeText(schemaTest)
 
-            val testAvsc2 = folderRule.newFile("avro/other_test.avsc")
+            val testAvsc2 = tempDir.resolve("avro/other_test.avsc")
             testAvsc2.writeText(schemaTest)
 
-            val depAvsc = folderRule.newFile("avro/dependency_test.avsc")
+            val depAvsc = tempDir.resolve("avro/dependency_test.avsc")
             val depSchema = """
             {
                 "type":"record",
@@ -558,8 +556,8 @@ class BasicAuthenticationIT {
             depAvsc.writeText(depSchema)
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(RegisterSchemasTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)
@@ -569,7 +567,7 @@ class BasicAuthenticationIT {
 
         @Test
         fun `RegisterSchemasTask should fail register schemas without credentials when required`() {
-            buildFile = folderRule.newFile("build.gradle")
+            buildFile = tempDir.resolve("build.gradle")
             buildFile.writeText(
                 """
             plugins {
@@ -586,8 +584,8 @@ class BasicAuthenticationIT {
         """
             )
 
-            folderRule.newFolder("avro")
-            val testAvsc = folderRule.newFile("avro/test.avsc")
+            tempDir.resolve("avro").mkdirs()
+            val testAvsc = tempDir.resolve("avro/test.avsc")
             val schemaTest = """
             {
                 "type":"record",
@@ -603,8 +601,8 @@ class BasicAuthenticationIT {
             testAvsc.writeText(schemaTest)
 
             val result: BuildResult? = GradleRunner.create()
-                .withGradleVersion("8.6")
-                .withProjectDir(folderRule.root)
+                .withGradleVersion(gradleVersion)
+                .withProjectDir(tempDir)
                 .withArguments(RegisterSchemasTask.TASK_NAME)
                 .withPluginClasspath()
                 .withDebug(true)

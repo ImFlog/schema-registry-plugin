@@ -1,37 +1,35 @@
 package com.github.imflog.schema.registry.tasks.config
 
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
+import org.junit.jupiter.params.provider.ValueSource
 import java.io.File
 import java.util.UUID
 
-class ConfigTaskIT : KafkaTestContainersUtils() {
-    private lateinit var folderRule: TemporaryFolder
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class ConfigTaskIT(private val gradleVersion: String) : KafkaTestContainersUtils() {
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
     private lateinit var subjectId: String
 
     @BeforeEach
     fun init() {
-        folderRule = TemporaryFolder()
         subjectId = UUID.randomUUID().toString().take(8)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        folderRule.delete()
     }
 
     @Test
     fun `ConfigTask should set subject compatibility`() {
-        folderRule.create()
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -49,8 +47,8 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -60,8 +58,7 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `ConfigTask should be UP-TO-DATE on second run`() {
-        folderRule.create()
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -80,8 +77,8 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result1: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -92,8 +89,8 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
 
         // When (second run)
         val result2: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -105,8 +102,7 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `ConfigTask should detect and reject invalid compatibility settings`() {
-        folderRule.create()
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -125,8 +121,8 @@ class ConfigTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(ConfigTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)

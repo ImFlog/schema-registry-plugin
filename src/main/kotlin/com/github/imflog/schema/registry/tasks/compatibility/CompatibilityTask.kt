@@ -12,11 +12,15 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import javax.inject.Inject
 
 
+@DisableCachingByDefault(because = "Compatibility is checked against a remote registry; the declared output is only an up-to-date marker")
 abstract class CompatibilityTask @Inject constructor(objects: ObjectFactory) : DefaultTask() {
     init {
         group = "registry"
@@ -28,6 +32,7 @@ abstract class CompatibilityTask @Inject constructor(objects: ObjectFactory) : D
     }
 
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     val inputFiles: List<File>
         get() = subjects.get().flatMap { subject ->
             val files = mutableListOf(rootDir.get().resolve(subject.file))

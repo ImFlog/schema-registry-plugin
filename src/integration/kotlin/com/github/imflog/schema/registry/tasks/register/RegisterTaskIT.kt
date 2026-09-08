@@ -1,9 +1,9 @@
 package com.github.imflog.schema.registry.tasks.register
 
 import com.github.imflog.schema.registry.SchemaType
+import com.github.imflog.schema.registry.utils.GradleVersions
 import com.github.imflog.schema.registry.utils.KafkaTestContainersUtils
 import org.assertj.core.api.Assertions
-import org.gradle.internal.impldep.org.junit.rules.TemporaryFolder
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
@@ -11,30 +11,34 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtensionContext
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedClass
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.ArgumentsProvider
 import org.junit.jupiter.params.provider.ArgumentsSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.junit.jupiter.params.support.ParameterDeclarations
 import java.io.File
 import java.util.UUID
 import java.util.stream.Stream
 
-class RegisterTaskIT : KafkaTestContainersUtils() {
-    private lateinit var folderRule: TemporaryFolder
+@ParameterizedClass
+@ValueSource(strings = [GradleVersions.MINIMUM, GradleVersions.CURRENT])
+class RegisterTaskIT(private val gradleVersion: String) : KafkaTestContainersUtils() {
+    @TempDir
+    lateinit var tempDir: File
     private lateinit var buildFile: File
     private lateinit var subjectId: String
 
     @BeforeEach
     fun beforeEach() {
-        folderRule = TemporaryFolder()
         subjectId = UUID.randomUUID().toString().take(8)
     }
 
     @AfterEach
     fun afterEach() {
         client.reset()
-        folderRule.delete()
     }
 
     @ParameterizedTest
@@ -44,9 +48,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         userSchema: String,
         playerSchema: String
     ) {
-        folderRule.create()
-        val typeFolder = folderRule.newFolder(type.name)
-        val resultFolder = folderRule.newFolder("${type.name}/results")
+        val typeFolder = tempDir.resolve(type.name).apply { mkdirs() }
+        val resultFolder = tempDir.resolve("${type.name}/results").apply { mkdirs() }
         val subjectName = "parameterized-${type.name}-$subjectId"
         val extension = type.extension
 
@@ -55,14 +58,14 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         val userSubject = "$subjectName-user-local"
 
         val playerFile = typeFolder.resolve("player.$extension")
-        val playerPath = playerFile.relativeTo(folderRule.root).path
+        val playerPath = playerFile.relativeTo(tempDir).path
         playerFile.writeText(playerSchema)
         val playerSubject = "$subjectName-player-local"
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -83,8 +86,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -109,9 +112,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         metadata: String,
         ruleSet: String,
     ) {
-        folderRule.create()
-        val typeFolder = folderRule.newFolder(type.name)
-        val resultFolder = folderRule.newFolder("${type.name}/results")
+        val typeFolder = tempDir.resolve(type.name).apply { mkdirs() }
+        val resultFolder = tempDir.resolve("${type.name}/results").apply { mkdirs() }
         val subjectName = "parameterized-${type.name}-$subjectId"
         val extension = type.extension
 
@@ -126,14 +128,14 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         ruleSetFile.writeText(ruleSet)
 
         val playerFile = typeFolder.resolve("player.$extension")
-        val playerPath = playerFile.relativeTo(folderRule.root).path
+        val playerPath = playerFile.relativeTo(tempDir).path
         playerFile.writeText(playerSchema)
         val playerSubject = "$subjectName-player-local"
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -158,8 +160,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -182,24 +184,23 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         userSchema: String,
         playerSchema: String
     ) {
-        folderRule.create()
-        folderRule.newFolder(type.name)
+        tempDir.resolve(type.name).mkdirs()
         val subjectName = "parameterized-${type.name}-local-$subjectId"
         val extension = type.extension
 
         val userPath = "$type/user.$extension"
-        val userFile = folderRule.newFile(userPath)
+        val userFile = tempDir.resolve(userPath)
         userFile.writeText(userSchema)
 
         val playerPath = "$type/player.$extension"
         val playerSubject = "$subjectName-player-local"
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = tempDir.resolve(playerPath)
         playerFile.writeText(playerSchema)
 
         // Small trick, for protobuf the name to import is not User but user.proto
         val referenceName = if (type == SchemaType.PROTOBUF) "user.proto" else "User"
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -218,8 +219,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -237,30 +238,29 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
     ) {
         // TODO: Instead of repeating code, we could create build.gradle files in resources.
         //  Also, when all format support mixed local + remote, we will keep only this test.
-        folderRule.create()
-        folderRule.newFolder(type.name)
+        tempDir.resolve(type.name).mkdirs()
         val subjectName = "parameterized-${type.name}-mixed-$subjectId"
         val extension = type.extension
 
         // Local
         val userPath = "$type/user.$extension"
-        val userFile = folderRule.newFile(userPath)
+        val userFile = tempDir.resolve(userPath)
         userFile.writeText(userSchema)
         val userSubject = "User"
 
         // Remote
         val addressPath = "$type/address.$extension"
-        val addressFile = folderRule.newFile(addressPath)
+        val addressFile = tempDir.resolve(addressPath)
         addressFile.writeText(addressSchema)
         val addressReferenceName = "Address"
         val addressSubject = "$subjectName-address-mixed"
 
         val playerPath = "$type/player.$extension"
         val playerSubject = "$subjectName-player-mixed"
-        val playerFile = folderRule.newFile(playerPath)
+        val playerFile = tempDir.resolve(playerPath)
         playerFile.writeText(playerSchema)
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -281,8 +281,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -292,9 +292,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `RegisterSchemasTask should support custom root directory for avro`() {
-        folderRule.create()
-        val customRoot = folderRule.newFolder("src", "main", "avro")
-        val resultFolder = folderRule.newFolder("results-avro")
+        val customRoot = tempDir.resolve("src/main/avro").apply { mkdirs() }
+        val resultFolder = tempDir.resolve("results-avro").apply { mkdirs() }
 
         val addressFile = File(customRoot, "Address.avsc")
         addressFile.writeText(
@@ -323,8 +322,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         """.trimIndent()
         )
 
-        folderRule.newFile("settings.gradle")
-        buildFile = folderRule.newFile("build-avro.gradle")
+        tempDir.resolve("settings.gradle").createNewFile()
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -345,9 +344,9 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
-            .withArguments(RegisterSchemasTask.TASK_NAME, "-b", "build-avro.gradle")
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
@@ -357,9 +356,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `RegisterSchemasTask should support custom root directory for json`() {
-        folderRule.create()
-        val customRoot = folderRule.newFolder("src", "main", "json")
-        val resultFolder = folderRule.newFolder("results-json")
+        val customRoot = tempDir.resolve("src/main/json").apply { mkdirs() }
+        val resultFolder = tempDir.resolve("results-json").apply { mkdirs() }
 
         val addressFile = File(customRoot, "Address.json")
         addressFile.writeText(
@@ -390,8 +388,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         """.trimIndent()
         )
 
-        folderRule.newFile("settings.gradle")
-        buildFile = folderRule.newFile("build-json.gradle")
+        tempDir.resolve("settings.gradle").createNewFile()
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -412,9 +410,9 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
-            .withArguments(RegisterSchemasTask.TASK_NAME, "-b", "build-json.gradle")
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
+            .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
             .build()
@@ -424,9 +422,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `RegisterSchemasTask should support custom root directory for metadata and ruleset`() {
-        folderRule.create()
-        val customRoot = folderRule.newFolder("src", "main", "avro")
-        val resultFolder = folderRule.newFolder("results-avro")
+        val customRoot = tempDir.resolve("src/main/avro").apply { mkdirs() }
+        val resultFolder = tempDir.resolve("results-avro").apply { mkdirs() }
 
         val schemaFile = File(customRoot, "User.avsc")
         schemaFile.writeText(
@@ -447,8 +444,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         val ruleSetFile = File(customRoot, "ruleSet.json")
         ruleSetFile.writeText("""{"domainRules": []}""")
 
-        folderRule.newFile("settings.gradle")
-        buildFile = folderRule.newFile("build.gradle")
+        tempDir.resolve("settings.gradle").createNewFile()
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -470,8 +467,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -482,9 +479,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `RegisterSchemasTask should support custom root directory for protobuf`() {
-        folderRule.create()
-        val customRoot = folderRule.newFolder("src", "main", "proto")
-        val resultFolder = folderRule.newFolder("results")
+        val customRoot = tempDir.resolve("src/main/proto").apply { mkdirs() }
+        val resultFolder = tempDir.resolve("results").apply { mkdirs() }
 
         val addressFile = File(customRoot, "com/example/address.proto")
         addressFile.parentFile.mkdirs()
@@ -511,8 +507,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         """.trimIndent()
         )
 
-        folderRule.newFile("settings.gradle")
-        buildFile = folderRule.newFile("build.gradle")
+        tempDir.resolve("settings.gradle").createNewFile()
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -533,8 +529,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         )
 
         val result: BuildResult? = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -545,9 +541,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
     @Test
     fun `RegisterSchemasTask should be UP-TO-DATE on second run`() {
-        folderRule.create()
-        val typeFolder = folderRule.newFolder("avro")
-        val resultFolder = folderRule.newFolder("avro/results")
+        val typeFolder = tempDir.resolve("avro").apply { mkdirs() }
+        val resultFolder = tempDir.resolve("avro/results").apply { mkdirs() }
 
         val userFile = typeFolder.resolve("user.avsc")
         userFile.writeText(
@@ -560,7 +555,7 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
         }"""
         )
 
-        buildFile = folderRule.newFile("build.gradle")
+        buildFile = tempDir.resolve("build.gradle")
         buildFile.writeText(
             """
             plugins {
@@ -580,8 +575,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
         // When
         val result1: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
@@ -592,8 +587,8 @@ class RegisterTaskIT : KafkaTestContainersUtils() {
 
         // When (second run)
         val result2: BuildResult = GradleRunner.create()
-            .withGradleVersion("8.6")
-            .withProjectDir(folderRule.root)
+            .withGradleVersion(gradleVersion)
+            .withProjectDir(tempDir)
             .withArguments(RegisterSchemasTask.TASK_NAME)
             .withPluginClasspath()
             .withDebug(true)
