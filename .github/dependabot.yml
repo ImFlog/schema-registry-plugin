@@ -14,16 +14,15 @@ updates:
           - "org.wiremock:*"
           - "org.testcontainers:*"
 
-  # The examples are a standalone build, deliberately kept on the minimum Gradle
-  # version the plugin supports so they double as a check that the floor still
-  # works. Wrapper bumps are skipped here on purpose; the plugin classpath is a
-  # snapshot of this very project and is bumped by the release process.
+  # The examples are a standalone build that tracks the current Gradle version;
+  # the minimum supported Gradle is checked by the integration tests instead
+  # (see GradleVersions.MINIMUM). The plugin classpath is a snapshot of this very
+  # project and is bumped by the release process, so it stays ignored here.
   - package-ecosystem: "gradle"
     directory: "/examples"
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "gradle-wrapper"
       - dependency-name: "com.github.imflog:kafka-schema-registry-gradle-plugin"
 
   - package-ecosystem: "github-actions"
