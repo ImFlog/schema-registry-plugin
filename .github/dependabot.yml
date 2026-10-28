@@ -5,6 +5,13 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    # The Confluent repository exposes no release dates, so Dependabot's cooldown
+    # filter drops every Confluent version ("Release date not available"), even
+    # without a configured cooldown. Excluding it explicitly should let them through.
+    cooldown:
+      default-days: 1
+      exclude:
+        - "io.confluent:*"
     groups:
       test-dependencies:
         patterns:
